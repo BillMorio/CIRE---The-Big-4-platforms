@@ -1,4 +1,4 @@
-import { ArrowDownWideNarrow, CheckCheck, RefreshCcwDot, StepForward, WrapText } from "lucide-react";
+import { ArrowDownWideNarrow, CheckCheck, RefreshCcwDot, StepForward, WrapText, Zap, Sparkles, Hash, MessageCircle } from "lucide-react";
 import { getPrevText, useEditor } from "novel";
 import { CommandGroup, CommandItem, CommandSeparator } from "../ui/command";
 
@@ -25,6 +25,33 @@ const options = [
   },
 ];
 
+const socialMediaOptions = [
+  {
+    value: "rehook",
+    label: "Rehook - Improve hook",
+    icon: Zap,
+    description: "Make the opening more engaging and attention-grabbing",
+  },
+  {
+    value: "add-emojis",
+    label: "Add emojis",
+    icon: Sparkles,
+    description: "Add relevant emojis to make content more engaging",
+  },
+  {
+    value: "add-hashtags",
+    label: "Suggest hashtags",
+    icon: Hash,
+    description: "Generate relevant hashtags for better reach",
+  },
+  {
+    value: "make-viral",
+    label: "Make it viral",
+    icon: MessageCircle,
+    description: "Optimize for maximum engagement and shareability",
+  },
+];
+
 interface AISelectorCommandsProps {
   onSelect: (value: string, option: string) => void;
 }
@@ -48,6 +75,27 @@ const AISelectorCommands = ({ onSelect }: AISelectorCommandsProps) => {
           >
             <option.icon className="h-4 w-4 text-purple-500" />
             {option.label}
+          </CommandItem>
+        ))}
+      </CommandGroup>
+      <CommandSeparator />
+      <CommandGroup heading="Social Media Optimization">
+        {socialMediaOptions.map((option) => (
+          <CommandItem
+            onSelect={(value) => {
+              const slice = editor.state.selection.content();
+              const text = editor.storage.markdown.serializer.serialize(slice.content);
+              onSelect(text, value);
+            }}
+            className="flex gap-2 px-4"
+            key={option.value}
+            value={option.value}
+          >
+            <option.icon className="h-4 w-4 text-purple-500" />
+            <div className="flex flex-col">
+              <span>{option.label}</span>
+              <span className="text-xs text-muted-foreground">{option.description}</span>
+            </div>
           </CommandItem>
         ))}
       </CommandGroup>

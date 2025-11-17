@@ -113,6 +113,66 @@ export async function POST(req: Request): Promise<Response> {
         content: `For this text: ${prompt}. You have to respect the command: ${command}`,
       },
     ])
+    .with("rehook", () => [
+      {
+        role: "system",
+        content:
+          "You are an AI writing assistant specialized in creating attention-grabbing hooks for social media content. " +
+          "Your goal is to make the opening line more engaging, compelling, and likely to stop users from scrolling. " +
+          "Use proven hook patterns: bold statements, intriguing questions, surprising facts, or relatable scenarios. " +
+          "Keep it concise and impactful. The hook should create curiosity or emotional resonance.",
+      },
+      {
+        role: "user",
+        content: `Improve the hook for this content: ${prompt}`,
+      },
+    ])
+    .with("add-emojis", () => [
+      {
+        role: "system",
+        content:
+          "You are an AI writing assistant that adds relevant emojis to social media content. " +
+          "Add emojis that enhance the message, make it more engaging, and increase visual appeal. " +
+          "Don't overuse emojis - use them strategically to emphasize key points. " +
+          "Keep the original text intact but make it more engaging with well-placed emojis.",
+      },
+      {
+        role: "user",
+        content: `Add emojis to this content: ${prompt}`,
+      },
+    ])
+    .with("add-hashtags", () => [
+      {
+        role: "system",
+        content:
+          "You are an AI writing assistant that suggests relevant hashtags for social media content. " +
+          "Analyze the content and suggest 3-7 highly relevant hashtags that will improve discoverability. " +
+          "Mix popular hashtags with niche-specific ones for optimal reach. " +
+          "Return the original content followed by the suggested hashtags on a new line.",
+      },
+      {
+        role: "user",
+        content: `Suggest hashtags for this content: ${prompt}`,
+      },
+    ])
+    .with("make-viral", () => [
+      {
+        role: "system",
+        content:
+          "You are an AI writing assistant specialized in viral social media content. " +
+          "Rewrite the content to maximize engagement and shareability using proven viral content patterns: " +
+          "- Strong emotional hooks (curiosity, surprise, inspiration, relatability) " +
+          "- Clear and concise messaging " +
+          "- Pattern interrupts and unexpected angles " +
+          "- Social proof or FOMO elements when appropriate " +
+          "- Call-to-action or conversation starters " +
+          "Keep it authentic and platform-appropriate.",
+      },
+      {
+        role: "user",
+        content: `Optimize this content for virality: ${prompt}`,
+      },
+    ])
     .run();
 
   const result = await streamText({

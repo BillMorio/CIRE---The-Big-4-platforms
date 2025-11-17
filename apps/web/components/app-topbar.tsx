@@ -80,6 +80,19 @@ export function AppTopbar() {
     
     if (segments.length <= 1) return null;
 
+    if (pathname.startsWith('/editor')) {
+      // Check for source param from URL
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        const source = params.get('source');
+        
+        if (source === 'draft') return { href: '/drafts', label: 'Back to Drafts' };
+        if (source === 'search') return { href: '/discover/search', label: 'Back to Search' };
+        if (source === 'studio') return { href: '/studio', label: 'Back to Studio' };
+      }
+      return { href: '/drafts', label: 'Back to Drafts' };
+    }
+
     if (pathname.startsWith('/discover/search')) {
       return { href: '/discover', label: 'Back to Trending' };
     }
@@ -109,8 +122,8 @@ export function AppTopbar() {
   const breadcrumbItems = getBreadcrumbItems();
   const backButton = getBackButton();
 
-  // Only show topbar on discover, drafts, and ai-generated routes
-  const showTopbar = pathname.startsWith('/discover') || pathname.startsWith('/drafts') || pathname.startsWith('/ai-generated');
+  // Only show topbar on discover, drafts, ai-generated, and editor routes
+  const showTopbar = pathname.startsWith('/discover') || pathname.startsWith('/drafts') || pathname.startsWith('/ai-generated') || pathname.startsWith('/editor');
   if (!showTopbar) {
     return null;
   }

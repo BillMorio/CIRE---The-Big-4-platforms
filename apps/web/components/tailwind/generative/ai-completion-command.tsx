@@ -22,13 +22,8 @@ const AICompletionCommands = ({
             editor
               .chain()
               .focus()
-              .insertContentAt(
-                {
-                  from: selection.from,
-                  to: selection.to,
-                },
-                completion,
-              )
+              .deleteRange({ from: selection.from, to: selection.to })
+              .insertContent(completion)
               .run();
           }}
         >

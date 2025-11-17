@@ -162,6 +162,33 @@ export function DataCards<TData, TValue>({
           </SelectContent>
         </Select>
 
+        {/* Content Category Filter */}
+        <Select
+          value={
+            (table.getColumn("contentCategory")?.getFilterValue() as string) ?? "all"
+          }
+          onValueChange={(value) =>
+            table
+              .getColumn("contentCategory")
+              ?.setFilterValue(value === "all" ? "" : value)
+          }
+        >
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <FilterIcon className="h-4 w-4 mr-2" />
+            <SelectValue placeholder="Content Type" />
+          </SelectTrigger>
+          <SelectContent className="z-[1000]">
+            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="Personal Story">Personal Story</SelectItem>
+            <SelectItem value="Technical">Technical</SelectItem>
+            <SelectItem value="Advice">Advice</SelectItem>
+            <SelectItem value="Promotional">Promotional</SelectItem>
+            <SelectItem value="Educational">Educational</SelectItem>
+            <SelectItem value="News">News</SelectItem>
+            <SelectItem value="Entertainment">Entertainment</SelectItem>
+          </SelectContent>
+        </Select>
+
         {/* Sort Options */}
         <Select
           value={sorting[0]?.id ?? "updatedAt"}
@@ -243,6 +270,28 @@ export function DataCards<TData, TValue>({
                       {draft.title}
                     </h3>
                   </Link>
+
+                  {/* Content Category Badge */}
+                  {draft.contentCategory && (
+                    <div className="mb-3">
+                      <Badge 
+                        variant="secondary" 
+                        className="text-xs bg-black/10 dark:bg-white/10 text-gray-900 dark:text-gray-100 border-black/20 dark:border-white/20 flex items-center gap-1.5 w-fit"
+                      >
+                        <div className={`w-2 h-2 rounded-full ${
+                          draft.contentCategory === "Personal Story" ? "bg-pink-500" :
+                          draft.contentCategory === "Technical" ? "bg-blue-500" :
+                          draft.contentCategory === "Advice" ? "bg-green-500" :
+                          draft.contentCategory === "Promotional" ? "bg-orange-500" :
+                          draft.contentCategory === "Educational" ? "bg-purple-500" :
+                          draft.contentCategory === "News" ? "bg-red-500" :
+                          draft.contentCategory === "Entertainment" ? "bg-yellow-500" :
+                          "bg-gray-500"
+                        }`} />
+                        {draft.contentCategory}
+                      </Badge>
+                    </div>
+                  )}
 
                   {/* Excerpt */}
                   <p className="text-sm text-muted-foreground line-clamp-3 mb-4">

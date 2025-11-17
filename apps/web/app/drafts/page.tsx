@@ -25,6 +25,7 @@ const mockDrafts = [
     updatedAt: "2024-01-15T10:30:00Z",
     platform: "Twitter" as "Twitter" | "Reddit" | "LinkedIn" | "YouTube" | "Blog",
     contentType: "post" as const,
+    contentCategory: "Advice" as const,
     tags: ["productivity", "tips", "twitter"],
   },
   {
@@ -38,6 +39,7 @@ const mockDrafts = [
     updatedAt: "2024-01-14T18:45:00Z",
     platform: "LinkedIn" as "Twitter" | "Reddit" | "LinkedIn" | "YouTube" | "Blog",
     contentType: "article" as const,
+    contentCategory: "Personal Story" as const,
     tags: ["ai", "content", "opinion"],
   },
   {
@@ -56,6 +58,7 @@ const mockDrafts = [
     updatedAt: "2024-01-13T11:30:00Z",
     platform: "LinkedIn" as "Twitter" | "Reddit" | "LinkedIn" | "YouTube" | "Blog",
     contentType: "thread" as const,
+    contentCategory: "Technical" as const,
     tags: ["marketing", "reddit", "insights"],
   },
   {
@@ -69,6 +72,7 @@ const mockDrafts = [
     updatedAt: "2024-01-15T09:00:00Z",
     platform: "YouTube" as "Twitter" | "Reddit" | "LinkedIn" | "YouTube" | "Blog",
     contentType: "video-script" as const,
+    contentCategory: "Educational" as const,
     tags: ["video", "ai-tools", "tutorial"],
   },
   {
@@ -87,6 +91,7 @@ const mockDrafts = [
     updatedAt: "2024-01-15T08:30:00Z",
     platform: "LinkedIn" as "Twitter" | "Reddit" | "LinkedIn" | "YouTube" | "Blog",
     contentType: "post" as const,
+    contentCategory: "Advice" as const,
     tags: ["career", "growth", "linkedin"],
   },
   {
@@ -100,6 +105,7 @@ const mockDrafts = [
     updatedAt: "2024-01-14T10:00:00Z",
     platform: "Blog" as "Twitter" | "Reddit" | "LinkedIn" | "YouTube" | "Blog",
     contentType: "article" as const,
+    contentCategory: "News" as const,
     tags: ["tech", "news", "weekly"],
   },
 ];

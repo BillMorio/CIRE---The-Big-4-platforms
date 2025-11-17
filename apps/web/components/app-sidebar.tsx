@@ -48,11 +48,6 @@ const data = {
       icon: Search,
     },
     {
-      title: "AI Generated",
-      url: "/ai-generated",
-      icon: Bot,
-    },
-    {
       title: "My Drafts",
       url: "/drafts",
       icon: FileText,

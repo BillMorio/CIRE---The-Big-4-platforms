@@ -18,6 +18,7 @@ export type Draft = {
   updatedAt: string;
   platform?: "Twitter" | "Reddit" | "LinkedIn" | "YouTube" | "Blog";
   contentType: "post" | "article" | "thread" | "video-script";
+  contentCategory: "Personal Story" | "Technical" | "Advice" | "Promotional" | "Educational" | "News" | "Entertainment";
   tags?: string[];
 };
 
@@ -37,6 +38,10 @@ export const columns: ColumnDef<Draft>[] = [
   {
     accessorKey: "platform",
     header: "Platform",
+  },
+  {
+    accessorKey: "contentCategory",
+    header: "Content Type",
   },
   {
     accessorKey: "createdAt",
