@@ -13,6 +13,8 @@ import {
   Search,
   Send,
   Settings2,
+  ChevronsUpDown,
+  Check,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -28,6 +30,21 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Command as CommandPrimitive,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import { useBrandCampaignStore, useSelectedBrandCampaigns } from "@/lib/store"
+import { cn } from "@/lib/utils"
 
 const data = {
   user: {
@@ -84,22 +101,152 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const [brandOpen, setBrandOpen] = React.useState(false);
+  const [campaignOpen, setCampaignOpen] = React.useState(false);
+  
+  const {
+    selectedBrand,
+    selectedCampaign,
+    brands,
+    setSelectedBrand,
+    setSelectedCampaign,
+    initialize,
+  } = useBrandCampaignStore();
+  
+  const brandCampaigns = useSelectedBrandCampaigns();
+
+  // Initialize store on mount
+  React.useEffect(() => {
+    initialize();
+  }, [initialize]);
+
   return (
     <Sidebar variant="inset" {...props}>
-      <SidebarHeader>
+      <SidebarHeader className="border-b border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Search className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">CIRE</span>
-                  <span className="truncate text-xs">Content Intelligence</span>
-                </div>
-              </a>
-            </SidebarMenuButton>
+            {/* Brand Selector */}
+            <Popover open={brandOpen} onOpenChange={setBrandOpen}>
+              <PopoverTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground text-xl">
+                    {selectedBrand?.logo || "🏢"}
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">
+                      {selectedBrand?.name || "Select Brand"}
+                    </span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      Brand/Company
+                    </span>
+                  </div>
+                  <ChevronsUpDown className="ml-auto size-4" />
+                </SidebarMenuButton>
+              </PopoverTrigger>
+              <PopoverContent className="w-[280px] p-0" align="start">
+                <CommandPrimitive>
+                  <CommandInput placeholder="Search brands..." />
+                  <CommandList>
+                    <CommandEmpty>No brands found.</CommandEmpty>
+                    <CommandGroup>
+                      {brands.map((brand) => (
+                        <CommandItem
+                          key={brand.id}
+                          value={brand.name}
+                          onSelect={() => {
+                            setSelectedBrand(brand);
+                            setBrandOpen(false);
+                          }}
+                        >
+                          <span className="mr-2 text-lg">{brand.logo || "🏢"}</span>
+                          <div className="flex-1">
+                            <div className="font-medium">{brand.name}</div>
+                            {brand.description && (
+                              <div className="text-xs text-muted-foreground line-clamp-1">
+                                {brand.description}
+                              </div>
+                            )}
+                          </div>
+                          <Check
+                            className={cn(
+                              "ml-auto h-4 w-4",
+                              selectedBrand?.id === brand.id
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </CommandPrimitive>
+              </PopoverContent>
+            </Popover>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            {/* Campaign Selector */}
+            <Popover open={campaignOpen} onOpenChange={setCampaignOpen}>
+              <PopoverTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+                    <FileText className="size-4" />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">
+                      {selectedCampaign?.name || "Select Campaign"}
+                    </span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {selectedCampaign?.status === 'active' ? '🟢 Active' : '⏸️ Paused'}
+                    </span>
+                  </div>
+                  <ChevronsUpDown className="ml-auto size-4" />
+                </SidebarMenuButton>
+              </PopoverTrigger>
+              <PopoverContent className="w-[280px] p-0" align="start">
+                <CommandPrimitive>
+                  <CommandInput placeholder="Search campaigns..." />
+                  <CommandList>
+                    <CommandEmpty>No campaigns found.</CommandEmpty>
+                    <CommandGroup>
+                      {brandCampaigns.map((campaign) => (
+                        <CommandItem
+                          key={campaign.id}
+                          value={campaign.name}
+                          onSelect={() => {
+                            setSelectedCampaign(campaign);
+                            setCampaignOpen(false);
+                          }}
+                        >
+                          <div className="flex-1">
+                            <div className="font-medium">{campaign.name}</div>
+                            {campaign.description && (
+                              <div className="text-xs text-muted-foreground line-clamp-1">
+                                {campaign.description}
+                              </div>
+                            )}
+                          </div>
+                          <Check
+                            className={cn(
+                              "ml-auto h-4 w-4",
+                              selectedCampaign?.id === campaign.id
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </CommandPrimitive>
+              </PopoverContent>
+            </Popover>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

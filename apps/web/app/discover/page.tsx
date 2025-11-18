@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Clock, TrendingUp, Users, Settings, ExternalLink, Search } from "lucide-react"
+import { Clock, TrendingUp, Users, Settings, ExternalLink, Search, Target } from "lucide-react"
+import { useBrandCampaignStore } from "@/lib/store"
+import { AppTopbar } from "@/components/app-topbar"
 
 // Mock data for demonstration
 const scrapingStatus = {
@@ -52,6 +54,7 @@ const mockContent = [
 export default function DiscoverPage() {
   const [selectedPlatform, setSelectedPlatform] = useState<string>("all")
   const [sortBy, setSortBy] = useState<string>("trending")
+  const { selectedBrand, selectedCampaign } = useBrandCampaignStore()
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -72,7 +75,40 @@ export default function DiscoverPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-4 max-w-6xl mx-auto w-full">
+    <div className="flex flex-1 flex-col">
+      <AppTopbar />
+      <div className="flex-1 overflow-auto">
+        <div className="flex flex-col gap-4 p-4 pt-4 max-w-6xl mx-auto w-full">
+          {/* Campaign Context Banner */}
+        {selectedCampaign && (
+          <Card className="border-l-4 border-l-purple-500 bg-gradient-to-r from-purple-50 to-white">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Target className="w-5 h-5 text-purple-600" />
+                  <div>
+                    <div className="font-semibold text-sm">
+                      {selectedBrand?.logo} {selectedBrand?.name} • {selectedCampaign.name}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Tracking: {selectedCampaign.settings.searchKeywords.slice(0, 3).join(", ")}
+                      {selectedCampaign.settings.searchKeywords.length > 3 && ` +${selectedCampaign.settings.searchKeywords.length - 3} more`}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="bg-white">
+                    {selectedCampaign.settings.creatorsToTrack.length} creators
+                  </Badge>
+                  <Badge variant="outline" className="bg-white">
+                    {selectedCampaign.settings.platforms.join(", ")}
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Scraping Jobs Status Bar */}
         <Card className="border-l-4 border-l-green-400 bg-gradient-to-r from-green-50 to-white">
           <CardContent className="p-4">
@@ -196,6 +232,8 @@ export default function DiscoverPage() {
             </Card>
           ))}
         </div>
+        </div>
+      </div>
     </div>
   )
 }

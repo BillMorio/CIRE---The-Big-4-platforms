@@ -40,11 +40,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Providers>
           <SidebarProvider>
             <AppSidebar />
-            <main className="flex-1 overflow-auto">
-              <AppTopbar />
-              <div className="pt-16 min-h-screen">
-                {children}
-              </div>
+            <main className="flex-1">
+              {children}
             </main>
           </SidebarProvider>
         </Providers>

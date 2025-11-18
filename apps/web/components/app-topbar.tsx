@@ -10,7 +10,6 @@ import { MobileBreadcrumb } from "@/components/mobile-breadcrumb";
 
 export function AppTopbar() {
   const pathname = usePathname();
-  const { state, isMobile, open } = useSidebar();
 
   // Generate breadcrumb items based on current path
   const getBreadcrumbItems = () => {
@@ -128,34 +127,23 @@ export function AppTopbar() {
     return null;
   }
 
-  // Dynamic left positioning based on sidebar state
-  const getLeftPosition = () => {
-    if (isMobile) return "left-0"; // Mobile: sidebar is overlay, so full width
-    if (!open) return "left-0"; // Sidebar completely hidden/toggled off
-    return state === "expanded" ? "left-64" : "left-12"; // 16rem = 64, 3rem = 12
-  };
-
   return (
-    <header className={`fixed top-0 ${getLeftPosition()} right-0 z-40 flex h-16 shrink-0 items-center gap-2 backdrop-blur-md bg-background/80 border-b border-border/40 transition-all duration-200 ease-in-out`}>
-      <div className="flex items-center gap-2 px-4 flex-1 min-w-0">
-        <SidebarTrigger className="-ml-1" />
-        <Separator orientation="vertical" className="mr-2 h-4" />
-        {breadcrumbItems.length > 0 && (
-          <MobileBreadcrumb
-            items={breadcrumbItems}
-            className="flex-1 min-w-0"
-          />
-        )}
-      </div>
+    <header className="sticky top-0 z-40 h-16 flex items-center gap-2 px-4 backdrop-blur-md bg-background/80 border-b border-border/40 flex-shrink-0">
+      <SidebarTrigger className="-ml-1" />
+      <Separator orientation="vertical" className="mx-2 h-4" />
+      {breadcrumbItems.length > 0 && (
+        <MobileBreadcrumb
+          items={breadcrumbItems}
+          className="flex-1 min-w-0"
+        />
+      )}
       {backButton && (
-        <div className="ml-auto px-4">
-          <Button variant="outline" size="sm" asChild>
-            <Link href={backButton.href}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              {backButton.label}
-            </Link>
-          </Button>
-        </div>
+        <Button variant="outline" size="sm" asChild className="ml-auto">
+          <Link href={backButton.href}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            {backButton.label}
+          </Link>
+        </Button>
       )}
     </header>
   );

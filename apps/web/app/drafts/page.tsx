@@ -3,9 +3,12 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Target } from "lucide-react";
 import { columns } from "./columns";
 import { DataCards } from "./data-cards";
+import { useBrandCampaignStore } from "@/lib/store";
+import { AppTopbar } from "@/components/app-topbar";
 
 // Mock data for drafts
 const mockDrafts = [
@@ -111,6 +114,8 @@ const mockDrafts = [
 ];
 
 export default function DraftsPage() {
+  const { selectedBrand, selectedCampaign } = useBrandCampaignStore();
+  
   // Calculate stats
   const stats = {
     total: mockDrafts.length,
@@ -120,7 +125,39 @@ export default function DraftsPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-6 max-w-7xl mx-auto w-full">
+    <div className="flex flex-1 flex-col">
+      <AppTopbar />
+      <div className="flex-1 overflow-auto">
+        <div className="flex flex-col gap-6 p-4 pt-6 max-w-7xl mx-auto w-full">
+          {/* Campaign Context Banner */}
+        {selectedCampaign && (
+        <Card className="border-l-4 border-l-purple-500 bg-gradient-to-r from-purple-50 to-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Target className="w-5 h-5 text-purple-600" />
+                <div>
+                  <div className="font-semibold text-sm">
+                    {selectedBrand?.logo} {selectedBrand?.name} • {selectedCampaign.name}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Content aligned with campaign objectives and brand voice
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="bg-white">
+                  {selectedCampaign.settings.contentPillars.length} content pillars
+                </Badge>
+                <Badge variant={selectedCampaign.status === 'active' ? 'default' : 'secondary'}>
+                  {selectedCampaign.status}
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-2xl font-bold">My Drafts</h1>
@@ -160,8 +197,10 @@ export default function DraftsPage() {
         </Card>
       </div>
 
-      {/* Data Cards with TanStack Table */}
-      <DataCards columns={columns} data={mockDrafts} />
+        {/* Data Cards with TanStack Table */}
+        <DataCards columns={columns} data={mockDrafts} />
+        </div>
+      </div>
     </div>
   );
 }

@@ -42,8 +42,11 @@ import {
   FileText,
   Settings,
   MoreVertical,
+  Target,
 } from "lucide-react";
 import { useState } from "react";
+import { useBrandCampaignStore } from "@/lib/store";
+import { AppTopbar } from "@/components/app-topbar";
 
 // Mock data structure - in real app, this would come from your database
 interface PlatformContent {
@@ -69,6 +72,7 @@ export default function EditorPage() {
   const searchParams = useSearchParams();
   const draftId = searchParams.get("draftId");
   const source = searchParams.get("source"); // 'draft', 'studio', 'search'
+  const { selectedBrand, selectedCampaign } = useBrandCampaignStore();
   
   const [title, setTitle] = useState("Untitled Draft");
   const [platform, setPlatform] = useState<string>("Twitter");
@@ -138,6 +142,7 @@ export default function EditorPage() {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
+      <AppTopbar />
       {/* Action Bar */}
       <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex items-center justify-between p-3 md:p-4 max-w-screen-xl mx-auto w-full gap-2">
@@ -251,6 +256,31 @@ export default function EditorPage() {
                 </DrawerContent>
               </Drawer>
             </div>
+            
+            {/* Campaign Context Banner */}
+            {selectedCampaign && (
+              <Card className="mb-4 md:mb-6 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/20">
+                <CardContent className="p-3 md:p-4">
+                  <div className="flex items-start gap-2 md:gap-3">
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                      <Target className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-sm mb-1">
+                        {selectedBrand?.logo} {selectedBrand?.name} • {selectedCampaign.name}
+                      </div>
+                      <div className="text-xs text-muted-foreground mb-2">
+                        {selectedCampaign.description}
+                      </div>
+                      <div className="text-xs bg-purple-50 rounded p-2 border border-purple-100">
+                        <strong>Brand Voice:</strong> {selectedCampaign.settings.brandVoice}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* AI Assistant Card */}
             <Card className="mb-4 md:mb-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/20">
               <CardContent className="p-3 md:p-4">
