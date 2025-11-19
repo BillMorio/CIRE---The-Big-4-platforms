@@ -13,16 +13,17 @@ interface BrandCampaignStore extends BrandCampaignContextType {
 export const useBrandCampaignStore = create<BrandCampaignStore>()(
   persist(
     (set, get) => ({
-      selectedBrand: null,
-      selectedCampaign: null,
-      brands: [],
-      campaigns: [],
-      initialized: false,
+      selectedBrand: mockBrands[0],
+      selectedCampaign: mockCampaigns[0],
+      brands: mockBrands,
+      campaigns: mockCampaigns,
+      initialized: true,
 
       // Initialize with mock data on first load
       initialize: () => {
         const state = get();
-        if (!state.initialized) {
+        // Always ensure we have data
+        if (state.brands.length === 0) {
           set({
             brands: mockBrands,
             campaigns: mockCampaigns,
@@ -111,6 +112,7 @@ export const useBrandCampaignStore = create<BrandCampaignStore>()(
         selectedCampaign: state.selectedCampaign,
         initialized: state.initialized,
       }),
+      skipHydration: true,
     }
   )
 );

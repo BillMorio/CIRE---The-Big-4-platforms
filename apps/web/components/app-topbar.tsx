@@ -128,7 +128,7 @@ export function AppTopbar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 h-16 flex items-center gap-2 px-4 backdrop-blur-md bg-background/80 border-b border-border/40 flex-shrink-0">
+    <header className="sticky top-0 z-40 h-16 flex items-center gap-2 px-4 bg-gray-50 border-b border-gray-200 flex-shrink-0 rounded-bl-3xl">
       <SidebarTrigger className="-ml-1" />
       <Separator orientation="vertical" className="mx-2 h-4" />
       {breadcrumbItems.length > 0 && (

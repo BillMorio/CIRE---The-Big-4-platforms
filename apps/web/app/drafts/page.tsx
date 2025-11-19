@@ -127,7 +127,7 @@ export default function DraftsPage() {
   return (
     <div className="flex flex-1 flex-col">
       <AppTopbar />
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto bg-white">
         <div className="flex flex-col gap-6 p-4 pt-6 max-w-7xl mx-auto w-full">
           {/* Campaign Context Banner */}
         {selectedCampaign && (

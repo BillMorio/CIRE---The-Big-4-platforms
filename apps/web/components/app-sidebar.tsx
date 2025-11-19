@@ -103,6 +103,7 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [brandOpen, setBrandOpen] = React.useState(false);
   const [campaignOpen, setCampaignOpen] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
   
   const {
     selectedBrand,
@@ -115,10 +116,43 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   
   const brandCampaigns = useSelectedBrandCampaigns();
 
-  // Initialize store on mount
+  // Initialize and hydrate store on mount
   React.useEffect(() => {
+    // Hydrate persisted state
+    useBrandCampaignStore.persist.rehydrate();
     initialize();
+    setMounted(true);
   }, [initialize]);
+
+  // Don't render brand/campaign selectors until mounted to avoid hydration mismatch
+  if (!mounted) {
+    return (
+      <Sidebar variant="inset" {...props}>
+        <SidebarHeader className="border-b border-sidebar-border">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton size="lg">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground text-xl">
+                  🏢
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">Loading...</span>
+                  <span className="truncate text-xs text-muted-foreground">Brand/Company</span>
+                </div>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent>
+          <NavMain items={data.navMain} />
+          <NavSecondary items={data.navSecondary} className="mt-auto" />
+        </SidebarContent>
+        <SidebarFooter>
+          <NavUser user={data.user} />
+        </SidebarFooter>
+      </Sidebar>
+    );
+  }
 
   return (
     <Sidebar variant="inset" {...props}>
