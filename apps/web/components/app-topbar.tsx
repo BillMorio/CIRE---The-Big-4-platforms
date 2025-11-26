@@ -121,14 +121,14 @@ export function AppTopbar() {
   const breadcrumbItems = getBreadcrumbItems();
   const backButton = getBackButton();
 
-  // Only show topbar on discover, drafts, ai-generated, and editor routes
-  const showTopbar = pathname.startsWith('/discover') || pathname.startsWith('/drafts') || pathname.startsWith('/ai-generated') || pathname.startsWith('/editor');
+  // Only show topbar on discover, drafts, ai-generated, editor, and calendar routes
+  const showTopbar = pathname.startsWith('/discover') || pathname.startsWith('/drafts') || pathname.startsWith('/ai-generated') || pathname.startsWith('/editor') || pathname.startsWith('/calendar');
   if (!showTopbar) {
     return null;
   }
 
   return (
-    <header className="sticky top-0 z-40 h-16 flex items-center gap-2 px-4 bg-gray-50 border-b border-gray-200 flex-shrink-0 rounded-bl-3xl">
+    <header className="sticky top-0 z-50 h-16 flex items-center gap-2 px-4 backdrop-blur-md bg-background/80 border-b border-border/40 flex-shrink-0">
       <SidebarTrigger className="-ml-1" />
       <Separator orientation="vertical" className="mx-2 h-4" />
       {breadcrumbItems.length > 0 && (

@@ -127,15 +127,15 @@ export default function DraftsPage() {
   return (
     <div className="flex flex-1 flex-col">
       <AppTopbar />
-      <div className="flex-1 overflow-auto bg-white">
+      <div className="flex-1 overflow-auto bg-background">
         <div className="flex flex-col gap-6 p-4 pt-6 max-w-7xl mx-auto w-full">
           {/* Campaign Context Banner */}
         {selectedCampaign && (
-        <Card className="border-l-4 border-l-purple-500 bg-gradient-to-r from-purple-50 to-white">
+        <Card className="border border-border bg-muted">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Target className="w-5 h-5 text-purple-600" />
+                <Target className="w-5 h-5 text-muted-foreground" />
                 <div>
                   <div className="font-semibold text-sm">
                     {selectedBrand?.logo} {selectedBrand?.name} • {selectedCampaign.name}
@@ -146,7 +146,7 @@ export default function DraftsPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-white">
+                <Badge variant="outline" className="border-border">
                   {selectedCampaign.settings.contentPillars.length} content pillars
                 </Badge>
                 <Badge variant={selectedCampaign.status === 'active' ? 'default' : 'secondary'}>
@@ -171,27 +171,27 @@ export default function DraftsPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-2">
+        <Card className="border border-border">
           <CardContent className="p-4 text-center">
-            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{stats.total}</div>
+            <div className="text-3xl font-bold">{stats.total}</div>
             <div className="text-sm text-muted-foreground mt-1">Total Drafts</div>
           </CardContent>
         </Card>
-        <Card className="border-2">
+        <Card className="border border-border">
           <CardContent className="p-4 text-center">
-            <div className="text-3xl font-bold text-gray-600 dark:text-gray-400">{stats.draft}</div>
+            <div className="text-3xl font-bold">{stats.draft}</div>
             <div className="text-sm text-muted-foreground mt-1">Draft</div>
           </CardContent>
         </Card>
-        <Card className="border-2">
+        <Card className="border border-border">
           <CardContent className="p-4 text-center">
-            <div className="text-3xl font-bold text-green-600 dark:text-green-400">{stats.ready}</div>
+            <div className="text-3xl font-bold">{stats.ready}</div>
             <div className="text-sm text-muted-foreground mt-1">Ready</div>
           </CardContent>
         </Card>
-        <Card className="border-2">
+        <Card className="border border-border">
           <CardContent className="p-4 text-center">
-            <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{stats.review}</div>
+            <div className="text-3xl font-bold">{stats.review}</div>
             <div className="text-sm text-muted-foreground mt-1">In Review</div>
           </CardContent>
         </Card>

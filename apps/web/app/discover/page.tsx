@@ -77,15 +77,15 @@ export default function DiscoverPage() {
   return (
     <div className="flex flex-1 flex-col">
       <AppTopbar />
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto bg-background">
         <div className="flex flex-col gap-4 p-4 pt-4 max-w-6xl mx-auto w-full">
           {/* Campaign Context Banner */}
         {selectedCampaign && (
-          <Card className="border-l-4 border-l-purple-500 bg-gradient-to-r from-purple-50 to-white">
+          <Card className="border border-border bg-muted">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Target className="w-5 h-5 text-purple-600" />
+                  <Target className="w-5 h-5 text-muted-foreground" />
                   <div>
                     <div className="font-semibold text-sm">
                       {selectedBrand?.logo} {selectedBrand?.name} • {selectedCampaign.name}
@@ -96,11 +96,11 @@ export default function DiscoverPage() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-white">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="outline" className="border-border">
                     {selectedCampaign.settings.creatorsToTrack.length} creators
                   </Badge>
-                  <Badge variant="outline" className="bg-white">
+                  <Badge variant="outline" className="border-border">
                     {selectedCampaign.settings.platforms.join(", ")}
                   </Badge>
                 </div>
@@ -110,11 +110,11 @@ export default function DiscoverPage() {
         )}
 
         {/* Scraping Jobs Status Bar */}
-        <Card className="border-l-4 border-l-green-400 bg-gradient-to-r from-green-50 to-white">
+        <Card className="border border-border bg-muted">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <div className="w-3 h-3 rounded-full bg-green-500" />
                   <span className="text-sm font-medium">All jobs healthy</span>
                   <span className="text-xs text-muted-foreground">• Last run: 2 hours ago</span>
@@ -139,8 +139,8 @@ export default function DiscoverPage() {
         </Card>
 
         {/* Action Bar */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto">
             <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="All Platforms" />
@@ -183,7 +183,7 @@ export default function DiscoverPage() {
         {/* Content Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {mockContent.map((content) => (
-            <Card key={content.id} className="hover:shadow-md transition-shadow">
+            <Card key={content.id} className="border border-border hover:bg-accent transition-colors">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-2">
                   <CardTitle className="text-base line-clamp-2">
