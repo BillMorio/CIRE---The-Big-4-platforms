@@ -18,6 +18,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { MobileBreadcrumb } from "@/components/mobile-breadcrumb";
+import { AppTopbar } from "@/components/app-topbar";
 import {
   AlertCircle,
   CheckCircle,
@@ -212,209 +213,59 @@ export default function JobsStatusPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-6 max-w-6xl mx-auto w-full">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Scraping Jobs Status</h1>
-        </div>
-
-        {/* Content Generated Today Section */}
-        <div>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold">Content Generated Today</h2>
-            <Badge variant="outline" className="text-sm font-medium">
-              Live Updates
-            </Badge>
-          </div>
-          
-          {/* Mobile: Horizontal scroll, Desktop: Grid */}
-          <div className="flex overflow-x-auto gap-4 pb-4 md:grid md:grid-cols-2 lg:grid-cols-4 md:overflow-visible md:pb-0">
-            {/* Twitter Generated Content */}
-            <Card className="flex-shrink-0 w-72 md:w-auto bg-gradient-to-r from-gray-900/5 to-gray-900/10 dark:from-gray-100/5 dark:to-gray-100/10 border-gray-200 dark:border-gray-700">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                    𝕏
-                  </div>
-                  <span className="font-medium">Twitter</span>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Posts Generated:</span>
-                    <span className="font-bold text-lg">247</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Approved:</span>
-                    <span className="font-medium text-green-600">198</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Pending:</span>
-                    <span className="font-medium text-yellow-600">35</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Rejected:</span>
-                    <span className="font-medium text-red-600">14</span>
-                  </div>
-                </div>
-                <div className="mt-4 pt-3 border-t dark:border-gray-700">
-                  <div className="text-xs text-muted-foreground">
-                    Success Rate: <span className="font-medium text-green-600">80.2%</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Reddit Generated Content */}
-            <Card className="flex-shrink-0 w-72 md:w-auto bg-gradient-to-r from-orange-500/5 to-orange-500/10 dark:from-orange-500/10 dark:to-orange-500/20 border-orange-200 dark:border-orange-800">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                    R
-                  </div>
-                  <span className="font-medium">Reddit</span>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Posts Generated:</span>
-                    <span className="font-bold text-lg">156</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Approved:</span>
-                    <span className="font-medium text-green-600">134</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Pending:</span>
-                    <span className="font-medium text-yellow-600">18</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Rejected:</span>
-                    <span className="font-medium text-red-600">4</span>
-                  </div>
-                </div>
-                <div className="mt-4 pt-3 border-t dark:border-orange-700">
-                  <div className="text-xs text-muted-foreground">
-                    Success Rate: <span className="font-medium text-green-600">85.9%</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* LinkedIn Generated Content */}
-            <Card className="flex-shrink-0 w-72 md:w-auto bg-gradient-to-r from-blue-600/5 to-blue-600/10 dark:from-blue-600/10 dark:to-blue-600/20 border-blue-200 dark:border-blue-800">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                    in
-                  </div>
-                  <span className="font-medium">LinkedIn</span>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Posts Generated:</span>
-                    <span className="font-bold text-lg">89</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Approved:</span>
-                    <span className="font-medium text-green-600">76</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Pending:</span>
-                    <span className="font-medium text-yellow-600">11</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Rejected:</span>
-                    <span className="font-medium text-red-600">2</span>
-                  </div>
-                </div>
-                <div className="mt-4 pt-3 border-t dark:border-blue-700">
-                  <div className="text-xs text-muted-foreground">
-                    Success Rate: <span className="font-medium text-green-600">85.4%</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* YouTube Generated Content */}
-            <Card className="flex-shrink-0 w-72 md:w-auto bg-gradient-to-r from-red-600/5 to-red-600/10 dark:from-red-600/10 dark:to-red-600/20 border-red-200 dark:border-red-800">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                    ▶
-                  </div>
-                  <span className="font-medium">YouTube</span>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Posts Generated:</span>
-                    <span className="font-bold text-lg">203</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Approved:</span>
-                    <span className="font-medium text-green-600">167</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Pending:</span>
-                    <span className="font-medium text-yellow-600">28</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Rejected:</span>
-                    <span className="font-medium text-red-600">8</span>
-                  </div>
-                </div>
-                <div className="mt-4 pt-3 border-t dark:border-red-700">
-                  <div className="text-xs text-muted-foreground">
-                    Success Rate: <span className="font-medium text-green-600">82.3%</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Platform Scrapers Status Section */}
-        <div 
-          className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded-lg p-3 -mx-3 transition-colors mb-6"
-          onClick={() => setIsScrapersExpanded(!isScrapersExpanded)}
-        >
+    <div className="flex flex-col h-screen">
+      <AppTopbar />
+      <div className="flex-1 overflow-auto bg-background">
+        <div className="flex flex-col gap-4 p-4 pt-4 max-w-6xl mx-auto w-full">
+          {/* Header */}
           <div className="flex items-center justify-between">
-            <h2 className="text-lg md:text-xl font-bold">Platform Scrapers Status</h2>
-            <div className="flex items-center gap-2">
-              <span className="hidden md:inline text-sm text-muted-foreground">
-                {isScrapersExpanded ? 'Collapse' : 'Expand'}
-              </span>
-              {isScrapersExpanded ? (
-                <ChevronUp className="h-5 w-5 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="h-5 w-5 text-muted-foreground" />
-              )}
-            </div>
+            <h1 className="text-2xl font-bold">Scraping Jobs Status</h1>
           </div>
-          
-          {/* Mobile-friendly status summary when collapsed */}
-          {!isScrapersExpanded && (
-            <div className="mt-3 pt-3 border-t dark:border-gray-700">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                <span className={`text-sm font-medium ${getOverallScraperStatus().color}`}>
-                  {getOverallScraperStatus().text}
+
+          {/* Platform Scrapers Status Section */}
+          <div 
+            className="cursor-pointer hover:bg-accent rounded-lg p-3 -mx-3 transition-colors mb-6"
+            onClick={() => setIsScrapersExpanded(!isScrapersExpanded)}
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg md:text-xl font-bold">Platform Scrapers Status</h2>
+              <div className="flex items-center gap-2">
+                <span className="hidden md:inline text-sm text-muted-foreground">
+                  {isScrapersExpanded ? 'Collapse' : 'Expand'}
                 </span>
-                <Badge 
-                  variant={getOverallScraperStatus().badge.variant as "default" | "secondary" | "destructive" | "outline"}
-                  className={`${getOverallScraperStatus().badge.className} w-fit`}
-                >
-                  {getOverallScraperStatus().badge.text}
-                </Badge>
+                {isScrapersExpanded ? (
+                  <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                )}
               </div>
             </div>
-          )}
-        </div>
+            
+            {/* Mobile-friendly status summary when collapsed */}
+            {!isScrapersExpanded && (
+              <div className="mt-3 pt-3 border-t border-border">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                  <span className={`text-sm font-medium ${getOverallScraperStatus().color}`}>
+                    {getOverallScraperStatus().text}
+                  </span>
+                  <Badge 
+                    variant={getOverallScraperStatus().badge.variant as "default" | "secondary" | "destructive" | "outline"}
+                    className={`${getOverallScraperStatus().badge.className} w-fit`}
+                  >
+                    {getOverallScraperStatus().badge.text}
+                  </Badge>
+                </div>
+              </div>
+            )}
+          </div>
 
-        {/* Jobs Grid - Collapsible */}
-        <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
-          isScrapersExpanded ? 'opacity-100 max-h-none' : 'opacity-0 max-h-0'
-        }`}>
-          <div className="grid gap-4 md:gap-6">
-            {scrapingJobs.map((job) => (
-            <Card key={job.id} className={`${getPlatformBackground(job.platform)} border-l-4 border-l-gray-200 dark:border-l-gray-700`}>
+          {/* Jobs Grid - Collapsible */}
+          <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
+            isScrapersExpanded ? 'opacity-100 max-h-none' : 'opacity-0 max-h-0'
+          }`}>
+            <div className="grid gap-4 md:gap-6">
+              {scrapingJobs.map((job) => (
+              <Card key={job.id} className={`${getPlatformBackground(job.platform)} border-l-4 border-l-border`}>
               <CardHeader className="pb-3 md:pb-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
@@ -447,7 +298,7 @@ export default function JobsStatusPage() {
 
                 {/* Error Info (if exists) */}
                 {job.status === "error" && job.error && (
-                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                  <div className="bg-muted border border-border rounded-lg p-3">
                     <div className="text-red-800 dark:text-red-200 font-medium text-sm">Error:</div>
                     <div className="text-red-700 dark:text-red-300 text-sm mt-1">{job.error}</div>
                     {job.previousRun && (
@@ -755,10 +606,12 @@ export default function JobsStatusPage() {
                   )}
                 </div>
               </CardContent>
-            </Card>
-            ))}
+              </Card>
+              ))}
+            </div>
           </div>
         </div>
+      </div>
     </div>
   );
 }
