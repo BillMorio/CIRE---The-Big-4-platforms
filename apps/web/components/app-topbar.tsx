@@ -30,43 +30,48 @@ export function AppTopbar() {
         items.push({ label: 'Manual Search' });
       }
       
-      // Handle /discover/jobs
-      else if (segments[1] === 'jobs') {
-        items.push({ label: 'Scraping Jobs', href: '/discover/jobs' });
+      // Handle /scrapers
+      else if ((segments[0] as string) === 'scrapers') {
+        items.push({ label: 'Scrapers', href: '/scrapers' });
         
-        // Handle /discover/jobs/[platform]
-        if (segments[2]) {
-          const platform = segments[2];
+        // Handle /scrapers/[platform]
+        if (segments[1]) {
+          const platform = segments[1];
           const platformName = platform.charAt(0).toUpperCase() + platform.slice(1);
           
-          // Handle /discover/jobs/[platform]/history
-          if (segments[3] === 'history') {
+          // Handle /scrapers/[platform]/history
+          if (segments[2] === 'history') {
             items.push({ label: `${platformName} Runs` });
           }
           
-          // Handle /discover/jobs/[platform]/runs/[runId]
-          else if (segments[3] === 'runs' && segments[4]) {
+          // Handle /scrapers/[platform]/runs/[runId]
+          else if (segments[2] === 'runs' && segments[3]) {
             items.push({ 
               label: `${platformName} Runs`, 
-              href: `/discover/jobs/${platform}/history` 
+              href: `/scrapers/${platform}/history` 
             });
             items.push({ 
               label: 'Run Details',
-              href: `/discover/jobs/${platform}/runs/${segments[4]}`
+              href: `/scrapers/${platform}/runs/${segments[3]}`
             });
             
-            // Handle /discover/jobs/[platform]/runs/[runId]/creators/[creator]
-            if (segments[5] === 'creators' && segments[6]) {
-              const creator = decodeURIComponent(segments[6]);
+            // Handle /scrapers/[platform]/runs/[runId]/creators/[creator]
+            if (segments[4] === 'creators' && segments[5]) {
+              const creator = decodeURIComponent(segments[5]);
               items.push({ label: creator });
             }
-            // Handle /discover/jobs/[platform]/runs/[runId]/keywords/[keyword]
-            else if (segments[5] === 'keywords' && segments[6]) {
-              const keyword = decodeURIComponent(segments[6]);
+            // Handle /scrapers/[platform]/runs/[runId]/keywords/[keyword]
+            else if (segments[4] === 'keywords' && segments[5]) {
+              const keyword = decodeURIComponent(segments[5]);
               items.push({ label: keyword });
             }
           }
         }
+      }
+      
+      // Handle /jobs
+      else if ((segments[0] as string) === 'jobs') {
+        items.push({ label: 'Diagnostics', href: '/jobs' });
       }
     }
 
@@ -128,7 +133,7 @@ export function AppTopbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 h-16 flex items-center gap-2 px-4 backdrop-blur-md bg-background/80 border-b border-border/40 flex-shrink-0">
+    <header className="sticky top-0 z-50 h-16 flex items-center gap-2 px-4 glass-dark border-b border-white/5 flex-shrink-0">
       <SidebarTrigger className="-ml-1" />
       <Separator orientation="vertical" className="mx-2 h-4" />
       {breadcrumbItems.length > 0 && (

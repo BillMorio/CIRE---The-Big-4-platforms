@@ -74,8 +74,22 @@ const config = {
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			sm: 'calc(var(--radius) - 4px)',
+        '3xl': '1.5rem',
+        '4xl': '2rem',
+        '5xl': '3rem',
+        '6xl': '4rem',
   		},
+      letterSpacing: {
+        'technical': '0.3em',
+        'technical-wide': '0.6em',
+        'technical-ultra': '0.8em',
+      },
+      boxShadow: {
+        'glass': '0 0 0 1px rgba(255, 255, 255, 0.1), 0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+        'glow': '0 0 20px rgba(255, 255, 255, 0.1)',
+        'glow-lime': '0 0 20px rgba(191, 255, 0, 0.3)',
+      },
   		keyframes: {
   			'accordion-down': {
   				from: {
@@ -92,11 +106,15 @@ const config = {
   				to: {
   					height: '0'
   				}
-  			}
+  			},
+        'shimmer': {
+          '100%': { transform: 'translateX(100%)' },
+        },
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+        'shimmer': 'shimmer 2s infinite',
   		}
   	}
   },

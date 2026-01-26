@@ -221,7 +221,7 @@ export default function EditorPage() {
                 <DrawerTrigger asChild>
                   <Button 
                     size="lg" 
-                    className="h-14 w-14 rounded-full shadow-lg bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                    className="h-14 w-14 rounded-xl shadow-lg bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
                   >
                     <Settings className="w-6 h-6" />
                   </Button>
@@ -262,7 +262,7 @@ export default function EditorPage() {
               <Card className="mb-4 md:mb-6 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/20">
                 <CardContent className="p-3 md:p-4">
                   <div className="flex items-start gap-2 md:gap-3">
-                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
                       <Target className="w-4 h-4 md:w-5 md:h-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -285,7 +285,7 @@ export default function EditorPage() {
             <Card className="mb-4 md:mb-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/20">
               <CardContent className="p-3 md:p-4">
                 <div className="flex items-start gap-2 md:gap-3">
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
                     <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-white" />
                   </div>
                   <div className="flex-1">
@@ -317,7 +317,7 @@ export default function EditorPage() {
               {!hasContentForPlatform ? (
                 // Show repurpose prompt when no content exists for this platform
                 <div className="flex flex-col items-center justify-center min-h-[500px] text-center">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center mb-4">
                     <Sparkles className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">

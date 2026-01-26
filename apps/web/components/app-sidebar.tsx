@@ -97,7 +97,18 @@ const data = {
       icon: Send,
     },
   ],
-
+  navScrapers: [
+    {
+      title: "Jobs",
+      url: "/jobs",
+      icon: BarChart3,
+    },
+    {
+      title: "Status",
+      url: "/scrapers",
+      icon: Bot,
+    },
+  ],
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -155,26 +166,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }
 
   return (
-    <Sidebar variant="inset" {...props}>
-      <SidebarHeader className="border-b border-sidebar-border">
-        <SidebarMenu>
+    <Sidebar variant="inset" {...props} className="glass-dark border-r-white/5">
+      <SidebarHeader className="border-b border-white/5 p-4">
+        <SidebarMenu className="gap-3">
           <SidebarMenuItem>
             {/* Brand Selector */}
             <Popover open={brandOpen} onOpenChange={setBrandOpen}>
               <PopoverTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  className="rounded-xl border border-white/10 hover:bg-white/5 transition-all data-[state=open]:bg-white/10"
                 >
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground text-xl">
+                  <div className="flex aspect-square size-10 items-center justify-center rounded-lg bg-white/5 text-xl shadow-glow">
                     {selectedBrand?.logo || "🏢"}
                   </div>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">
+                  <div className="grid flex-1 text-left text-sm leading-tight ml-2">
+                    <span className="truncate font-black tracking-tight text-white">
                       {selectedBrand?.name || "Select Brand"}
                     </span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      Brand/Company
+                    <span className="technical-label">
+                      Organization
                     </span>
                   </div>
                   <ChevronsUpDown className="ml-auto size-4" />
@@ -227,17 +238,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <PopoverTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  className="rounded-xl border border-white/5 hover:bg-white/5 transition-all"
                 >
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 text-white">
-                    <FileText className="size-4" />
+                  <div className="flex aspect-square size-10 items-center justify-center rounded-lg bg-white/5 text-white shadow-glow">
+                    <FileText className="size-5" />
                   </div>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">
+                  <div className="grid flex-1 text-left text-sm leading-tight ml-2">
+                    <span className="truncate font-black tracking-tight text-white">
                       {selectedCampaign?.name || "Select Campaign"}
                     </span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      {selectedCampaign?.status === 'active' ? '🟢 Active' : '⏸️ Paused'}
+                    <span className="technical-label">
+                      {selectedCampaign?.status === 'active' ? 'Operational' : 'Paused'}
                     </span>
                   </div>
                   <ChevronsUpDown className="ml-auto size-4" />
@@ -286,6 +297,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
+        <NavMain items={data.navScrapers} label="Scraper Results" />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

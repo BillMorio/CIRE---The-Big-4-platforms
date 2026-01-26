@@ -218,8 +218,11 @@ export default function JobsStatusPage() {
       <div className="flex-1 overflow-auto bg-background">
         <div className="flex flex-col gap-4 p-4 pt-4 max-w-6xl mx-auto w-full">
           {/* Header */}
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">Scraping Jobs Status</h1>
+          <div className="flex flex-col gap-2 mb-6">
+            <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-gradient">
+              Scraper Matrix
+            </h1>
+            <p className="technical-label opacity-60">Status: {scrapingJobs.filter(j => j.status === 'active').length}/{scrapingJobs.length} Nodes Active</p>
           </div>
 
           {/* Platform Scrapers Status Section */}
@@ -228,7 +231,7 @@ export default function JobsStatusPage() {
             onClick={() => setIsScrapersExpanded(!isScrapersExpanded)}
           >
             <div className="flex items-center justify-between">
-              <h2 className="text-lg md:text-xl font-bold">Platform Scrapers Status</h2>
+              <h2 className="text-sm font-black tracking-[0.4em] uppercase text-white/40">Node Fleet Status</h2>
               <div className="flex items-center gap-2">
                 <span className="hidden md:inline text-sm text-muted-foreground">
                   {isScrapersExpanded ? 'Collapse' : 'Expand'}
@@ -265,11 +268,11 @@ export default function JobsStatusPage() {
           }`}>
             <div className="grid gap-4 md:gap-6">
               {scrapingJobs.map((job) => (
-              <Card key={job.id} className={`${getPlatformBackground(job.platform)} border-l-4 border-l-border`}>
+              <Card key={job.id} className="border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-all">
               <CardHeader className="pb-3 md:pb-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 ${job.color} rounded-full flex items-center justify-center text-white text-sm font-bold`}>
+                    <div className={`w-8 h-8 ${job.color} rounded-lg flex items-center justify-center text-white text-sm font-bold`}>
                       {job.icon}
                     </div>
                     <div>
@@ -393,7 +396,7 @@ export default function JobsStatusPage() {
                           
                           <div className="pt-4 border-t dark:border-gray-700">
                             <Button variant="outline" size="default" asChild className="w-full">
-                              <Link href={`/discover/jobs/${job.id}/history`}>
+                              <Link href={`/scrapers/${job.id}/history`}>
                                 <Eye className="w-4 h-4 mr-2" />
                                 View Details
                               </Link>
@@ -483,7 +486,7 @@ export default function JobsStatusPage() {
                           
                           <div className="pt-4 border-t dark:border-gray-700">
                             <Button variant="outline" size="default" asChild className="w-full">
-                              <Link href={`/discover/jobs/${job.id}/history`}>
+                              <Link href={`/scrapers/${job.id}/history`}>
                                 <Eye className="w-4 h-4 mr-2" />
                                 View Details
                               </Link>
@@ -591,14 +594,14 @@ export default function JobsStatusPage() {
                 {/* Action Buttons */}
                 <div className="flex flex-col gap-3 pt-2">
                   <Button variant="default" size="default" asChild className="bg-black hover:bg-gray-800 text-white font-medium w-full">
-                    <Link href={`/discover/jobs/${job.id}/history`}>
+                    <Link href={`/scrapers/${job.id}/history`}>
                       <History className="w-4 h-4 mr-2" />
                       View All Runs
                     </Link>
                   </Button>
                   {job.status === "error" && (
                     <Button variant="outline" size="sm" asChild className="w-full">
-                      <Link href={`/discover/jobs/${job.id}/errors`}>
+                      <Link href={`/scrapers/${job.id}/errors`}>
                         <AlertCircle className="w-4 h-4 mr-2" />
                         View Error Details
                       </Link>

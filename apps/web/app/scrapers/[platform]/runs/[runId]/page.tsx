@@ -81,11 +81,11 @@ export default function RunDetailsPage() {
   const runDetails = getRunDetails(platform, runId);
 
   const handleKeywordClick = (keyword: string) => {
-    router.push(`/discover/jobs/${platform}/runs/${runId}/keywords/${encodeURIComponent(keyword)}`);
+    router.push(`/scrapers/${platform}/runs/${runId}/keywords/${encodeURIComponent(keyword)}`);
   };
 
   const handleCreatorClick = (creator: string) => {
-    router.push(`/discover/jobs/${platform}/runs/${runId}/creators/${encodeURIComponent(creator)}`);
+    router.push(`/scrapers/${platform}/runs/${runId}/creators/${encodeURIComponent(creator)}`);
   };
 
   return (

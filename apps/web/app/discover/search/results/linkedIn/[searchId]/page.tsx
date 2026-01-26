@@ -156,37 +156,37 @@ export default function SearchResultsPage() {
         </div>
 
       {/* Query Details Section */}
-      <Card className="w-auto max-w-md shadow-none">
+      <Card className="w-auto max-w-md shadow-none glass-linkedin">
         <CardContent className="p-4">
           <div className="space-y-3 text-sm">
             <div className="flex">
-              <span className="text-muted-foreground w-20">Search:</span>
-              <span className="font-medium">{mockQuery}</span>
+              <span className="technical-label w-24">Search:</span>
+              <span className="font-black text-white">{mockQuery}</span>
             </div>
             <div className="flex">
-              <span className="text-muted-foreground w-20">Max Posts:</span>
-              <span className="font-medium">10</span>
+              <span className="technical-label w-24">Depth:</span>
+              <span className="font-black text-white">25 NODES</span>
             </div>
             <div className="flex">
-              <span className="text-muted-foreground w-20">Type:</span>
+              <span className="technical-label w-24">Nodes:</span>
               <Badge
-                variant="destructive"
-                className="text-xs bg-red-500/20 text-red-700 backdrop-blur-sm border-2 border-red-300/50"
+                variant="outline"
+                className="technical-label border-white/10 opacity-100"
               >
-                Videos
+                ALL_CONTENT
               </Badge>
             </div>
             <div className="flex">
-              <span className="text-muted-foreground w-20">Platform:</span>
-              <Badge className="bg-[#0077b5] text-xs">LinkedIn</Badge>
+              <span className="technical-label w-24">Domain:</span>
+              <Badge className="bg-white text-black technical-label opacity-100">LINKEDIN</Badge>
             </div>
             <div className="flex">
-              <span className="text-muted-foreground w-20">Status:</span>
+              <span className="technical-label w-24">Status:</span>
               <Badge
                 variant="secondary"
-                className="bg-green-50 text-green-700 text-xs"
+                className="bg-green-500/10 text-green-500 border border-green-500/20 technical-label opacity-100 px-2 py-0"
               >
-                ✓ Completed
+                ✓ COMPLETED
               </Badge>
             </div>
           </div>

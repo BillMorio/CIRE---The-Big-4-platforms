@@ -216,7 +216,7 @@ export default function YouTubeSearchResultsPage() {
         </div>
 
       {/* Query Details Section */}
-      <Card className="w-auto max-w-md shadow-none">
+      <Card className="w-auto max-w-md shadow-none glass-youtube">
         <CardContent className="p-4">
           <div className="space-y-3 text-sm">
             <div className="flex">
@@ -226,6 +226,19 @@ export default function YouTubeSearchResultsPage() {
             <div className="flex">
               <span className="text-muted-foreground w-20">Max Videos:</span>
               <span className="font-medium">50</span>
+            </div>
+            <div className="flex">
+              <span className="technical-label w-24">Status:</span>
+              <Badge
+                variant="secondary"
+                className="bg-red-500/10 text-red-500 border border-red-500/20 technical-label opacity-100 px-2 py-0"
+              >
+                ⚠ FAILED
+              </Badge>
+            </div>
+            <div className="flex">
+              <span className="technical-label w-24">Error:</span>
+              <span className="text-red-500 technical-label opacity-100">API_QUOTA_EXCEEDED</span>
             </div>
             <div className="flex">
               <span className="text-muted-foreground w-20">Duration:</span>

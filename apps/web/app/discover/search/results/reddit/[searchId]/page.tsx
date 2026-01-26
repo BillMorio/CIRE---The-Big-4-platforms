@@ -204,37 +204,37 @@ export default function RedditSearchResultsPage() {
         </div>
 
       {/* Query Details Section */}
-      <Card className="w-auto max-w-md shadow-none">
+      <Card className="w-auto max-w-md shadow-none glass-reddit">
         <CardContent className="p-4">
           <div className="space-y-3 text-sm">
             <div className="flex">
-              <span className="text-muted-foreground w-20">Search:</span>
-              <span className="font-medium">{mockQuery}</span>
+              <span className="technical-label w-24">Search:</span>
+              <span className="font-black text-white">{mockQuery}</span>
             </div>
             <div className="flex">
-              <span className="text-muted-foreground w-20">Max Posts:</span>
-              <span className="font-medium">50</span>
+              <span className="technical-label w-24">Depth:</span>
+              <span className="font-black text-white">50 NODES</span>
             </div>
             <div className="flex">
-              <span className="text-muted-foreground w-20">Subreddits:</span>
+              <span className="technical-label w-24">Nodes:</span>
               <Badge
                 variant="outline"
-                className="text-xs bg-orange-100 text-orange-700 border-orange-300"
+                className="technical-label border-white/10 opacity-100"
               >
-                All Subreddits
+                ALL_SUBREDDITS
               </Badge>
             </div>
             <div className="flex">
-              <span className="text-muted-foreground w-20">Platform:</span>
-              <Badge className="bg-orange-500 text-xs text-white">Reddit</Badge>
+              <span className="technical-label w-24">Domain:</span>
+              <Badge className="bg-white text-black technical-label opacity-100">REDDIT</Badge>
             </div>
             <div className="flex">
-              <span className="text-muted-foreground w-20">Status:</span>
+              <span className="technical-label w-24">Status:</span>
               <Badge
                 variant="secondary"
-                className="bg-green-50 text-green-700 text-xs"
+                className="bg-green-500/10 text-green-500 border border-green-500/20 technical-label opacity-100 px-2 py-0"
               >
-                ✓ Completed
+                ✓ COMPLETED
               </Badge>
             </div>
           </div>

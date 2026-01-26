@@ -124,7 +124,7 @@ export default function PlatformHistoryPage() {
   const runs = getRunsData(platform);
 
   const handleRunClick = (runId: string) => {
-    router.push(`/discover/jobs/${platform}/runs/${runId}`);
+    router.push(`/scrapers/${platform}/runs/${runId}`);
   };
 
   return (
@@ -194,7 +194,7 @@ export default function PlatformHistoryPage() {
                           </span>
                           <div className="flex gap-1 flex-wrap">
                             {run.postsGenerated.pending > 0 && (
-                              <Badge variant="outline" className="text-xs text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+                              <Badge variant="outline" className="text-xs text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800" >
                                 {run.postsGenerated.pending} pending
                               </Badge>
                             )}

@@ -8,8 +8,8 @@ import Link from "next/link";
 
 export default function Page() {
   return (
-    <div className="flex min-h-screen flex-col items-center gap-4 py-4 sm:px-5">
-      <div className="flex w-full max-w-screen-lg items-center gap-2 px-4 sm:mb-[calc(20vh)]">
+    <div className="flex min-h-screen flex-col items-center gap-4 py-4 sm:px-5 bg-black text-white">
+      <div className="flex w-full max-w-screen-lg items-center gap-2 px-4 sm:mb-[calc(10vh)] glass p-4 rounded-xl border-white/5 mt-4">
         <Button size="icon" variant="outline">
           <a href="https://github.com/steven-tey/novel" target="_blank" rel="noreferrer">
             <GithubIcon />

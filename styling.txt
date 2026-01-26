@@ -1,0 +1,38 @@
+# APP STYLING STYLING & VIBE GUIDELINES
+
+The components follow a premium, high-tech, and futuristic aesthetic characterized by high contrast, deep layering, and fluid motion graphics.
+
+## 1. COLOR PALETTE
+- **Backgrounds**: Pure Black (`#000000`) is the default canvas. Use `zinc-950` for subtle depth variations.
+- **Accents**: 
+  - **Electric Lime** (`#BFFF00`): Used for "active" data flows, highlights, and energy-focused elements.
+  - **Pure White**: Used for primary text and high-contrast UI borders.
+  - **Translucent Whites**: `white/5` up to `white/30` for surfaces, borders, and overlays.
+- **Gradients**: Often used as subtle radial glows or background ambience to break the black void.
+
+## 2. SURFACES & INTERFACES (GLASSMORPHISM)
+- **Glass Effect**: Heavy use of `backdrop-blur` (ranging from `xl` to `3xl`).
+- **Linerity**: Sharp, thin borders using `border-white/10` or `border-white/20`.
+- **Rounding**: Extreme corners. Use `rounded-full` for badges/pills and `rounded-[2.5rem]` to `rounded-[4rem]` for large containers.
+- **Shadows**: Soft, expansive glows (`shadow-primary/5` or `shadow-white/5`) instead of traditional hard shadows.
+
+## 3. TYPOGRAPHY
+- **Hero Headings**: 
+  - Font Weight: `font-black` (900).
+  - Tracking: `tracking-tighter` or `tracking-[-0.05em]`.
+  - Effect: `bg-clip-text text-transparent` with linear gradients (White to White/40).
+- **Technical Labels**:
+  - Transform: `uppercase`.
+  - Tracking: Wide tracking (`tracking-[0.3em]` to `tracking-[0.8em]`).
+  - Font Size: Small (`text-[9px]` or `text-[10px]`).
+  - Vibe: Should feel like "System Diagnostics" or "Metadata".
+
+## 4. MOTION & INTERACTION
+- **Entry**: Smooth `spring` or `ease-out` transitions.
+- **Micro-interactions**: Hover effects that increase border opacity or trigger a subtle background shimmer.
+- **Secondary Motion**: Particle systems (floating dots), SVG motion paths for data flows, and parallax geometric shapes.
+- **3D Depth**: Use of CSS `perspective` and `translateZ` for immersive carousels.
+
+## 5. OVERALL VIBE
+- **Keywords**: Cinematic, High-Tech, Premium, Minimalist, Matrix-Inspired, Interactive Study.
+- **Philsophy**: Every element should feel like it's projected on a high-end holographic interface. Nothing should feel "flat" or "standard web-tier".

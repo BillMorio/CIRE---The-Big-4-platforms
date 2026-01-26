@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Search, TrendingUp, History, Calendar, Hash, User, Video } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 // Mock search history data
 const mockSearchHistory = [
@@ -238,26 +239,23 @@ export default function ManualSearchPage() {
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 pt-6 w-full max-w-6xl mx-auto">
         {/* Header Section */}
-        <div className="text-center space-y-3">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Search className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
-            <h1 className="text-xl sm:text-2xl font-bold">Manual Content Search</h1>
-          </div>
-          <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto px-2">
-            Search for specific keywords, hashtags, or topics across platforms to discover high-performing content.
-          </p>
+        <div className="flex flex-col gap-2 mb-8 items-center text-center">
+            <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-gradient pb-2">
+              Content Search
+            </h1>
+            <p className="technical-label text-sm opacity-60 max-w-2xl">Manual Extraction Protocol // Multi-Node Discovery</p>
         </div>
 
         {/* Search Configuration */}
         <Card className="w-full max-w-6xl mx-auto">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              {selectedPlatform === 'reddit' && <div className="w-5 h-5 sm:w-6 sm:h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold">r</div>}
-              {selectedPlatform === 'twitter' && <div className="w-5 h-5 sm:w-6 sm:h-6 bg-black rounded flex items-center justify-center text-white text-xs font-bold">𝕏</div>}
-              {selectedPlatform === 'linkedin' && <div className="w-5 h-5 sm:w-6 sm:h-6 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold">in</div>}
-              {selectedPlatform === 'youtube' && <div className="w-5 h-5 sm:w-6 sm:h-6 bg-red-600 rounded flex items-center justify-center text-white text-xs font-bold">▶</div>}
-              <span className="truncate">
-                {selectedPlatform.charAt(0).toUpperCase() + selectedPlatform.slice(1)} Scraper
+          <CardHeader className="pb-4 border-b border-white/5">
+            <CardTitle className="flex items-center gap-3 text-base sm:text-lg">
+              {selectedPlatform === 'reddit' && <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-[0_0_15px_rgba(255,69,0,0.5)]">r</div>}
+              {selectedPlatform === 'twitter' && <div className="w-8 h-8 bg-white rounded flex items-center justify-center text-black text-xs font-bold shadow-[0_0_15px_rgba(255,255,255,0.3)]">𝕏</div>}
+              {selectedPlatform === 'linkedin' && <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-[0_0_15px_rgba(0,119,181,0.5)]">in</div>}
+              {selectedPlatform === 'youtube' && <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-[0_0_15px_rgba(255,0,0,0.5)]">▶</div>}
+              <span className="truncate technical-label text-base opacity-100 font-black tracking-widest text-white/40">
+                {selectedPlatform.toUpperCase()} SEARCH_PARAMETER_CONFIG
               </span>
             </CardTitle>
           </CardHeader>
@@ -296,7 +294,7 @@ export default function ManualSearchPage() {
 
             {/* Reddit-specific inputs */}
             {selectedPlatform === 'reddit' && (
-              <div className="space-y-4 border rounded-lg p-3 sm:p-4 bg-orange-50 dark:bg-orange-950/20 overflow-hidden">
+              <div className="space-y-4 border rounded-xl p-4 sm:p-6 glass-reddit overflow-hidden">
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="keywords" className="text-sm font-medium">Keywords *</Label>
@@ -342,7 +340,7 @@ export default function ManualSearchPage() {
 
             {/* Twitter-specific inputs */}
             {selectedPlatform === 'twitter' && (
-              <div className="space-y-4 border rounded-lg p-3 sm:p-4 bg-blue-50 dark:bg-blue-950/20 overflow-hidden">
+              <div className="space-y-4 border rounded-xl p-4 sm:p-6 glass-twitter overflow-hidden">
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="hashtags" className="text-sm font-medium">Hashtags *</Label>
@@ -383,7 +381,7 @@ export default function ManualSearchPage() {
 
             {/* LinkedIn-specific inputs */}
             {selectedPlatform === 'linkedin' && (
-              <div className="space-y-4 border rounded-lg p-3 sm:p-4 bg-blue-50 dark:bg-blue-950/20 overflow-hidden">
+              <div className="space-y-4 border rounded-xl p-4 sm:p-6 glass-linkedin overflow-hidden">
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="keywords" className="text-sm font-medium">Keywords *</Label>
@@ -426,7 +424,7 @@ export default function ManualSearchPage() {
 
             {/* YouTube-specific inputs */}
             {selectedPlatform === 'youtube' && (
-              <div className="space-y-4 border rounded-lg p-3 sm:p-4 bg-red-50 dark:bg-red-950/20 overflow-hidden">
+              <div className="space-y-4 border rounded-xl p-4 sm:p-6 glass-youtube overflow-hidden">
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="keywords" className="text-sm font-medium">Keywords *</Label>
@@ -472,11 +470,17 @@ export default function ManualSearchPage() {
               <Button
                 onClick={handleSearch}
                 size="lg"
-                className="px-6 sm:px-8 w-full sm:w-auto"
+                className={cn(
+                  "px-6 sm:px-8 w-full sm:w-auto rounded-xl transition-all duration-500",
+                  selectedPlatform === 'reddit' && "bg-orange-500 hover:bg-orange-600 shadow-[0_0_20px_rgba(255,69,0,0.3)]",
+                  selectedPlatform === 'twitter' && "bg-white text-black hover:bg-white/90 shadow-[0_0_20px_rgba(255,255,255,0.3)]",
+                  selectedPlatform === 'linkedin' && "bg-blue-600 hover:bg-blue-700 shadow-[0_0_20px_rgba(0,119,181,0.3)]",
+                  selectedPlatform === 'youtube' && "bg-red-600 hover:bg-red-700 shadow-[0_0_20px_rgba(255,0,0,0.3)]"
+                )}
                 disabled={!formData.keywords && !formData.hashtags}
               >
                 <Search className="w-4 h-4 mr-2" />
-                Start Scraping
+                START EXTRACTION_SEQUENCE
               </Button>
             </div>
           </CardContent>
@@ -484,9 +488,9 @@ export default function ManualSearchPage() {
 
         {/* Popular Topics Section */}
         <div className="space-y-4 w-full">
-          <h2 className="text-base sm:text-lg font-semibold flex items-center gap-2">
+          <h2 className="technical-label text-base opacity-40 flex items-center gap-2">
             <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
-            Popular {selectedPlatform === 'all' ? '' : selectedPlatform.charAt(0).toUpperCase() + selectedPlatform.slice(1)} Topics
+            POPULAR {selectedPlatform === 'all' ? '' : selectedPlatform.toUpperCase()} TOPICS
           </h2>
           <div className="flex flex-wrap gap-2 w-full overflow-hidden">
             {displayTopics.map((topic, index) => (
@@ -524,7 +528,7 @@ export default function ManualSearchPage() {
         <div className="space-y-4 w-full">
           <div className="flex items-center gap-2">
             <History className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-            <h2 className="text-base sm:text-lg font-semibold">Recent Searches</h2>
+            <h2 className="technical-label text-base opacity-40">RECENT SEARCH_HISTORY</h2>
           </div>
           
           <div className="grid gap-3 w-full">
