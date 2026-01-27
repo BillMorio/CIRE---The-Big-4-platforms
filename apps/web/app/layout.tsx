@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 import Providers from "./providers";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AppTopbar } from "@/components/app-topbar";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 const title = "Novel - Notion-style WYSIWYG editor with AI-powered autocompletions";
 const description =
@@ -38,11 +38,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <body>
         <Providers>
-          <SidebarProvider>
+          <SidebarProvider className="h-svh overflow-hidden">
             <AppSidebar />
-            <main className="flex-1">
-              {children}
-            </main>
+            <SidebarInset className="flex flex-col h-full overflow-hidden">
+              <div className="flex-1 overflow-auto relative">
+                <AppTopbar />
+                {children}
+              </div>
+            </SidebarInset>
           </SidebarProvider>
         </Providers>
       </body>

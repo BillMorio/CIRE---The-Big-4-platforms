@@ -46,7 +46,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useBrandCampaignStore } from "@/lib/store";
-import { AppTopbar } from "@/components/app-topbar";
 
 // Mock data structure - in real app, this would come from your database
 interface PlatformContent {
@@ -141,8 +140,7 @@ export default function EditorPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
-      <AppTopbar />
+    <div className="flex flex-col overflow-hidden">
       {/* Action Bar */}
       <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex items-center justify-between p-3 md:p-4 max-w-screen-xl mx-auto w-full gap-2">

@@ -8,7 +8,6 @@ import { Plus, Target } from "lucide-react";
 import { columns } from "./columns";
 import { DataCards } from "./data-cards";
 import { useBrandCampaignStore } from "@/lib/store";
-import { AppTopbar } from "@/components/app-topbar";
 
 // Mock data for drafts
 const mockDrafts = [
@@ -125,10 +124,7 @@ export default function DraftsPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col">
-      <AppTopbar />
-      <div className="flex-1 overflow-auto bg-background">
-        <div className="flex flex-col gap-6 p-4 pt-6 max-w-7xl mx-auto w-full">
+    <div className="flex flex-col gap-6 p-4 pt-6 max-w-7xl mx-auto w-full">
           {/* Campaign Context Banner */}
         {selectedCampaign && (
         <Card className="border border-border bg-muted">
@@ -200,7 +196,5 @@ export default function DraftsPage() {
         {/* Data Cards with TanStack Table */}
         <DataCards columns={columns} data={mockDrafts} />
         </div>
-      </div>
-    </div>
   );
 }

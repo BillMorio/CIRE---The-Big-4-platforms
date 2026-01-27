@@ -18,7 +18,6 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { MobileBreadcrumb } from "@/components/mobile-breadcrumb";
-import { AppTopbar } from "@/components/app-topbar";
 import {
   AlertCircle,
   CheckCircle,
@@ -145,20 +144,20 @@ export default function JobsStatusPage() {
     switch (status) {
       case "active":
         return (
-          <Badge className="bg-green-500 text-white text-xs font-medium">
-            ACTIVE
+          <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
+            Active
           </Badge>
         );
       case "error":
         return (
-          <Badge variant="destructive" className="text-xs font-medium">
-            ERROR
+          <Badge variant="destructive" className="bg-red-500/10 text-red-600 border-red-500/20">
+            Error
           </Badge>
         );
       default:
         return (
-          <Badge variant="secondary" className="text-xs font-medium">
-            IDLE
+          <Badge variant="secondary">
+            Idle
           </Badge>
         );
     }
@@ -186,7 +185,7 @@ export default function JobsStatusPage() {
         badge: { 
           text: "Healthy", 
           variant: "default", 
-          className: "bg-green-500 text-white" 
+          className: "bg-green-500/10 text-green-600 border-green-500/20" 
         }
       };
     } else if (errorJobs === 1) {
@@ -213,13 +212,11 @@ export default function JobsStatusPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      <AppTopbar />
-      <div className="flex-1 overflow-auto bg-background">
-        <div className="flex flex-col gap-4 p-4 pt-4 max-w-6xl mx-auto w-full">
+    <div className="flex flex-1 overflow-auto bg-background">
+        <div className="flex flex-col gap-4 p-4 md:p-8 max-w-6xl mx-auto w-full">
           {/* Header */}
-          <div className="flex flex-col gap-2 mb-6">
-            <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-gradient">
+          <div className="flex flex-col gap-2 mb-6 text-center md:text-left">
+            <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-gradient">
               Scraper Matrix
             </h1>
             <p className="technical-label opacity-60">Status: {scrapingJobs.filter(j => j.status === 'active').length}/{scrapingJobs.length} Nodes Active</p>
@@ -368,17 +365,17 @@ export default function JobsStatusPage() {
                                 </span>
                                 <div className="flex gap-1 flex-wrap">
                                   {job.postsGenerated.pending > 0 && (
-                                    <Badge variant="outline" className="text-xs text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+                                    <Badge variant="outline" className="text-yellow-700 dark:text-yellow-300 bg-yellow-500/10 border-yellow-500/20">
                                       {job.postsGenerated.pending} pending
                                     </Badge>
                                   )}
                                   {job.postsGenerated.approved > 0 && (
-                                    <Badge variant="outline" className="text-xs text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+                                    <Badge variant="outline" className="text-green-700 dark:text-green-300 bg-green-500/10 border-green-500/20">
                                       {job.postsGenerated.approved} approved
                                     </Badge>
                                   )}
                                   {job.postsGenerated.rejected > 0 && (
-                                    <Badge variant="outline" className="text-xs text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+                                    <Badge variant="outline" className="text-red-700 dark:text-red-300 bg-red-500/10 border-red-500/20">
                                       {job.postsGenerated.rejected} rejected
                                     </Badge>
                                   )}
@@ -420,7 +417,7 @@ export default function JobsStatusPage() {
                           <div className="flex items-start justify-between mb-4">
                             <div className="flex items-center gap-2">
                               <CheckCircle className="w-4 h-4 text-green-500" />
-                              <Badge className="text-xs bg-green-500 text-white">SUCCESS</Badge>
+                              <Badge className="bg-green-500/10 text-green-600 border-green-500/20">Success</Badge>
                             </div>
                             <span className="text-sm font-medium text-muted-foreground">2m 34s</span>
                           </div>
@@ -458,17 +455,17 @@ export default function JobsStatusPage() {
                                 </span>
                                 <div className="flex gap-1 flex-wrap">
                                   {job.postsGenerated.pending > 0 && (
-                                    <Badge variant="outline" className="text-xs text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+                                    <Badge variant="outline" className="text-yellow-700 dark:text-yellow-300 bg-yellow-500/10 border-yellow-500/20">
                                       {job.postsGenerated.pending} pending
                                     </Badge>
                                   )}
                                   {job.postsGenerated.approved > 0 && (
-                                    <Badge variant="outline" className="text-xs text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+                                    <Badge variant="outline" className="text-green-700 dark:text-green-300 bg-green-500/10 border-green-500/20">
                                       {job.postsGenerated.approved} approved
                                     </Badge>
                                   )}
                                   {job.postsGenerated.rejected > 0 && (
-                                    <Badge variant="outline" className="text-xs text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+                                    <Badge variant="outline" className="text-red-700 dark:text-red-300 bg-red-500/10 border-red-500/20">
                                       {job.postsGenerated.rejected} rejected
                                     </Badge>
                                   )}
@@ -515,7 +512,7 @@ export default function JobsStatusPage() {
                                 {job.health.percentage}%
                               </span>
                               {job.health.trending === "declining" && (
-                                <Badge variant="outline" className="text-xs text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+                                <Badge variant="outline" className="text-yellow-700 dark:text-yellow-300 bg-yellow-500/10 border-yellow-500/20">
                                   declining
                                 </Badge>
                               )}
@@ -545,7 +542,7 @@ export default function JobsStatusPage() {
                           </div>
                           
                           <div className="mt-4 pt-4 border-t dark:border-gray-700">
-                            <div className={`text-xs px-2 py-1 rounded-full inline-block ${
+                            <div className={`text-[10px] px-2 py-1 rounded-full inline-block font-medium ${
                               job.health.percentage >= 95 ? "bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300" :
                               job.health.percentage >= 85 ? "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300" : 
                               "bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300"
@@ -580,7 +577,7 @@ export default function JobsStatusPage() {
                         {job.health.percentage}%
                       </span>
                       {job.health.trending === "declining" && (
-                        <Badge variant="outline" className="text-xs text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+                        <Badge variant="outline" className="text-yellow-700 dark:text-yellow-300 bg-yellow-500/10 border-yellow-500/20">
                           declining
                         </Badge>
                       )}
@@ -614,7 +611,6 @@ export default function JobsStatusPage() {
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 }

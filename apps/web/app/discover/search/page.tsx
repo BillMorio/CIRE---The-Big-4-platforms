@@ -214,7 +214,7 @@ export default function ManualSearchPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge variant="default" className="bg-green-500">Completed</Badge>
+        return <Badge className="bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/30">Completed</Badge>
       case "failed":
         return <Badge variant="destructive">Failed</Badge>
       default:
@@ -230,7 +230,7 @@ export default function ManualSearchPage() {
       YouTube: "bg-red-600"
     }
     return (
-      <Badge className={`${colors[platform as keyof typeof colors] || "bg-gray-500"} text-white`}>
+      <Badge className={colors[platform as keyof typeof colors] || "bg-gray-500"}>
         {platform}
       </Badge>
     )
@@ -497,7 +497,7 @@ export default function ManualSearchPage() {
               <Badge
                 key={index}
                 variant="secondary"
-                className="px-2 sm:px-3 py-1 text-xs sm:text-sm cursor-pointer hover:bg-accent transition-colors shrink-0"
+                className="cursor-pointer hover:bg-accent transition-colors shrink-0"
                 onClick={() => handlePopularTopicClick(topic)}
               >
                 {topic}
@@ -506,7 +506,7 @@ export default function ManualSearchPage() {
             {!showAllTopics && currentTopics.length > 6 && (
               <Badge
                 variant="outline"
-                className="px-2 sm:px-3 py-1 text-xs sm:text-sm cursor-pointer hover:bg-accent transition-colors shrink-0"
+                className="cursor-pointer hover:bg-accent transition-colors shrink-0"
                 onClick={() => setShowAllTopics(true)}
               >
                 +{currentTopics.length - 6} more
@@ -515,7 +515,7 @@ export default function ManualSearchPage() {
             {showAllTopics && (
               <Badge
                 variant="outline"
-                className="px-2 sm:px-3 py-1 text-xs sm:text-sm cursor-pointer hover:bg-accent transition-colors shrink-0"
+                className="cursor-pointer hover:bg-accent transition-colors shrink-0"
                 onClick={() => setShowAllTopics(false)}
               >
                 Show Less

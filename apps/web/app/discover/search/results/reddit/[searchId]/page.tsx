@@ -160,48 +160,11 @@ export default function RedditSearchResultsPage() {
   const mockQuery = "AI productivity programming";
 
   return (
-    <SidebarInset>
-      <header className="flex h-16 shrink-0 items-center gap-2">
-        <div className="flex items-center gap-2 px-4">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/discover">Discover</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/discover/search">Manual Search</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Reddit Results</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-        <div className="ml-auto px-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.back()}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-        </div>
-      </header>
-
-      <div className="flex flex-1 flex-col gap-6 p-4 pt-0 max-w-7xl mx-auto w-full">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-bold">{mockQuery}</h1>
-        </div>
+    <div className="flex flex-1 flex-col gap-6 p-4 pt-4 max-w-7xl mx-auto w-full">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <h1 className="text-2xl font-bold">{mockQuery}</h1>
+      </div>
 
       {/* Query Details Section */}
       <Card className="w-auto max-w-md shadow-none glass-reddit">
@@ -244,6 +207,5 @@ export default function RedditSearchResultsPage() {
       {/* Results Section with Data Cards */}
       <DataCards columns={columns} data={mockSearchResults} />
     </div>
-  </SidebarInset>
-);
+  );
 }

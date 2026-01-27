@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Clock, TrendingUp, Users, Settings, ExternalLink, Search, Target } from "lucide-react"
 import { useBrandCampaignStore } from "@/lib/store"
-import { AppTopbar } from "@/components/app-topbar"
 import { cn } from "@/lib/utils"
 
 // Mock data for demonstration
@@ -76,19 +75,16 @@ export default function DiscoverPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col">
-      <AppTopbar />
-      <div className="flex-1 overflow-auto bg-background">
-        <div className="flex flex-col gap-4 p-4 pt-4 max-w-6xl mx-auto w-full">
+    <div className="flex flex-col gap-4 p-4 pt-4 max-w-6xl mx-auto w-full">
           {/* Campaign Context Banner */}
         {selectedCampaign && (
-          <Card className="border border-white/5 bg-white/[0.02] backdrop-blur-sm">
+          <Card className="glass">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Target className="w-5 h-5 text-white/40" />
+                  <Target className="w-5 h-5 text-muted-foreground" />
                   <div>
-                    <div className="font-black text-sm text-white tracking-tight">
+                    <div className="font-black text-sm tracking-tight">
                       {selectedBrand?.logo} {selectedBrand?.name} / {selectedCampaign.name}
                     </div>
                     <div className="technical-label mt-0.5">
@@ -98,10 +94,10 @@ export default function DiscoverPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant="outline" className="border-white/10 technical-label">
-                    {selectedCampaign.settings.creatorsToTrack.length} NODES
+                  <Badge variant="outline">
+                    {selectedCampaign.settings.creatorsToTrack.length} Nodes
                   </Badge>
-                  <Badge variant="outline" className="border-white/10 technical-label">
+                  <Badge variant="outline">
                     {selectedCampaign.settings.platforms.join(", ")}
                   </Badge>
                 </div>
@@ -111,9 +107,9 @@ export default function DiscoverPage() {
         )}
 
         {/* Scraping Jobs Status Bar */}
-        <Card className="border border-white/5 bg-white/[0.02] backdrop-blur-sm">
+        <Card className="glass">
           <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="w-2 h-2 rounded-full bg-green-500 shadow-glow" />
@@ -121,14 +117,14 @@ export default function DiscoverPage() {
                   <span className="technical-label opacity-40">• Last run: 2 hours ago</span>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                 <div className="text-sm technical-label opacity-60">
-                  <span className="font-black text-white">127 NEW_ENTRIES</span>
+                  <span className="font-black">127 NEW_ENTRIES</span>
                   <span className="ml-2">
                     (TWTR: 47, RDIT: 43, LNKD: 37)
                   </span>
                 </div>
-                <Button variant="outline" size="sm" asChild className="rounded-lg h-8 px-3 border-white/10 bg-white/5">
+                <Button variant="outline" size="sm" asChild className="rounded-lg h-8 px-3 w-full sm:w-auto">
                   <Link href="/scrapers">
                     <Settings className="w-3 h-3 mr-2" />
                     Diagnostics →
@@ -201,7 +197,7 @@ export default function DiscoverPage() {
                   </CardTitle>
                   <Badge 
                     variant="secondary" 
-                    className={`${getPlatformColor(content.platform)} text-white text-xs`}
+                    className={getPlatformColor(content.platform)}
                   >
                     {content.platform}
                   </Badge>
@@ -225,7 +221,7 @@ export default function DiscoverPage() {
                       {content.platform === "Twitter" && `${content.engagement.likes} likes`}
                     </div>
                   </div>
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline">
                     Score: {content.performance_score}
                   </Badge>
                 </div>
@@ -242,8 +238,6 @@ export default function DiscoverPage() {
             </Card>
           ))}
         </div>
-        </div>
-      </div>
     </div>
   )
 }

@@ -29,10 +29,21 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 240 5.9% 90%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    --shadow-glow: 0 0 10px rgba(0, 0, 0, 0.03);
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
+    --glass-border: 240 5.9% 90% / 0.5;
+    --glass-bg: 0 0% 100% / 0.3;
   }
 
-  /* Force Cinematic Dark Mode globally */
-  .dark, :root {
+  .dark {
     --background: 0 0% 0%; /* Pure Black */
     --foreground: 0 0% 100%; /* Pure White */
 
@@ -69,20 +80,24 @@
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 0 0% 15%;
     --sidebar-ring: 0 0% 100%;
+    --shadow-glow: 0 0 20px rgba(255, 255, 255, 0.1);
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    --glass-border: 0 0% 100% / 0.1;
+    --glass-bg: 0 0% 100% / 0.02;
   }
 }
 
 @layer components {
   .glass {
-    @apply backdrop-blur-xl bg-white/5 border border-white/10 shadow-glass;
+    @apply backdrop-blur-xl bg-[hsl(var(--glass-bg))] border-[hsl(var(--glass-border))] shadow-glass;
   }
   
   .glass-dark {
-    @apply backdrop-blur-2xl bg-black/40 border border-white/5 shadow-glass;
+    @apply backdrop-blur-2xl bg-black/40 border-white/5 shadow-glass;
   }
 
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-b from-white to-white/40;
+    @apply bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/40;
   }
 
   .technical-label {

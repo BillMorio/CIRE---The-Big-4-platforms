@@ -1,12 +1,14 @@
 "use client";
 
 import {
-  ColumnDef,
   getCoreRowModel,
   useReactTable,
   getPaginationRowModel,
   getSortedRowModel,
   getFilteredRowModel,
+} from "@tanstack/react-table";
+import type {
+  ColumnDef,
   SortingState,
   ColumnFiltersState,
 } from "@tanstack/react-table";
@@ -169,7 +171,7 @@ export function DataCards<TData, TValue>({
             return (
               <Card
                 key={row.id}
-                className="hover:shadow-md transition-shadow bg-gradient-to-t from-blue-50/30 to-card shadow-xs dark:from-blue-950/10 dark:bg-card"
+                className="hover:shadow-md transition-shadow"
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
@@ -212,26 +214,26 @@ export function DataCards<TData, TValue>({
                       {post.contentType === "video" && (
                         <Badge
                           variant="destructive"
-                          className="text-xs bg-red-500/20 text-red-700 backdrop-blur-sm border-2 border-red-300/50"
+                          className="bg-red-500/10 text-red-600 border-red-500/20"
                         >
                           Video {post.videoLength && `• ${post.videoLength}`}
                         </Badge>
                       )}
                       {post.contentType === "carousel" && (
-                        <Badge className="bg-blue-500/20 text-blue-700 dark:text-blue-300 backdrop-blur-sm border-2 border-blue-300/50 text-xs">
+                        <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20">
                           Carousel
                         </Badge>
                       )}
                       {post.contentType === "text" && (
                         <Badge
                           variant="outline"
-                          className="text-xs bg-gray-100/50 backdrop-blur-sm border-2 border-gray-300/50"
+                          className="bg-muted/50 text-muted-foreground border-border/50"
                         >
                           Text
                         </Badge>
                       )}
                       {post.contentType === "document" && (
-                        <Badge className="bg-green-500/20 text-green-700 dark:text-green-300 backdrop-blur-sm border-2 border-green-300/50 text-xs">
+                        <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
                           Document
                         </Badge>
                       )}

@@ -185,7 +185,7 @@ export function DataCards<TData, TValue>({
             return (
               <Card
                 key={row.id}
-                className="hover:shadow-md transition-shadow bg-gradient-to-t from-sky-50/30 to-card shadow-xs dark:from-sky-950/10 dark:bg-card"
+                className="hover:shadow-md transition-shadow"
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-2">
@@ -236,7 +236,7 @@ export function DataCards<TData, TValue>({
                         <Badge
                           key={index}
                           variant="outline"
-                          className="text-xs bg-sky-100 text-sky-700 border-sky-300"
+                          className="bg-sky-500/10 text-sky-600 border-sky-500/20"
                         >
                           #{hashtag}
                         </Badge>
@@ -244,7 +244,6 @@ export function DataCards<TData, TValue>({
                       {tweet.hashtags.length > 3 && (
                         <Badge
                           variant="outline"
-                          className="text-xs"
                         >
                           +{tweet.hashtags.length - 3}
                         </Badge>
@@ -275,30 +274,30 @@ export function DataCards<TData, TValue>({
                       {tweet.tweetType === "video" && (
                         <Badge
                           variant="destructive"
-                          className="text-xs bg-red-500/20 text-red-700 backdrop-blur-sm border-2 border-red-300/50"
+                          className="bg-red-500/10 text-red-600 border-red-500/20"
                         >
                           Video
                         </Badge>
                       )}
                       {tweet.tweetType === "image" && (
-                        <Badge className="bg-green-500/20 text-green-700 dark:text-green-300 backdrop-blur-sm border-2 border-green-300/50 text-xs">
+                        <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
                           Image
                         </Badge>
                       )}
                       {tweet.tweetType === "quote" && (
-                        <Badge className="bg-purple-500/20 text-purple-700 dark:text-purple-300 backdrop-blur-sm border-2 border-purple-300/50 text-xs">
+                        <Badge className="bg-purple-500/10 text-purple-600 border-purple-500/20">
                           Quote
                         </Badge>
                       )}
                       {tweet.tweetType === "thread" && (
-                        <Badge className="bg-blue-500/20 text-blue-700 dark:text-blue-300 backdrop-blur-sm border-2 border-blue-300/50 text-xs">
+                        <Badge className="bg-sky-500/10 text-sky-600 border-sky-500/20">
                           Thread
                         </Badge>
                       )}
                       {tweet.tweetType === "text" && (
                         <Badge
                           variant="outline"
-                          className="text-xs bg-gray-100/50 backdrop-blur-sm border-2 border-gray-300/50"
+                          className="bg-muted/50 text-muted-foreground border-border/50"
                         >
                           Text
                         </Badge>

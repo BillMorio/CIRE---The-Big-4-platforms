@@ -15,6 +15,7 @@ import {
   Settings2,
   ChevronsUpDown,
   Check,
+  Video,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -73,6 +74,11 @@ const data = {
       title: "Studio",
       url: "/studio",
       icon: PenTool,
+    },
+    {
+      title: "YouTube Studio",
+      url: "/studio/youtube/new",
+      icon: Video,
     },
     {
       title: "Calendar",
@@ -166,8 +172,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }
 
   return (
-    <Sidebar variant="inset" {...props} className="glass-dark border-r-white/5">
-      <SidebarHeader className="border-b border-white/5 p-4">
+    <Sidebar variant="inset" {...props} className="glass border-r">
+      <SidebarHeader className="border-b p-4">
         <SidebarMenu className="gap-3">
           <SidebarMenuItem>
             {/* Brand Selector */}
@@ -175,13 +181,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <PopoverTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
-                  className="rounded-xl border border-white/10 hover:bg-white/5 transition-all data-[state=open]:bg-white/10"
+                  className="rounded-xl border hover:bg-accent/50 transition-all data-[state=open]:bg-accent/50"
                 >
-                  <div className="flex aspect-square size-10 items-center justify-center rounded-lg bg-white/5 text-xl shadow-glow">
+                  <div className="flex aspect-square size-10 items-center justify-center rounded-lg bg-accent/30 text-xl shadow-glow">
                     {selectedBrand?.logo || "🏢"}
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight ml-2">
-                    <span className="truncate font-black tracking-tight text-white">
+                    <span className="truncate font-black tracking-tight text-foreground">
                       {selectedBrand?.name || "Select Brand"}
                     </span>
                     <span className="technical-label">
@@ -238,13 +244,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <PopoverTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
-                  className="rounded-xl border border-white/5 hover:bg-white/5 transition-all"
+                  className="rounded-xl border border-border/50 hover:bg-accent/50 transition-all"
                 >
-                  <div className="flex aspect-square size-10 items-center justify-center rounded-lg bg-white/5 text-white shadow-glow">
+                  <div className="flex aspect-square size-10 items-center justify-center rounded-lg bg-accent/30 text-foreground shadow-glow">
                     <FileText className="size-5" />
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight ml-2">
-                    <span className="truncate font-black tracking-tight text-white">
+                    <span className="truncate font-black tracking-tight text-foreground">
                       {selectedCampaign?.name || "Select Campaign"}
                     </span>
                     <span className="technical-label">

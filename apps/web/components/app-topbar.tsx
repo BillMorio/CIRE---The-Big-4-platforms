@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { MobileBreadcrumb } from "@/components/mobile-breadcrumb";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export function AppTopbar() {
   const pathname = usePathname();
@@ -126,14 +127,22 @@ export function AppTopbar() {
   const breadcrumbItems = getBreadcrumbItems();
   const backButton = getBackButton();
 
-  // Only show topbar on discover, drafts, ai-generated, editor, and calendar routes
-  const showTopbar = pathname.startsWith('/discover') || pathname.startsWith('/drafts') || pathname.startsWith('/ai-generated') || pathname.startsWith('/editor') || pathname.startsWith('/calendar');
+  // Only show topbar on app routes (not root landing page)
+  const showTopbar = (pathname.startsWith('/discover') || 
+                      pathname.startsWith('/drafts') || 
+                      pathname.startsWith('/ai-generated') || 
+                      pathname.startsWith('/editor') || 
+                      pathname.startsWith('/calendar') ||
+                      pathname.startsWith('/dashboard') ||
+                      pathname.startsWith('/scrapers')) && 
+                      pathname !== '/';
+  
   if (!showTopbar) {
     return null;
   }
 
   return (
-    <header className="sticky top-0 z-50 h-16 flex items-center gap-2 px-4 glass-dark border-b border-white/5 flex-shrink-0">
+    <header className="sticky top-0 z-40 h-16 flex items-center gap-2 px-4 glass border-b flex-shrink-0">
       <SidebarTrigger className="-ml-1" />
       <Separator orientation="vertical" className="mx-2 h-4" />
       {breadcrumbItems.length > 0 && (
@@ -142,14 +151,17 @@ export function AppTopbar() {
           className="flex-1 min-w-0"
         />
       )}
-      {backButton && (
-        <Button variant="outline" size="sm" asChild className="ml-auto">
-          <Link href={backButton.href}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {backButton.label}
-          </Link>
-        </Button>
-      )}
+      <div className="ml-auto flex items-center gap-2">
+        {backButton && (
+          <Button variant="outline" size="sm" asChild>
+            <Link href={backButton.href}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              {backButton.label}
+            </Link>
+          </Button>
+        )}
+        <ModeToggle />
+      </div>
     </header>
   );
 }

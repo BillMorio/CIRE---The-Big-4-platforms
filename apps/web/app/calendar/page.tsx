@@ -122,11 +122,7 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col">
-      <AppTopbar />
-      
-      <div className="flex-1 overflow-auto bg-background">
-        <div className="flex flex-col gap-4 sm:gap-6 p-4 sm:p-6">
+    <div className="flex flex-col gap-4 sm:gap-6 p-4 sm:p-6">
           
           {/* Campaign Context Banner */}
           {campaign && brand && (
@@ -301,8 +297,6 @@ export default function CalendarPage() {
             </CardContent>
           </Card>
 
-        </div>
-      </div>
     </div>
   );
 }

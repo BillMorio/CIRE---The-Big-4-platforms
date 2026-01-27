@@ -189,7 +189,7 @@ export function DataCards<TData, TValue>({
             return (
               <Card
                 key={row.id}
-                className="hover:shadow-md transition-shadow bg-gradient-to-t from-red-50/30 to-card shadow-xs dark:from-red-950/10 dark:bg-card group"
+                className="hover:shadow-md transition-shadow group"
               >
                 <CardHeader className="pb-3">
                   {/* Thumbnail with Play Button Overlay */}
@@ -279,7 +279,7 @@ export function DataCards<TData, TValue>({
                     <div>
                       <Badge
                         variant="outline"
-                        className="text-xs bg-gray-100/50 backdrop-blur-sm border-2 border-gray-300/50"
+                        className="bg-muted/50 text-muted-foreground border-border/50"
                       >
                         {video.category}
                       </Badge>

@@ -204,7 +204,7 @@ export function DataCards<TData, TValue>({
             return (
               <Card
                 key={row.id}
-                className="hover:shadow-md transition-shadow bg-gradient-to-t from-orange-50/30 to-card shadow-xs dark:from-orange-950/10 dark:bg-card"
+                className="hover:shadow-md transition-shadow"
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-2">
@@ -212,14 +212,14 @@ export function DataCards<TData, TValue>({
                       <div className="flex items-center gap-2 mb-2">
                         <Badge
                           variant="outline"
-                          className="text-xs bg-orange-100 text-orange-700 border-orange-300"
+                          className="bg-orange-500/10 text-orange-600 border-orange-500/20"
                         >
                           r/{post.subreddit}
                         </Badge>
                         {post.flair && (
                           <Badge
                             variant="secondary"
-                            className="text-xs bg-blue-100 text-blue-700"
+                            className="bg-accent/50 text-muted-foreground"
                           >
                             {post.flair}
                           </Badge>
@@ -271,25 +271,25 @@ export function DataCards<TData, TValue>({
                       {post.postType === "video" && (
                         <Badge
                           variant="destructive"
-                          className="text-xs bg-red-500/20 text-red-700 backdrop-blur-sm border-2 border-red-300/50"
+                          className="bg-red-500/10 text-red-600 border-red-500/20"
                         >
                           Video
                         </Badge>
                       )}
                       {post.postType === "image" && (
-                        <Badge className="bg-green-500/20 text-green-700 dark:text-green-300 backdrop-blur-sm border-2 border-green-300/50 text-xs">
+                        <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
                           Image
                         </Badge>
                       )}
                       {post.postType === "link" && (
-                        <Badge className="bg-blue-500/20 text-blue-700 dark:text-blue-300 backdrop-blur-sm border-2 border-blue-300/50 text-xs">
+                        <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20">
                           Link
                         </Badge>
                       )}
                       {post.postType === "text" && (
                         <Badge
                           variant="outline"
-                          className="text-xs bg-gray-100/50 backdrop-blur-sm border-2 border-gray-300/50"
+                          className="bg-muted/50 text-muted-foreground border-border/50"
                         >
                           Text
                         </Badge>
