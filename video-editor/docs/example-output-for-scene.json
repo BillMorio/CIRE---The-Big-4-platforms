@@ -1,0 +1,434 @@
+{
+  "project": {
+    "id": "proj_xyz789",
+    "title": "5 Proven Strategies to Grow Your YouTube Channel in 2024",
+    "totalDuration": 142.8,
+    "masterVoiceover": {
+      "url": "https://storage.example.com/voiceovers/master_audio_2min.mp3",
+      "duration": 142.8,
+      "transcriptUrl": "https://storage.example.com/transcripts/master_transcript_2min.json"
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene_001",
+      "index": 1,
+      "startTime": 0.0,
+      "endTime": 6.5,
+      "duration": 6.5,
+      "script": "Hey everyone! Welcome back to the channel. If you're struggling to grow your YouTube presence, this video is exactly what you need.",
+      "visualType": "a-roll",
+      "aRoll": {
+        "type": "ai-avatar",
+        "avatarId": "avatar_host_01",
+        "provider": "heygen",
+        "emotion": "enthusiastic",
+        "cameraAngle": "medium-shot",
+        "sourceUrl": null,
+        "assetStatus": "pending_generation",
+        "fittingRequired": true,
+        "fittingStrategy": "generate_to_duration"
+      },
+      "transition": {
+        "type": "fade",
+        "duration": 0.5,
+        "direction": "in"
+      }
+    },
+    {
+      "id": "scene_002",
+      "index": 2,
+      "startTime": 6.5,
+      "endTime": 18.3,
+      "duration": 11.8,
+      "script": "Today, I'm sharing five proven strategies that helped me go from zero to one hundred thousand subscribers. These aren't just theories - they're battle-tested methods that actually work.",
+      "visualType": "b-roll",
+      "bRoll": {
+        "type": "motion-graphic",
+        "provider": "veo3",
+        "prompt": "animated number counter from 0 to 100k subscribers, modern YouTube style with silver play button appearing",
+        "sourceUrl": null,
+        "sourceDuration": null,
+        "targetDuration": 11.8,
+        "assetStatus": "pending_generation",
+        "fittingRequired": true,
+        "fittingStrategy": "generate_to_duration",
+        "generationParams": {
+          "style": "modern-youtube",
+          "motion": "dynamic",
+          "duration": 11.8
+        }
+      },
+      "transition": {
+        "type": "crossfade",
+        "duration": 1.0
+      }
+    },
+    {
+      "id": "scene_003",
+      "index": 3,
+      "startTime": 18.3,
+      "endTime": 23.8,
+      "duration": 5.5,
+      "script": "Strategy number one: Master the art of the thumbnail. This is absolutely crucial.",
+      "visualType": "a-roll",
+      "aRoll": {
+        "type": "ai-avatar",
+        "avatarId": "avatar_host_01",
+        "provider": "heygen",
+        "emotion": "serious-emphasis",
+        "cameraAngle": "close-up",
+        "sourceUrl": null,
+        "assetStatus": "pending_generation",
+        "fittingRequired": true,
+        "fittingStrategy": "generate_to_duration"
+      },
+      "transition": {
+        "type": "fade",
+        "duration": 0.8,
+        "direction": "in"
+      }
+    },
+    {
+      "id": "scene_004",
+      "index": 4,
+      "startTime": 23.8,
+      "endTime": 36.2,
+      "duration": 12.4,
+      "script": "Your thumbnail is the first thing people see. It needs to pop off the screen, communicate value instantly, and make someone stop scrolling. Use bold colors, clear text, and make sure it's readable even on a tiny phone screen.",
+      "visualType": "b-roll",
+      "bRoll": {
+        "type": "stock-footage",
+        "provider": "pexels",
+        "searchQuery": "graphic designer creating youtube thumbnails on computer",
+        "videoId": "pexels_22334",
+        "sourceUrl": "https://example.com/stock/thumbnail_design.mp4",
+        "sourceDuration": 18.7,
+        "targetDuration": 12.4,
+        "assetStatus": "ready",
+        "fittingRequired": true,
+        "fittingStrategy": "trim",
+        "trimStrategy": "start_trim",
+        "trimStart": 0.0,
+        "trimEnd": 12.4
+      },
+      "transition": {
+        "type": "crossfade",
+        "duration": 0.5
+      }
+    },
+    {
+      "id": "scene_005",
+      "index": 5,
+      "startTime": 36.2,
+      "endTime": 48.9,
+      "duration": 12.7,
+      "script": "Here's an example from one of my most successful videos. Notice the contrast - the bright yellow against the dark background immediately grabs attention. The text is large and readable, and my face shows genuine emotion. This thumbnail got a click-through rate of over twelve percent.",
+      "visualType": "b-roll",
+      "bRoll": {
+        "type": "stock-footage",
+        "provider": "pexels",
+        "searchQuery": "youtube analytics dashboard showing high ctr metrics",
+        "videoId": "pexels_55667",
+        "sourceUrl": "https://example.com/stock/analytics_ctr.mp4",
+        "sourceDuration": 9.5,
+        "targetDuration": 12.7,
+        "assetStatus": "ready",
+        "fittingRequired": true,
+        "fittingStrategy": "slowdown",
+        "speedFactor": 0.748
+      },
+      "transition": {
+        "type": "wipe",
+        "duration": 0.8,
+        "direction": "left"
+      }
+    },
+    {
+      "id": "scene_006",
+      "index": 6,
+      "startTime": 48.9,
+      "endTime": 54.2,
+      "duration": 5.3,
+      "script": "Strategy number two: Hook them in the first five seconds. You have no time to waste.",
+      "visualType": "a-roll",
+      "aRoll": {
+        "type": "ai-avatar",
+        "avatarId": "avatar_host_01",
+        "provider": "heygen",
+        "emotion": "urgent",
+        "cameraAngle": "medium-shot",
+        "sourceUrl": null,
+        "assetStatus": "pending_generation",
+        "fittingRequired": true,
+        "fittingStrategy": "generate_to_duration"
+      },
+      "transition": {
+        "type": "fade",
+        "duration": 0.5,
+        "direction": "in"
+      }
+    },
+    {
+      "id": "scene_007",
+      "index": 7,
+      "startTime": 54.2,
+      "endTime": 67.5,
+      "duration": 13.3,
+      "script": "Most viewers decide whether to keep watching in the first five seconds. That's it. Five seconds. So don't waste time with lengthy intros or unnecessary pleasantries. Get straight to the value. Tell them exactly what they'll learn and why it matters.",
+      "visualType": "b-roll",
+      "bRoll": {
+        "type": "motion-graphic",
+        "provider": "hera-ai",
+        "prompt": "5 second countdown timer with attention-grabbing visual effects, viewer retention graph rising",
+        "sourceUrl": null,
+        "sourceDuration": null,
+        "targetDuration": 13.3,
+        "assetStatus": "pending_generation",
+        "fittingRequired": true,
+        "fittingStrategy": "generate_to_duration",
+        "generationParams": {
+          "style": "high-energy-tech",
+          "colorScheme": "red-orange-urgent",
+          "motion": "fast-dynamic",
+          "duration": 13.3
+        }
+      },
+      "transition": {
+        "type": "crossfade",
+        "duration": 1.0
+      }
+    },
+    {
+      "id": "scene_008",
+      "index": 8,
+      "startTime": 67.5,
+      "endTime": 72.8,
+      "duration": 5.3,
+      "script": "Strategy number three: Optimize for the algorithm, but create for humans.",
+      "visualType": "a-roll",
+      "aRoll": {
+        "type": "ai-avatar",
+        "avatarId": "avatar_host_01",
+        "provider": "heygen",
+        "emotion": "thoughtful",
+        "cameraAngle": "medium-shot",
+        "sourceUrl": null,
+        "assetStatus": "pending_generation",
+        "fittingRequired": true,
+        "fittingStrategy": "generate_to_duration"
+      },
+      "transition": {
+        "type": "dissolve",
+        "duration": 0.7
+      }
+    },
+    {
+      "id": "scene_009",
+      "index": 9,
+      "startTime": 72.8,
+      "endTime": 86.4,
+      "duration": 13.6,
+      "script": "Yes, you need good SEO. Yes, you need to use the right keywords. But never forget that real people are watching your content. The algorithm rewards videos that keep people watching, so focus on creating genuinely valuable, entertaining content that people actually want to see.",
+      "visualType": "b-roll",
+      "bRoll": {
+        "type": "stock-footage",
+        "provider": "pexels",
+        "searchQuery": "diverse group of people watching videos on phones smiling",
+        "videoId": "pexels_77889",
+        "sourceUrl": "https://example.com/stock/people_watching.mp4",
+        "sourceDuration": 20.2,
+        "targetDuration": 13.6,
+        "assetStatus": "ready",
+        "fittingRequired": true,
+        "fittingStrategy": "trim",
+        "trimStrategy": "middle_trim",
+        "trimStart": 3.5,
+        "trimEnd": 17.1
+      },
+      "transition": {
+        "type": "crossfade",
+        "duration": 0.6
+      }
+    },
+    {
+      "id": "scene_010",
+      "index": 10,
+      "startTime": 86.4,
+      "endTime": 91.5,
+      "duration": 5.1,
+      "script": "Strategy number four: Consistency is your secret weapon.",
+      "visualType": "a-roll",
+      "aRoll": {
+        "type": "ai-avatar",
+        "avatarId": "avatar_host_01",
+        "provider": "heygen",
+        "emotion": "confident",
+        "cameraAngle": "close-up",
+        "sourceUrl": null,
+        "assetStatus": "pending_generation",
+        "fittingRequired": true,
+        "fittingStrategy": "generate_to_duration"
+      },
+      "transition": {
+        "type": "fade",
+        "duration": 0.5,
+        "direction": "in"
+      }
+    },
+    {
+      "id": "scene_011",
+      "index": 11,
+      "startTime": 91.5,
+      "endTime": 104.8,
+      "duration": 13.3,
+      "script": "Pick a schedule and stick to it. Whether it's once a week or three times a week, consistency builds trust with your audience and signals to YouTube that you're a reliable creator. When I went from posting randomly to posting every Tuesday and Friday, my growth rate tripled.",
+      "visualType": "b-roll",
+      "bRoll": {
+        "type": "motion-graphic",
+        "provider": "veo3",
+        "prompt": "animated calendar with checkmarks appearing on Tuesday and Friday, graph showing exponential growth curve",
+        "sourceUrl": null,
+        "sourceDuration": null,
+        "targetDuration": 13.3,
+        "assetStatus": "pending_generation",
+        "fittingRequired": true,
+        "fittingStrategy": "generate_to_duration",
+        "generationParams": {
+          "style": "clean-corporate",
+          "colorScheme": "blue-green-growth",
+          "motion": "smooth-professional",
+          "duration": 13.3
+        }
+      },
+      "transition": {
+        "type": "wipe",
+        "duration": 0.8,
+        "direction": "right"
+      }
+    },
+    {
+      "id": "scene_012",
+      "index": 12,
+      "startTime": 104.8,
+      "endTime": 110.2,
+      "duration": 5.4,
+      "script": "And finally, strategy number five: Engage with your community.",
+      "visualType": "a-roll",
+      "aRoll": {
+        "type": "ai-avatar",
+        "avatarId": "avatar_host_01",
+        "provider": "heygen",
+        "emotion": "friendly-warm",
+        "cameraAngle": "medium-shot",
+        "sourceUrl": null,
+        "assetStatus": "pending_generation",
+        "fittingRequired": true,
+        "fittingStrategy": "generate_to_duration"
+      },
+      "transition": {
+        "type": "fade",
+        "duration": 0.5,
+        "direction": "in"
+      }
+    },
+    {
+      "id": "scene_013",
+      "index": 13,
+      "startTime": 110.2,
+      "endTime": 124.5,
+      "duration": 14.3,
+      "script": "Reply to comments, especially in the first hour after posting. Ask questions at the end of your videos. Create polls. Use the community tab. The more you interact with your viewers, the more loyal they become. Plus, YouTube's algorithm loves videos with high engagement, so it's a win-win.",
+      "visualType": "b-roll",
+      "bRoll": {
+        "type": "stock-footage",
+        "provider": "pexels",
+        "searchQuery": "social media notifications comments likes engagement flowing",
+        "videoId": "pexels_99001",
+        "sourceUrl": "https://example.com/stock/engagement_notifications.mp4",
+        "sourceDuration": 10.8,
+        "targetDuration": 14.3,
+        "assetStatus": "ready",
+        "fittingRequired": true,
+        "fittingStrategy": "slowdown",
+        "speedFactor": 0.755
+      },
+      "transition": {
+        "type": "crossfade",
+        "duration": 0.8
+      }
+    },
+    {
+      "id": "scene_014",
+      "index": 14,
+      "startTime": 124.5,
+      "endTime": 130.1,
+      "duration": 5.6,
+      "script": "So there you have it - five strategies that actually work. But here's the truth...",
+      "visualType": "a-roll",
+      "aRoll": {
+        "type": "ai-avatar",
+        "avatarId": "avatar_host_01",
+        "provider": "heygen",
+        "emotion": "serious-honest",
+        "cameraAngle": "close-up",
+        "sourceUrl": "https://example.com/stock/avatar_conclusion.mp4",
+        "assetStatus": "generated",
+        "fittingRequired": false,
+        "fittingStrategy": "none"
+      },
+      "transition": {
+        "type": "dissolve",
+        "duration": 0.6
+      }
+    },
+    {
+      "id": "scene_015",
+      "index": 15,
+      "startTime": 130.1,
+      "endTime": 142.8,
+      "duration": 12.7,
+      "script": "None of this matters if you don't take action. Start today. Pick one strategy and implement it in your next video. If this helped you, smash that subscribe button, and I'll see you in the next one. Peace!",
+      "visualType": "b-roll",
+      "bRoll": {
+        "type": "motion-graphic",
+        "provider": "hera-ai",
+        "prompt": "animated subscribe button with bell icon, glowing call-to-action effects, thumbs up and like animations",
+        "sourceUrl": "https://example.com/stock/subscribe_animation.mp4",
+        "sourceDuration": 12.7,
+        "targetDuration": 12.7,
+        "assetStatus": "generated",
+        "fittingRequired": false,
+        "fittingStrategy": "none",
+        "generationParams": {
+          "style": "energetic-youtube",
+          "colorScheme": "red-white-youtube",
+          "motion": "bouncy-engaging",
+          "duration": 12.7
+        }
+      },
+      "transition": {
+        "type": "fade",
+        "duration": 1.0,
+        "direction": "out"
+      }
+    }
+  ],
+  "metadata": {
+    "totalScenes": 15,
+    "aRollScenes": 7,
+    "bRollScenes": 8,
+    "stockFootageCount": 4,
+    "motionGraphicCount": 4,
+    "assetsGenerated": 2,
+    "assetsPendingGeneration": 9,
+    "assetsReady": 4,
+    "assetsRequiringFitting": 13,
+    "generatedAt": "2026-02-02T10:45:00Z",
+    "aiModel": "whisper-v3-turbo",
+    "transcriptionConfidence": 0.97,
+    "averageSceneDuration": 9.52,
+    "aRollAverageDuration": 5.5,
+    "bRollAverageDuration": 12.9
+  }
+}
