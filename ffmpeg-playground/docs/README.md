@@ -21,6 +21,8 @@ This server can:
 | **Trim videos** | Cut out a portion of a video |
 | **Add watermarks** | Overlay an image on a video |
 | **Apply filters** | Add effects like grayscale, blur, sepia |
+| **Speed adjustment** | Fit video to a target duration (slow/speed up) |
+| **Zoom effects** | Ken Burns-style zoom in/out with center point control |
 
 ---
 
@@ -169,6 +171,76 @@ POST /api/filter
 Body: file, filter (grayscale|blur|sharpen|mirror|flip|sepia|vintage|negative)
 ```
 Applies a visual effect to the video.
+
+---
+
+### 11. Speed Adjustment / Fit to Duration ⭐
+```
+POST /api/speed
+Body: file
+Optional: targetDuration (seconds) - fits video to this exact duration
+Optional: speed (multiplier, 0.25-4x) - if no targetDuration provided
+```
+
+Adjusts video playback speed to fit a target duration.
+
+| Parameter | Effect |
+|-----------|--------|
+| `targetDuration=5` | Fits video to exactly 5 seconds |
+| `speed=2` | Plays video at 2x speed (half duration) |
+| `speed=0.5` | Plays video at 0.5x speed (double duration) |
+
+**How it works:**
+- Uses `setpts` filter for video speed
+- Uses chained `atempo` filters for audio (maintains pitch)
+- Audio tempo limited to 0.5-2.0 range per filter, so multiple filters are chained for extreme speeds
+
+**Response includes:**
+```json
+{
+  "originalDuration": "10.00",
+  "newDuration": "5.00",
+  "speedApplied": "2.00"
+}
+```
+
+---
+
+### 12. Zoom In/Out (Ken Burns Effect) ⭐
+```
+POST /api/zoom
+Body: file
+Optional: type ("in" or "out", default: "in")
+Optional: startZoom (1-3, default: 1 for zoom in, 1.5 for zoom out)
+Optional: endZoom (1-3, default: 1.5 for zoom in, 1 for zoom out)
+Optional: centerX (0-1, default: 0.5 - horizontal center point)
+Optional: centerY (0-1, default: 0.5 - vertical center point)
+```
+
+Applies a smooth Ken Burns-style zoom effect.
+
+| Parameter | Effect |
+|-----------|--------|
+| `type=in` | Zooms from startZoom to endZoom (usually wider to closer) |
+| `type=out` | Zooms from startZoom to endZoom (usually closer to wider) |
+| `centerX=0.25` | Zoom focuses on left side of frame |
+| `centerX=0.75` | Zoom focuses on right side of frame |
+
+**How it works:**
+- Upscales video to 8x resolution (reduces jitter)
+- Applies `zoompan` filter with linear interpolation
+- Uses `lanczos` scaling for high-quality interpolation
+- Downscales back to original resolution
+
+**Response includes:**
+```json
+{
+  "zoomType": "in",
+  "startZoom": 1,
+  "endZoom": 1.5,
+  "center": { "x": 0.5, "y": 0.5 }
+}
+```
 
 ---
 

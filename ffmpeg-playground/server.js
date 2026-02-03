@@ -458,6 +458,216 @@ app.post('/api/filter', upload.single('file'), (req, res) => {
     .run();
 });
 
+// 11. Adjust video speed (fit to target duration)
+app.post('/api/speed', upload.single('file'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  // Get video duration first to calculate speed if targetDuration is provided
+  const getVideoDuration = (filePath) => {
+    return new Promise((resolve, reject) => {
+      ffmpeg.ffprobe(filePath, (err, metadata) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(metadata.format.duration || 0);
+      });
+    });
+  };
+
+  try {
+    const originalDuration = await getVideoDuration(req.file.path);
+    
+    // Calculate speed: either from speed param or from targetDuration
+    let speed;
+    const targetDuration = parseFloat(req.body.targetDuration);
+    
+    if (targetDuration && targetDuration > 0) {
+      // Calculate speed needed to fit video to target duration
+      // speed = originalDuration / targetDuration
+      // speed > 1 means video needs to play faster (shorter output)
+      // speed < 1 means video needs to play slower (longer output)
+      speed = originalDuration / targetDuration;
+    } else {
+      speed = parseFloat(req.body.speed) || 1;
+    }
+
+    // Clamp speed to reasonable range (0.25x to 4x)
+    speed = Math.max(0.25, Math.min(4, speed));
+
+    const outputPath = path.join(outputsDir, `speed-${Date.now()}.mp4`);
+
+    // For video: setpts filter
+    // PTS/speed for faster (speed > 1), PTS*factor for slower
+    // setpts=PTS/speed is equivalent to setpts=PTS*(1/speed)
+    const videoFilter = `setpts=PTS/${speed}`;
+
+    // For audio: atempo filter (only supports 0.5 to 2.0 range)
+    // Chain multiple atempo filters for extreme values
+    const buildAtempoFilter = (speed) => {
+      const filters = [];
+      let currentSpeed = speed;
+      
+      while (currentSpeed > 2.0) {
+        filters.push('atempo=2.0');
+        currentSpeed /= 2.0;
+      }
+      while (currentSpeed < 0.5) {
+        filters.push('atempo=0.5');
+        currentSpeed /= 0.5;
+      }
+      filters.push(`atempo=${currentSpeed.toFixed(4)}`);
+      
+      return filters.join(',');
+    };
+
+    const audioFilter = buildAtempoFilter(speed);
+    const expectedDuration = originalDuration / speed;
+
+    console.log(`Speed adjustment: ${speed.toFixed(2)}x, original: ${originalDuration.toFixed(2)}s, expected: ${expectedDuration.toFixed(2)}s`);
+
+    ffmpeg(req.file.path)
+      .videoFilters(videoFilter)
+      .audioFilters(audioFilter)
+      .outputOptions([
+        '-c:v', 'libx264',
+        '-preset', 'fast',
+        '-crf', '23',
+        '-c:a', 'aac',
+        '-b:a', '192k'
+      ])
+      .output(outputPath)
+      .on('start', (cmd) => console.log('Speed adjustment started:', cmd))
+      .on('progress', (progress) => console.log('Progress:', progress.percent?.toFixed(2) + '%'))
+      .on('end', () => {
+        res.json({
+          success: true,
+          message: `Speed adjusted to ${speed.toFixed(2)}x`,
+          outputFile: `/outputs/${path.basename(outputPath)}`,
+          originalDuration: originalDuration.toFixed(2),
+          newDuration: expectedDuration.toFixed(2),
+          speedApplied: speed.toFixed(2)
+        });
+      })
+      .on('error', (err) => {
+        res.status(500).json({ error: err.message });
+      })
+      .run();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 12. Zoom in/out effect (Ken Burns) - with upscale for smooth output
+app.post('/api/zoom', upload.single('file'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  // Get video metadata
+  const getVideoInfo = (filePath) => {
+    return new Promise((resolve, reject) => {
+      ffmpeg.ffprobe(filePath, (err, metadata) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        const videoStream = metadata.streams.find(s => s.codec_type === 'video');
+        let fps = 30;
+        if (videoStream?.r_frame_rate) {
+          const parts = videoStream.r_frame_rate.split('/');
+          fps = parts.length === 2 ? parseInt(parts[0]) / parseInt(parts[1]) : parseFloat(parts[0]);
+        }
+        resolve({
+          duration: metadata.format.duration || 0,
+          width: videoStream?.width || 1920,
+          height: videoStream?.height || 1080,
+          fps: Math.round(fps) || 30
+        });
+      });
+    });
+  };
+
+  try {
+    const videoInfo = await getVideoInfo(req.file.path);
+    
+    // Zoom parameters
+    const zoomType = req.body.type || 'in'; // 'in' or 'out'
+    const startZoom = parseFloat(req.body.startZoom) || (zoomType === 'in' ? 1 : 1.5);
+    const endZoom = parseFloat(req.body.endZoom) || (zoomType === 'in' ? 1.5 : 1);
+    const centerX = parseFloat(req.body.centerX) || 0.5; // 0-1, center of zoom
+    const centerY = parseFloat(req.body.centerY) || 0.5; // 0-1, center of zoom
+    
+    // Output dimensions
+    const outputWidth = parseInt(req.body.width) || videoInfo.width;
+    const outputHeight = parseInt(req.body.height) || videoInfo.height;
+    
+    const outputPath = path.join(outputsDir, `zoom-${Date.now()}.mp4`);
+    
+    const fps = videoInfo.fps;
+    const totalFrames = Math.ceil(videoInfo.duration * fps);
+    
+    // Upscale factor to reduce jitter - use 8x for maximum smoothness
+    const upscaleFactor = 8;
+    const upscaleWidth = Math.round(outputWidth * upscaleFactor);
+    const upscaleHeight = Math.round(outputHeight * upscaleFactor);
+    
+    // Linear interpolation for zoom
+    const zoomExpr = `${startZoom}+(${endZoom}-${startZoom})*(on/${totalFrames})`;
+    
+    // Center the zoom based on centerX/centerY
+    const xExpr = `(iw-iw/zoom)*${centerX}`;
+    const yExpr = `(ih-ih/zoom)*${centerY}`;
+    
+    // Filter chain with high-quality scaling:
+    // 1. Upscale with lanczos for quality
+    // 2. Apply zoompan at high resolution
+    // 3. Downscale with lanczos back to output size
+    const filterComplex = [
+      `scale=${upscaleWidth}:${upscaleHeight}:flags=lanczos`,
+      `zoompan=z='${zoomExpr}':x='${xExpr}':y='${yExpr}':d=1:s=${upscaleWidth}x${upscaleHeight}:fps=${fps}`,
+      `scale=${outputWidth}:${outputHeight}:flags=lanczos`
+    ].join(',');
+    
+    console.log(`Zoom effect: ${zoomType}, ${startZoom}x -> ${endZoom}x, center: (${centerX}, ${centerY})`);
+    console.log(`Upscaling ${videoInfo.width}x${videoInfo.height} -> ${upscaleWidth}x${upscaleHeight} -> ${outputWidth}x${outputHeight}`);
+    console.log(`Filter: ${filterComplex}`);
+
+    ffmpeg(req.file.path)
+      .videoFilters(filterComplex)
+      .outputOptions([
+        '-c:v', 'libx264',
+        '-preset', 'fast',
+        '-crf', '23',
+        '-c:a', 'aac',
+        '-b:a', '192k',
+        '-pix_fmt', 'yuv420p'
+      ])
+      .output(outputPath)
+      .on('start', (cmd) => console.log('Zoom effect started:', cmd))
+      .on('progress', (progress) => console.log('Progress:', progress.percent?.toFixed(2) + '%'))
+      .on('end', () => {
+        res.json({
+          success: true,
+          message: `Zoom ${zoomType} effect applied!`,
+          outputFile: `/outputs/${path.basename(outputPath)}`,
+          zoomType,
+          startZoom,
+          endZoom,
+          center: { x: centerX, y: centerY }
+        });
+      })
+      .on('error', (err) => {
+        res.status(500).json({ error: err.message });
+      })
+      .run();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Simple test page
 app.get('/', (req, res) => {
   res.send(`
@@ -529,6 +739,16 @@ app.get('/', (req, res) => {
       <div class="endpoint">
         <span class="method">POST</span> <code>/api/filter</code>
         <p>Apply filter. Body: <code>filter</code> (grayscale, blur, sharpen, mirror, flip, sepia, vintage, negative)</p>
+      </div>
+      
+      <div class="endpoint">
+        <span class="method">POST</span> <code>/api/speed</code>
+        <p>Adjust video speed/fit to duration. Body: <code>targetDuration</code> (seconds) or <code>speed</code> (multiplier, 0.25-4x)</p>
+      </div>
+      
+      <div class="endpoint">
+        <span class="method">POST</span> <code>/api/zoom</code>
+        <p>Zoom in/out effect. Body: <code>type</code> (in/out), <code>startZoom</code>, <code>endZoom</code>, <code>centerX</code>, <code>centerY</code> (0-1)</p>
       </div>
       
       <h2>Quick Test</h2>
