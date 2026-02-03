@@ -7,10 +7,40 @@ import {
   Server, 
   Film, 
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Book,
+  Cpu,
+  Workflow
 } from "lucide-react";
 
 const testPages = [
+  {
+    title: "System Workflow",
+    description: "End-to-End autonomous pipeline: Script to Final Video",
+    href: "/playground/system-workflow",
+    icon: Workflow,
+    color: "text-emerald-500",
+    bgColor: "bg-emerald-500/10",
+    borderColor: "border-emerald-500/30"
+  },
+  {
+    title: "API Documentation",
+    description: "Quick reference for OpenAI, Pexels, and FFmpeg APIs",
+    href: "/playground/docs",
+    icon: Book,
+    color: "text-amber-500",
+    bgColor: "bg-amber-500/10",
+    borderColor: "border-amber-500/30"
+  },
+  {
+    title: "AI Agent Logic",
+    description: "Understanding Agent Loops, Tool Schemas, and Orchestration",
+    href: "/playground/agent-docs",
+    icon: Cpu,
+    color: "text-indigo-500",
+    bgColor: "bg-indigo-500/10",
+    borderColor: "border-indigo-500/30"
+  },
   {
     title: "UI Components",
     description: "Test UI components like buttons, inputs, modals, and cards in isolation",
@@ -37,6 +67,15 @@ const testPages = [
     color: "text-emerald-500",
     bgColor: "bg-emerald-500/10",
     borderColor: "border-emerald-500/30"
+  },
+  {
+    title: "Pexels Videos",
+    description: "Search and preview stock videos from Pexels",
+    href: "/playground/pexels",
+    icon: Film,
+    color: "text-orange-500",
+    bgColor: "bg-orange-500/10",
+    borderColor: "border-orange-500/30"
   },
   {
     title: "FFmpeg Operations",
