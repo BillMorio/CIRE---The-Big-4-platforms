@@ -1,6 +1,6 @@
 "use client";
 
-import { Scene } from "@/lib/types";
+import { Scene, VisualType } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
@@ -9,15 +9,27 @@ import {
   Clock, 
   Sparkles, 
   Video,
-  Image,
+  Image as ImageIcon,
   Wand2,
-  ArrowRight
+  ArrowRight,
+  ZoomIn
 } from "lucide-react";
 
 interface ScenePropertiesPanelProps {
   scene: Scene | null;
   onUpdate?: (data: Partial<Scene>) => void;
 }
+
+// Visual type configuration
+const VISUAL_TYPE_CONFIG: Record<VisualType, {
+  label: string;
+  color: string;
+}> = {
+  "a-roll": { label: "A-ROLL", color: "text-blue-500 border-blue-500/30" },
+  "b-roll": { label: "B-ROLL", color: "text-purple-500 border-purple-500/30" },
+  "graphics": { label: "GRAPHICS", color: "text-amber-500 border-amber-500/30" },
+  "image": { label: "IMAGE", color: "text-green-500 border-green-500/30" }
+};
 
 export function ScenePropertiesPanel({ scene, onUpdate }: ScenePropertiesPanelProps) {
   if (!scene) {
@@ -31,9 +43,24 @@ export function ScenePropertiesPanel({ scene, onUpdate }: ScenePropertiesPanelPr
     );
   }
 
-  const isARoll = scene.visualType === "a-roll";
-  const provider = isARoll ? scene.aRoll?.provider : scene.bRoll?.provider;
-  const assetStatus = isARoll ? scene.aRoll?.assetStatus : scene.bRoll?.assetStatus;
+  // Get asset data based on visual type
+  const getAssetData = () => {
+    switch (scene.visualType) {
+      case "a-roll":
+        return { provider: scene.aRoll?.provider, status: scene.aRoll?.assetStatus };
+      case "b-roll":
+        return { provider: scene.bRoll?.provider, status: scene.bRoll?.assetStatus };
+      case "graphics":
+        return { provider: scene.graphics?.provider, status: scene.graphics?.assetStatus };
+      case "image":
+        return { provider: scene.image?.provider, status: scene.image?.assetStatus };
+      default:
+        return { provider: undefined, status: undefined };
+    }
+  };
+
+  const { provider, status: assetStatus } = getAssetData();
+  const typeConfig = VISUAL_TYPE_CONFIG[scene.visualType];
 
   const getStatusColor = (status: string | undefined) => {
     switch (status) {
@@ -47,16 +74,16 @@ export function ScenePropertiesPanel({ scene, onUpdate }: ScenePropertiesPanelPr
     }
   };
 
-  const getProviderIcon = (prov: string | undefined) => {
-    switch (prov) {
-      case "heygen":
+  const getProviderIcon = () => {
+    switch (scene.visualType) {
+      case "a-roll":
         return <User className="w-3.5 h-3.5" />;
-      case "pexels":
-        return <Image className="w-3.5 h-3.5" />;
-      case "veo3":
-        return <Wand2 className="w-3.5 h-3.5" />;
-      case "hera-ai":
+      case "b-roll":
+        return <Film className="w-3.5 h-3.5" />;
+      case "graphics":
         return <Sparkles className="w-3.5 h-3.5" />;
+      case "image":
+        return <ImageIcon className="w-3.5 h-3.5" />;
       default:
         return <Video className="w-3.5 h-3.5" />;
     }
@@ -72,9 +99,9 @@ export function ScenePropertiesPanel({ scene, onUpdate }: ScenePropertiesPanelPr
           </h3>
           <Badge 
             variant="outline" 
-            className={`text-[9px] technical-label ${isARoll ? 'text-blue-500 border-blue-500/30' : 'text-purple-500 border-purple-500/30'}`}
+            className={`text-[9px] technical-label ${typeConfig.color}`}
           >
-            {scene.visualType.toUpperCase()}
+            {typeConfig.label}
           </Badge>
         </div>
         <p className="text-lg font-bold">Scene {scene.index.toString().padStart(2, '0')}</p>
@@ -119,7 +146,7 @@ export function ScenePropertiesPanel({ scene, onUpdate }: ScenePropertiesPanelPr
           <div className="space-y-2">
             <div className="flex items-center justify-between p-3 bg-muted/10 border border-border rounded-md">
               <div className="flex items-center gap-2">
-                {getProviderIcon(provider)}
+                {getProviderIcon()}
                 <span className="text-xs font-medium uppercase">{provider || "Unknown"}</span>
               </div>
               <Badge variant="outline" className={`text-[9px] ${getStatusColor(assetStatus)}`}>
@@ -127,7 +154,8 @@ export function ScenePropertiesPanel({ scene, onUpdate }: ScenePropertiesPanelPr
               </Badge>
             </div>
 
-            {isARoll && scene.aRoll && (
+            {/* A-Roll specific info */}
+            {scene.visualType === "a-roll" && scene.aRoll && (
               <div className="p-3 bg-muted/5 border border-border rounded-md space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground">Camera</span>
@@ -140,7 +168,8 @@ export function ScenePropertiesPanel({ scene, onUpdate }: ScenePropertiesPanelPr
               </div>
             )}
 
-            {!isARoll && scene.bRoll && (
+            {/* B-Roll specific info */}
+            {scene.visualType === "b-roll" && scene.bRoll && (
               <div className="p-3 bg-muted/5 border border-border rounded-md space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground">Type</span>
@@ -150,10 +179,62 @@ export function ScenePropertiesPanel({ scene, onUpdate }: ScenePropertiesPanelPr
                   <span className="text-muted-foreground">Fitting</span>
                   <span className="font-medium">{scene.bRoll.fittingStrategy}</span>
                 </div>
-                {scene.bRoll.prompt && (
+                {scene.bRoll.searchQuery && (
+                  <div className="pt-2 border-t border-border">
+                    <span className="text-[9px] text-muted-foreground block mb-1">Search Query</span>
+                    <p className="text-xs text-foreground/80 leading-relaxed">{scene.bRoll.searchQuery}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Graphics specific info */}
+            {scene.visualType === "graphics" && scene.graphics && (
+              <div className="p-3 bg-muted/5 border border-border rounded-md space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Type</span>
+                  <span className="font-medium uppercase text-[10px]">{scene.graphics.type}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Fitting</span>
+                  <span className="font-medium">{scene.graphics.fittingStrategy}</span>
+                </div>
+                {scene.graphics.prompt && (
                   <div className="pt-2 border-t border-border">
                     <span className="text-[9px] text-muted-foreground block mb-1">Prompt</span>
-                    <p className="text-xs text-foreground/80 leading-relaxed">{scene.bRoll.prompt}</p>
+                    <p className="text-xs text-foreground/80 leading-relaxed">{scene.graphics.prompt}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Image specific info */}
+            {scene.visualType === "image" && scene.image && (
+              <div className="p-3 bg-muted/5 border border-border rounded-md space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Effect</span>
+                  <span className="font-medium uppercase text-[10px]">{scene.image.fittingStrategy}</span>
+                </div>
+                {scene.image.zoomParams && (
+                  <>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Zoom</span>
+                      <span className="font-medium font-mono">
+                        {scene.image.zoomParams.startZoom}x → {scene.image.zoomParams.endZoom}x
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Center</span>
+                      <span className="font-medium font-mono">
+                        ({scene.image.zoomParams.centerX}, {scene.image.zoomParams.centerY})
+                      </span>
+                    </div>
+                  </>
+                )}
+                {scene.image.searchQuery && (
+                  <div className="pt-2 border-t border-border">
+                    <span className="text-[9px] text-muted-foreground block mb-1">Search Query</span>
+                    <p className="text-xs text-foreground/80 leading-relaxed">{scene.image.searchQuery}</p>
                   </div>
                 )}
               </div>

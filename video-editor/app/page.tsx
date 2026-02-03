@@ -5,27 +5,11 @@ import { Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SceneHeader } from "@/components/scenes/scene-header";
 import { SceneCard } from "@/components/scenes/scene-card";
-import { SceneEditorModal } from "@/components/scenes/scene-editor-modal";
+import { SceneModal } from "@/components/modals/scene-modal";
 import { NavSidebar } from "@/components/panels/nav-sidebar";
 import { ScenePropertiesPanel } from "@/components/panels/scene-properties-panel";
 import { Scene } from "@/lib/types";
 import { sampleScenes, sampleProject } from "@/lib/sample-data";
-import { 
-  DndContext, 
-  closestCenter, 
-  KeyboardSensor, 
-  PointerSensor, 
-  useSensor, 
-  useSensors,
-  DragEndEvent,
-  TouchSensor
-} from '@dnd-kit/core';
-import { 
-  arrayMove, 
-  SortableContext, 
-  sortableKeyboardCoordinates, 
-  rectSortingStrategy
-} from '@dnd-kit/sortable';
 
 export default function VideoEditorPage() {
   const [selectedSceneIndex, setSelectedSceneIndex] = useState<number | null>(null);
@@ -63,33 +47,6 @@ export default function VideoEditorPage() {
     };
     setScenes([...scenes, newScene]);
     showToast(`Scene ${scenes.length + 1} added`);
-  };
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 8 },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: { delay: 250, tolerance: 5 },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    
-    if (over && active.id !== over.id) {
-      setScenes((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        const reordered = arrayMove(items, oldIndex, newIndex);
-        // Update indices
-        return reordered.map((scene, i) => ({ ...scene, index: i + 1 }));
-      });
-      showToast("Scene order updated");
-    }
   };
 
   const selectedScene = selectedSceneIndex !== null ? scenes[selectedSceneIndex] : null;
@@ -139,57 +96,51 @@ export default function VideoEditorPage() {
                     {scenes.length} SCENES
                   </Badge>
                   <Badge variant="outline" className="text-[10px] technical-label font-bold py-1.5 px-4 text-green-500 border-green-500/30">
-                    {scenes.filter(s => 
-                      (s.aRoll?.assetStatus === "ready" || s.aRoll?.assetStatus === "generated") ||
-                      (s.bRoll?.assetStatus === "ready" || s.bRoll?.assetStatus === "generated")
-                    ).length} READY
+                    {scenes.filter(s => {
+                      const status = s.aRoll?.assetStatus || s.bRoll?.assetStatus || s.graphics?.assetStatus || s.image?.assetStatus;
+                      return status === "ready" || status === "generated";
+                    }).length} READY
                   </Badge>
                   <Badge variant="outline" className="text-[10px] technical-label font-bold py-1.5 px-4 text-amber-500 border-amber-500/30">
-                    {scenes.filter(s => 
-                      s.aRoll?.assetStatus === "pending_generation" ||
-                      s.bRoll?.assetStatus === "pending_generation"
-                    ).length} PENDING
+                    {scenes.filter(s => {
+                      const status = s.aRoll?.assetStatus || s.bRoll?.assetStatus || s.graphics?.assetStatus || s.image?.assetStatus;
+                      return status === "pending_generation";
+                    }).length} PENDING
                   </Badge>
                 </div>
               </div>
 
-              <DndContext 
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext 
-                  items={scenes.map(s => s.id)}
-                  strategy={rectSortingStrategy}
+              {/* Scene Grid - No drag and drop (scenes are sequential from AI) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 transition-all duration-500">
+                {scenes.map((scene, i) => (
+                  <SceneCard 
+                    key={scene.id} 
+                    scene={scene}
+                    isSelected={selectedSceneIndex === i}
+                    onClick={() => {
+                      setSelectedSceneIndex(i);
+                    }}
+                    onDoubleClick={() => {
+                      setSelectedSceneIndex(i);
+                      setIsModalOpen(true);
+                    }}
+                  />
+                ))}
+                
+                <button 
+                  onClick={addScene}
+                  className="border-2 border-dashed border-border rounded-lg aspect-video flex flex-col items-center justify-center gap-4 hover:bg-muted/10 hover:border-border/80 transition-all group relative overflow-hidden min-h-[180px]"
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 transition-all duration-500">
-                    {scenes.map((scene, i) => (
-                      <SceneCard 
-                        key={scene.id} 
-                        scene={scene}
-                        isSelected={selectedSceneIndex === i}
-                        onClick={() => {
-                          setSelectedSceneIndex(i);
-                        }}
-                      />
-                    ))}
-                    
-                    <button 
-                      onClick={addScene}
-                      className="border-2 border-dashed border-border rounded-lg aspect-video flex flex-col items-center justify-center gap-4 hover:bg-muted/10 hover:border-border/80 transition-all group relative overflow-hidden min-h-[180px]"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <div className="w-12 h-12 rounded-lg bg-muted/30 flex items-center justify-center group-hover:bg-muted/50 group-hover:scale-110 transition-all border border-border">
-                        <Plus className="w-6 h-6 text-muted-foreground group-hover:text-foreground transition-colors" />
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <span className="technical-label text-[10px] font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-all">Add Scene</span>
-                        <span className="text-[9px] opacity-40 technical-label">Scene {scenes.length + 1}</span>
-                      </div>
-                    </button>
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="w-12 h-12 rounded-lg bg-muted/30 flex items-center justify-center group-hover:bg-muted/50 group-hover:scale-110 transition-all border border-border">
+                    <Plus className="w-6 h-6 text-muted-foreground group-hover:text-foreground transition-colors" />
                   </div>
-                </SortableContext>
-              </DndContext>
+                  <div className="flex flex-col items-center">
+                    <span className="technical-label text-[10px] font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-all">Add Scene</span>
+                    <span className="text-[9px] opacity-40 technical-label">Scene {scenes.length + 1}</span>
+                  </div>
+                </button>
+              </div>
             </div>
           </main>
 
@@ -207,22 +158,16 @@ export default function VideoEditorPage() {
         </div>
       </div>
 
-      <SceneEditorModal 
+      <SceneModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        scene={selectedScene ? {
-          id: parseInt(selectedScene.id.split('_')[1]) || 0,
-          script: selectedScene.script,
-          duration: selectedScene.duration.toString(),
-          shotType: selectedScene.aRoll?.cameraAngle || "WIDE_SHOT"
-        } : undefined}
-        onUpdate={(data) => {
+        scene={selectedScene}
+        onUpdate={(data: Partial<Scene>) => {
           if (selectedSceneIndex !== null) {
             const newScenes = [...scenes];
             newScenes[selectedSceneIndex] = { 
               ...newScenes[selectedSceneIndex], 
-              script: data.script || newScenes[selectedSceneIndex].script,
-              duration: parseFloat(data.duration) || newScenes[selectedSceneIndex].duration
+              ...data
             };
             setScenes(newScenes);
           }

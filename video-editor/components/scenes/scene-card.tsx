@@ -1,44 +1,75 @@
 "use client";
 
-import { MoreVertical, Scissors, Play, Plus, GripVertical, User, Image, Sparkles, Wand2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Scissors, Play, Plus, User, Film, Sparkles, Image as ImageIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { Scene } from "@/lib/types";
+import { Scene, VisualType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface SceneCardProps {
   scene: Scene;
   isSelected?: boolean;
   onClick?: () => void;
+  onDoubleClick?: () => void;
 }
+
+// Visual type configuration
+const VISUAL_TYPE_CONFIG: Record<VisualType, {
+  label: string;
+  color: string;
+  bgColor: string;
+  borderColor: string;
+}> = {
+  "a-roll": {
+    label: "A-ROLL",
+    color: "text-blue-400",
+    bgColor: "bg-blue-500/10",
+    borderColor: "border-blue-500/30"
+  },
+  "b-roll": {
+    label: "B-ROLL",
+    color: "text-purple-400",
+    bgColor: "bg-purple-500/10",
+    borderColor: "border-purple-500/30"
+  },
+  "graphics": {
+    label: "GRAPHICS",
+    color: "text-amber-400",
+    bgColor: "bg-amber-500/10",
+    borderColor: "border-amber-500/30"
+  },
+  "image": {
+    label: "IMAGE",
+    color: "text-green-400",
+    bgColor: "bg-green-500/10",
+    borderColor: "border-green-500/30"
+  }
+};
 
 export function SceneCard({ 
   scene,
   isSelected, 
-  onClick
+  onClick,
+  onDoubleClick
 }: SceneCardProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging
-  } = useSortable({ id: scene.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    zIndex: isDragging ? 50 : undefined,
-    opacity: isDragging ? 0.5 : 1,
+  // Get asset data based on visual type
+  const getAssetData = () => {
+    switch (scene.visualType) {
+      case "a-roll":
+        return { provider: scene.aRoll?.provider, status: scene.aRoll?.assetStatus };
+      case "b-roll":
+        return { provider: scene.bRoll?.provider, status: scene.bRoll?.assetStatus };
+      case "graphics":
+        return { provider: scene.graphics?.provider, status: scene.graphics?.assetStatus };
+      case "image":
+        return { provider: scene.image?.provider, status: scene.image?.assetStatus };
+      default:
+        return { provider: undefined, status: undefined };
+    }
   };
 
-  const isARoll = scene.visualType === "a-roll";
-  const provider = isARoll ? scene.aRoll?.provider : scene.bRoll?.provider;
-  const assetStatus = isARoll ? scene.aRoll?.assetStatus : scene.bRoll?.assetStatus;
+  const { provider, status: assetStatus } = getAssetData();
+  const typeConfig = VISUAL_TYPE_CONFIG[scene.visualType];
 
   const getStatusColor = (status: string | undefined) => {
     switch (status) {
@@ -53,15 +84,31 @@ export function SceneCard({
   };
 
   const getProviderIcon = () => {
-    switch (provider) {
-      case "heygen":
+    switch (scene.visualType) {
+      case "a-roll":
         return <User className="w-3 h-3" />;
-      case "pexels":
-        return <Image className="w-3 h-3" />;
-      case "veo3":
-        return <Wand2 className="w-3 h-3" />;
-      case "hera-ai":
+      case "b-roll":
+        return <Film className="w-3 h-3" />;
+      case "graphics":
         return <Sparkles className="w-3 h-3" />;
+      case "image":
+        return <ImageIcon className="w-3 h-3" />;
+      default:
+        return null;
+    }
+  };
+
+  // Get fitting strategy label
+  const getFittingLabel = () => {
+    switch (scene.visualType) {
+      case "a-roll":
+        return scene.aRoll?.fittingStrategy;
+      case "b-roll":
+        return scene.bRoll?.fittingStrategy;
+      case "graphics":
+        return scene.graphics?.fittingStrategy;
+      case "image":
+        return scene.image?.fittingStrategy;
       default:
         return null;
     }
@@ -69,8 +116,6 @@ export function SceneCard({
 
   return (
     <Card 
-      ref={setNodeRef}
-      style={style}
       className={cn(
         "glass border-border overflow-hidden group transition-all cursor-pointer",
         isSelected 
@@ -78,18 +123,11 @@ export function SceneCard({
           : "hover:scale-[1.01] hover:border-border/80"
       )}
       onClick={onClick}
+      onDoubleClick={onDoubleClick}
     >
       <div className="aspect-video bg-muted/30 relative flex items-center justify-center overflow-hidden">
-        {/* Top left - Drag handle + Scene badge */}
+        {/* Top left - Scene number badge */}
         <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
-          <div 
-            {...attributes} 
-            {...listeners}
-            style={{ touchAction: 'none' }}
-            className="h-7 w-7 flex items-center justify-center rounded-md bg-background/60 hover:bg-background/80 border border-border cursor-grab active:cursor-grabbing transition-colors"
-          >
-            <GripVertical className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground" />
-          </div>
           <Badge 
             variant="outline" 
             className={cn(
@@ -107,19 +145,22 @@ export function SceneCard({
             variant="outline" 
             className={cn(
               "text-[8px] technical-label font-bold tracking-wider px-1.5 py-0.5",
-              isARoll 
-                ? "text-blue-400 border-blue-500/30 bg-blue-500/10" 
-                : "text-purple-400 border-purple-500/30 bg-purple-500/10"
+              typeConfig.color,
+              typeConfig.borderColor,
+              typeConfig.bgColor
             )}
           >
-            {isARoll ? "A-ROLL" : "B-ROLL"}
+            {typeConfig.label}
           </Badge>
           <div className={cn("w-2 h-2 rounded-full", getStatusColor(assetStatus))} />
         </div>
         
         {/* Empty state / Provider indicator */}
         <div className="flex flex-col items-center gap-2 opacity-30 group-hover:opacity-50 transition-opacity">
-          <div className="w-12 h-12 rounded-lg bg-muted/30 flex items-center justify-center">
+          <div className={cn(
+            "w-12 h-12 rounded-lg bg-muted/30 flex items-center justify-center",
+            typeConfig.bgColor
+          )}>
             {getProviderIcon() || <Plus className="w-6 h-6" />}
           </div>
           <span className="technical-label text-[9px] font-bold uppercase tracking-wider">
@@ -140,19 +181,19 @@ export function SceneCard({
                 {scene.transition.type.toUpperCase()}
               </div>
             </div>
-            {isARoll && scene.aRoll && (
+            {getFittingLabel() && getFittingLabel() !== "none" && (
               <Badge variant="outline" className="text-[8px] opacity-60 py-0">
-                {scene.aRoll.cameraAngle}
+                {getFittingLabel()?.replace(/_/g, ' ')}
               </Badge>
             )}
           </div>
         </div>
       </div>
       
-      <CardContent className="p-3 bg-card/50">
+      <CardContent className="p-3 bg-card/80">
         <p className={cn(
-          "text-[11px] line-clamp-2 leading-relaxed font-medium transition-colors",
-          isSelected ? "text-foreground" : "text-muted-foreground group-hover:text-foreground/80"
+          "text-[12px] line-clamp-2 leading-relaxed font-medium transition-colors",
+          isSelected ? "text-foreground" : "text-foreground/90"
         )}>
           {scene.script}
         </p>
