@@ -10,10 +10,20 @@ import {
   Sparkles,
   Book,
   Cpu,
+  Database,
   Workflow
 } from "lucide-react";
 
 const testPages = [
+  {
+    title: "System Health",
+    description: "Real-time monitoring of Supabase, OpenAI, Pexels, and FFmpeg",
+    href: "/health-check",
+    icon: Database,
+    color: "text-indigo-500",
+    bgColor: "bg-indigo-500/10",
+    borderColor: "border-indigo-500/30"
+  },
   {
     title: "System Workflow",
     description: "End-to-End autonomous pipeline: Script to Final Video",
@@ -49,15 +59,6 @@ const testPages = [
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
     borderColor: "border-blue-500/30"
-  },
-  {
-    title: "API Tests",
-    description: "Test API endpoints and integrations with external services",
-    href: "/playground/api",
-    icon: Server,
-    color: "text-green-500",
-    bgColor: "bg-green-500/10",
-    borderColor: "border-green-500/30"
   },
   {
     title: "OpenAI API",

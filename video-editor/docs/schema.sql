@@ -1,0 +1,82 @@
+-- Database Schema for Autonomous Video Pipeline
+-- Designed for Supabase (PostgreSQL)
+
+-- 1. ENUMS for Status Tracking
+CREATE TYPE project_status AS ENUM ('draft', 'processing', 'completed', 'failed');
+CREATE TYPE asset_status AS ENUM ('todo', 'processing', 'awaiting_input', 'completed', 'failed');
+CREATE TYPE visual_type AS ENUM ('a-roll', 'b-roll', 'graphics', 'image');
+CREATE TYPE job_status AS ENUM ('pending', 'processing', 'completed', 'failed');
+CREATE TYPE video_orientation AS ENUM ('landscape', 'vertical', 'square');
+
+-- 2. PROJECTS TABLE
+CREATE TABLE projects (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title TEXT NOT NULL,
+    status project_status NOT NULL DEFAULT 'draft',
+    orientation video_orientation NOT NULL DEFAULT 'landscape',
+    total_duration FLOAT NOT NULL DEFAULT 0,
+    master_audio_url TEXT,
+    transcript_url TEXT,
+    metadata JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 3. SCENES TABLE
+CREATE TABLE scenes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    index INT NOT NULL,
+    start_time FLOAT NOT NULL,
+    end_time FLOAT NOT NULL,
+    duration FLOAT NOT NULL, -- Stored for convenience
+    script TEXT,
+    visual_type visual_type NOT NULL,
+    status asset_status NOT NULL DEFAULT 'todo',
+    fitting_strategy TEXT DEFAULT 'trim', -- trim, stretch, generate
+    transition JSONB DEFAULT '{"type": "none", "duration": 0}'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    
+    -- Ensure scenes are ordered unique per project
+    CONSTRAINT unique_scene_index UNIQUE (project_id, index)
+);
+
+-- 4. SCENE VISUAL DATA (Specialized Params)
+CREATE TABLE scene_visual_data (
+    scene_id UUID PRIMARY KEY REFERENCES scenes(id) ON DELETE CASCADE,
+    payload JSONB NOT NULL DEFAULT '{}'::jsonb, -- Prompts, search queries, avatar IDs
+    asset_url TEXT, -- Raw link from provider
+    final_video_url TEXT, -- Rendered/processed link
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 5. JOBS TABLE (Async Orchestration)
+CREATE TABLE jobs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    scene_id UUID NOT NULL REFERENCES scenes(id) ON DELETE CASCADE,
+    provider TEXT NOT NULL, -- heygen, pexels, elevenlabs
+    external_id TEXT NOT NULL, -- The ID from the provider's API
+    status job_status NOT NULL DEFAULT 'pending',
+    result JSONB DEFAULT '{}'::jsonb, -- Last known API response
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 6. INDEXES for Performance
+CREATE INDEX idx_scenes_project_id ON scenes(project_id);
+CREATE INDEX idx_jobs_scene_id ON jobs(scene_id);
+CREATE INDEX idx_scenes_status ON scenes(status);
+
+-- 7. TRIGGER for Updated At
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE TRIGGER update_scenes_updated_at BEFORE UPDATE ON scenes FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE TRIGGER update_jobs_updated_at BEFORE UPDATE ON jobs FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();

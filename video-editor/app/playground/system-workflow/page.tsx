@@ -10,7 +10,8 @@ import {
   Mic2, FileText, Share2, UserCheck,
   CheckCircle2, Clock, ListOrdered,
   Layout, Database as SupabaseIcon,
-  Search, PlayCircle, Loader2
+  Search, PlayCircle, Loader2,
+  XCircle as XCircle2
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -160,7 +161,7 @@ export default function SystemWorkflowPage() {
                         <span className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-muted-foreground">
                           <loop.icon className="w-3 h-3" /> {loop.type}
                         </span>
-                        <Badge variant="outline" className="text-[9px]">{loop.status}</Badge>
+                        <Badge variant="outline" className="text-[9px] border-amber-500/30 text-amber-500 bg-amber-500/5 uppercase font-bold">AWAITING_INPUT</Badge>
                       </div>
                       <div className="text-sm font-semibold mb-1">{loop.action}</div>
                       <p className="text-xs text-muted-foreground">{loop.details}</p>
@@ -219,6 +220,128 @@ export default function SystemWorkflowPage() {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        </section>
+
+        {/* Phase 2.5: Asynchronous Orchestration (The "Launch & Poll" Pattern) */}
+        <section className="space-y-12">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-bold tracking-tight">Phase 2.5: Asynchronous Orchestration</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">How to handle long-running APIs (HeyGen, Eleven Labs) without blocking the entire pipeline.</p>
+          </div>
+
+          <Card className="border-border bg-muted/5 overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border">
+              {/* Step 1: Trigger */}
+              <div className="p-8 space-y-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 font-bold text-sm">1</div>
+                  <h4 className="font-bold uppercase tracking-widest text-xs">Launch</h4>
+                </div>
+                <div className="p-4 rounded-lg bg-background border border-border space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-mono text-blue-400">
+                    <Zap className="w-3 h-3" /> POST /v1/video/generate
+                  </div>
+                  <p className="text-xs text-muted-foreground">The agent starts the job. The API returns a <code>job_id</code> immediately (202 Accepted).</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline" className="text-[10px] bg-blue-500/5 text-blue-400">STATUS: PROCESSING</Badge>
+                </div>
+              </div>
+
+              {/* Step 2: Parallel Work */}
+              <div className="p-8 space-y-4 bg-indigo-500/[0.02]">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-500 font-bold text-sm">2</div>
+                  <h4 className="font-bold uppercase tracking-widest text-xs">Autonomous Drift</h4>
+                </div>
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Instead of waiting (which would waste money/time), the agent <strong>moves to the next scene</strong>.
+                  </p>
+                  <div className="p-3 rounded-lg border border-dashed border-indigo-500/30 flex items-center gap-3">
+                    <Loader2 className="w-4 h-4 text-indigo-500 animate-spin" />
+                    <span className="text-[10px] uppercase font-bold text-indigo-400 tracking-tighter">Job #123 Running in Cloud...</span>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground italic">Agent is now searching Pexels for Scene 2.</p>
+                </div>
+              </div>
+
+              {/* Step 3: Polling/Sync */}
+              <div className="p-8 space-y-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold text-sm">3</div>
+                  <h4 className="font-bold uppercase tracking-widest text-xs">Sync & Close</h4>
+                </div>
+                <div className="p-4 rounded-lg bg-background border border-border space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-mono text-emerald-400">
+                    <Search className="w-3 h-3" /> GET /v1/video/status
+                  </div>
+                  <p className="text-xs text-muted-foreground">When the agent finishes other tasks, it "checks back". If Done, it downloads the URL.</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline" className="text-[10px] bg-emerald-500/5 text-emerald-400">STATUS: COMPLETED</Badge>
+                </div>
+              </div>
+            </div>
+
+            {/* Technical State Machine */}
+            <div className="bg-background border-t border-border p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h4 className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
+                  <ListOrdered className="w-4 h-4 text-indigo-500" />
+                  Database State Machine
+                </h4>
+                <Badge variant="secondary" className="text-[10px]">SUPABASE SYNC</Badge>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {[
+                  { state: "PENDING", desc: "Scene identified but no work started." },
+                  { state: "PROCESSING", desc: "HeyGen/11Labs job launched. job_id stored." },
+                  { state: "RETRY", desc: "Job failed. Scheduled to try again." },
+                  { state: "COMPLETED", desc: "Asset URL secured and ready for render." }
+                ].map((s, i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="text-xs font-bold font-mono text-indigo-400">{s.state}</div>
+                    <p className="text-[10px] text-muted-foreground leading-snug">{s.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+
+          {/* New Strategic Comparison Section */}
+          <div className="space-y-6">
+            <h3 className="text-xl font-bold flex items-center gap-2">
+              <Code2 className="w-5 h-5 text-indigo-500" />
+              Strategic Decision: Who drives the polling?
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-6 rounded-xl border border-red-500/20 bg-red-500/[0.02] space-y-3">
+                <div className="flex items-center gap-2 text-red-500 font-bold text-sm uppercase">
+                  <XCircle2 className="w-4 h-4" /> Option A: LLM-Driven
+                </div>
+                <p className="text-xs text-muted-foreground">The LLM stays "awake" and repeatedly calls a status tool every 10 seconds.</p>
+                <ul className="text-[10px] space-y-1 text-muted-foreground">
+                  <li>❌ <strong>High Cost</strong>: Paying for LLM reasoning on every "Not yet" check.</li>
+                  <li>❌ <strong>History Bloat</strong>: Fills context window with repetitive status logs.</li>
+                </ul>
+              </div>
+
+              <div className="p-6 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.02] space-y-3">
+                <div className="flex items-center gap-2 text-emerald-500 font-bold text-sm uppercase">
+                  <CheckCircle2 className="w-4 h-4" /> Option B: System-Driven (Recommended)
+                </div>
+                <p className="text-xs text-muted-foreground">The LLM "Yields" control to a background worker in your application code.</p>
+                <ul className="text-[10px] space-y-1 text-muted-foreground">
+                  <li>✅ <strong>Cost Effective</strong>: Zero LLM cost during the waiting period.</li>
+                  <li>✅ <strong>Process Cleanup</strong>: LLM only wakes up when the asset is actually ready.</li>
+                </ul>
+              </div>
+            </div>
+            <p className="text-center text-xs text-muted-foreground italic">
+              "We treat the LLM like a high-priced consultant. You don't ask a consultant to sit and watch paint dry; you call them back when the paint is dry."
+            </p>
           </div>
         </section>
 
