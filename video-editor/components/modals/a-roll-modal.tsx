@@ -13,8 +13,10 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { 
-  User, 
+  User,
+  Sparkles,
   Scissors, 
   ZoomIn, 
   ZoomOut,
@@ -42,11 +44,13 @@ export function ARollModal({ isOpen, onClose, scene, onUpdate }: ARollModalProps
   const [endZoom, setEndZoom] = useState(1.3);
   const [centerX, setCenterX] = useState(0.5);
   const [centerY, setCenterY] = useState(0.5);
+  const [directorNote, setDirectorNote] = useState(scene.directorNote || "");
 
   const aRoll = scene.aRoll;
 
   const handleSave = () => {
     onUpdate({
+      directorNote,
       aRoll: {
         ...scene.aRoll!,
       }
@@ -203,17 +207,28 @@ export function ARollModal({ isOpen, onClose, scene, onUpdate }: ARollModalProps
         </div>
       </div>
 
-      {/* Script */}
-      <div className="space-y-3">
-        <label className="text-[10px] technical-label font-bold uppercase tracking-widest text-muted-foreground">
-          Script
-        </label>
-        <div className="p-3 bg-muted/10 border border-border rounded-md min-h-[120px]">
-          <p className="text-sm leading-relaxed">{scene.script}</p>
+      {/* Script & Director Note */}
+      <div className="space-y-4">
+        <div className="space-y-3">
+          <label className="text-[10px] technical-label font-bold uppercase tracking-widest text-muted-foreground">
+            Script
+          </label>
+          <div className="p-3 bg-muted/10 border border-border rounded-md min-h-[80px]">
+            <p className="text-sm leading-relaxed">{scene.script}</p>
+          </div>
         </div>
-        <div className="flex justify-between text-[9px] text-muted-foreground">
-          <span>{scene.script.length} chars</span>
-          <span>~{Math.ceil(scene.script.split(' ').length / 2.5)}s read time</span>
+
+        <div className="space-y-3">
+          <label className="text-[10px] technical-label font-bold uppercase tracking-widest text-amber-500/80 flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5" />
+            Director's Intent
+          </label>
+          <Textarea 
+            value={directorNote}
+            onChange={(e) => setDirectorNote(e.target.value)}
+            placeholder="Visual vibe, energy, or specific cinematic instructions..."
+            className="min-h-[100px] text-xs italic bg-amber-500/5 border-amber-500/20 focus-visible:border-amber-500/40"
+          />
         </div>
       </div>
 

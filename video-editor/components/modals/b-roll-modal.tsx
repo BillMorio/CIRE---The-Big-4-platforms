@@ -13,6 +13,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Film,
   Scissors, 
@@ -40,11 +41,13 @@ export function BRollModal({ isOpen, onClose, scene, onUpdate }: BRollModalProps
   const [startZoom, setStartZoom] = useState(1);
   const [endZoom, setEndZoom] = useState(1.3);
   const [searchQuery, setSearchQuery] = useState(scene.bRoll?.searchQuery || "");
+  const [directorNote, setDirectorNote] = useState(scene.directorNote || "");
 
   const bRoll = scene.bRoll;
 
   const handleSave = () => {
     onUpdate({
+      directorNote,
       bRoll: {
         ...scene.bRoll!,
         searchQuery,
@@ -232,13 +235,28 @@ export function BRollModal({ isOpen, onClose, scene, onUpdate }: BRollModalProps
         </Button>
       </div>
 
-      {/* Script Context */}
-      <div className="space-y-3">
-        <label className="text-[10px] technical-label font-bold uppercase tracking-widest text-muted-foreground">
-          Script Context
-        </label>
-        <div className="p-3 bg-muted/10 border border-border rounded-md">
-          <p className="text-xs leading-relaxed text-muted-foreground line-clamp-3">{scene.script}</p>
+      {/* Script & Director Note */}
+      <div className="space-y-4">
+        <div className="space-y-3">
+          <label className="text-[10px] technical-label font-bold uppercase tracking-widest text-muted-foreground">
+            Script Context
+          </label>
+          <div className="p-3 bg-muted/10 border border-border rounded-md">
+            <p className="text-xs leading-relaxed text-muted-foreground line-clamp-3">{scene.script}</p>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <label className="text-[10px] technical-label font-bold uppercase tracking-widest text-amber-500/80 flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5" />
+            Director's Intent
+          </label>
+          <Textarea 
+            value={directorNote}
+            onChange={(e) => setDirectorNote(e.target.value)}
+            placeholder="Visual vibe, energy, or specific cinematic instructions..."
+            className="min-h-[100px] text-xs italic bg-amber-500/5 border-amber-500/20 focus-visible:border-amber-500/40"
+          />
         </div>
       </div>
     </div>

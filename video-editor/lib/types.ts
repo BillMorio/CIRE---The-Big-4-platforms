@@ -85,6 +85,7 @@ export interface Scene {
   endTime: number;
   duration: number;
   script: string;
+  directorNote?: string;
   visualType: VisualType;
   aRoll?: ARoll;
   bRoll?: BRoll;

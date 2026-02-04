@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { 
   ArrowLeft, Film, Blend, Scissors, Maximize2, 
-  ChevronRight, Sparkles, Activity, Terminal, Music
+  ChevronRight, Sparkles, Activity, Terminal, Music, Mic2
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -58,6 +58,16 @@ const tools = [
     bgColor: "bg-blue-50",
     borderColor: "border-blue-100",
     status: "New"
+  },
+  {
+    title: "Whisper Transcriber",
+    description: "Neural speech-to-text with word-level temporal precision.",
+    href: "/playground/openai/whisper",
+    icon: Mic2,
+    color: "text-indigo-600",
+    bgColor: "bg-indigo-50",
+    borderColor: "border-indigo-100",
+    status: "Intelligence"
   }
 ];
 

@@ -1,10 +1,10 @@
-import { waitForProcessing } from "@/lib/agents/tools/simulation-tools";
+import { waitForProcessing } from "./definitions";
 
-export const process_voice_cloning = async (args: { seconds?: number }) => {
+export const trim_audio_segment = async (args: { seconds?: number }) => {
   const delay = args.seconds || 3;
-  console.log(`[Simulation] Cloning voice... (${delay}s)`);
+  console.log(`[Simulation] Trimming audio segment... (${delay}s)`);
   await waitForProcessing(delay);
-  return { status: "success", voiceId: "cloned_voice_v1" };
+  return { status: "success", audioSegmentId: "trimmed_segment_v1" };
 };
 
 export const generate_avatar_lipsync = async (args: { seconds?: number }) => {

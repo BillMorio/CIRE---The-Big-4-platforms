@@ -4,7 +4,7 @@ import OpenAI from "openai";
 const FFMPEG_SERVER = "http://localhost:3333";
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.OPEN_AI_API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
     return NextResponse.json({ error: "OpenAI API key not configured" }, { status: 500 });

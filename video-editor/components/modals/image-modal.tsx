@@ -13,6 +13,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Image as ImageIcon,
   ZoomIn,
@@ -45,11 +46,13 @@ export function ImageModal({ isOpen, onClose, scene, onUpdate }: ImageModalProps
   const [centerY, setCenterY] = useState(scene.image?.zoomParams?.centerY || 0.5);
   const [searchQuery, setSearchQuery] = useState(scene.image?.searchQuery || "");
   const [aiPrompt, setAiPrompt] = useState("");
+  const [directorNote, setDirectorNote] = useState(scene.directorNote || "");
 
   const image = scene.image;
 
   const handleSave = () => {
     onUpdate({
+      directorNote,
       image: {
         ...scene.image!,
         fittingStrategy: zoomType,
@@ -72,7 +75,7 @@ export function ImageModal({ isOpen, onClose, scene, onUpdate }: ImageModalProps
           <Target className="w-3.5 h-3.5" />
           Image Preview (Click to set zoom center)
         </label>
-        <div 
+        <div
           className="aspect-[16/10] bg-muted/10 border border-border rounded-lg flex flex-col items-center justify-center relative overflow-hidden cursor-crosshair"
           onClick={(e) => {
             const rect = e.currentTarget.getBoundingClientRect();
@@ -86,13 +89,13 @@ export function ImageModal({ isOpen, onClose, scene, onUpdate }: ImageModalProps
           <span className="technical-label text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 mt-2">
             Click to set zoom center
           </span>
-          
+
           {/* Zoom center indicator */}
-          <div 
+          <div
             className="absolute w-4 h-4 border-2 border-primary rounded-full bg-primary/20 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
             style={{ left: `${centerX * 100}%`, top: `${centerY * 100}%` }}
           />
-          
+
           <div className="absolute bottom-3 left-3 flex gap-2">
             <Badge variant="outline" className="text-[8px] bg-background/60">{scene.duration.toFixed(1)}s</Badge>
             <Badge variant="outline" className="text-[8px] bg-background/60">
@@ -115,8 +118,8 @@ export function ImageModal({ isOpen, onClose, scene, onUpdate }: ImageModalProps
               onClick={() => setZoomType(type)}
               className={cn(
                 "h-9 rounded-md border text-[9px] technical-label font-bold uppercase transition-colors",
-                zoomType === type 
-                  ? "bg-green-500/10 text-green-500 border-green-500/30" 
+                zoomType === type
+                  ? "bg-green-500/10 text-green-500 border-green-500/30"
                   : "bg-muted/10 border-border hover:bg-muted/20"
               )}
             >
@@ -155,19 +158,29 @@ export function ImageModal({ isOpen, onClose, scene, onUpdate }: ImageModalProps
         )}
       </div>
 
-      {/* Convert to Video */}
-      <div className="space-y-3 pt-4 border-t border-border">
-        <label className="text-[10px] technical-label font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-          <Video className="w-3.5 h-3.5" />
-          Convert to Video
-        </label>
-        <p className="text-[11px] text-muted-foreground">
-          Apply Ken Burns effect and convert this image to a video using FFmpeg.
-        </p>
-        <Button variant="outline" className="w-full h-10 text-[10px] technical-label font-bold">
-          <Play className="w-3.5 h-3.5 mr-2" />
-          Convert with FFmpeg
-        </Button>
+      {/* Script & Director Note */}
+      <div className="space-y-4">
+        <div className="p-4 bg-muted/5 border border-border rounded-xl space-y-3">
+          <label className="text-[10px] technical-label font-bold uppercase tracking-widest text-muted-foreground">
+            Script Context
+          </label>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            {scene.script}
+          </p>
+        </div>
+
+        <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl space-y-2">
+          <label className="text-[10px] technical-label font-bold uppercase tracking-widest text-amber-500/80 flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5" />
+            Director's Intent
+          </label>
+          <Textarea 
+            value={directorNote}
+            onChange={(e) => setDirectorNote(e.target.value)}
+            placeholder="Visual vibe, energy, or specific cinematic instructions..."
+            className="min-h-[100px] text-xs italic bg-transparent border-none focus-visible:ring-0 p-0 shadow-none"
+          />
+        </div>
       </div>
     </div>
   );

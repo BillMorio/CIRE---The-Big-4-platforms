@@ -17,8 +17,8 @@ export const SIMULATED_TOOLS: ChatCompletionTool[] = [
   {
     type: "function",
     function: {
-      name: "process_voice_cloning",
-      description: "Clones the target voice and processes the script audio.",
+      name: "trim_audio_segment",
+      description: "Trims a specific segment of audio from the master audio for avatar generation.",
       parameters: {
         type: "object",
         properties: { seconds: { type: "number", default: 3 } },
@@ -55,7 +55,7 @@ export const SIMULATED_TOOLS: ChatCompletionTool[] = [
   {
     type: "function",
     function: {
-      name: "trim_and_fit_footage",
+      name: "trim_stock_footage",
       description: "Trims stock footage to match the scene duration and applies cropping.",
       parameters: {
         type: "object",
@@ -67,8 +67,8 @@ export const SIMULATED_TOOLS: ChatCompletionTool[] = [
   {
     type: "function",
     function: {
-      name: "generate_static_visual",
-      description: "Generates a static background image or graphics plate.",
+      name: "generate_sdxl_visual",
+      description: "Generates a static background image or graphics plate using SDXL.",
       parameters: {
         type: "object",
         properties: {
@@ -82,8 +82,8 @@ export const SIMULATED_TOOLS: ChatCompletionTool[] = [
   {
     type: "function",
     function: {
-      name: "apply_text_overlays",
-      description: "Adds titles and technical labels to a scene.",
+      name: "apply_text_branding",
+      description: "Adds titles, logos, and technical branding to a scene.",
       parameters: {
         type: "object",
         properties: { seconds: { type: "number", default: 2 } },
@@ -99,6 +99,17 @@ export const SIMULATED_TOOLS: ChatCompletionTool[] = [
       parameters: {
         type: "object",
         properties: { seconds: { type: "number", default: 7 } },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "composite_ffmpeg_layer",
+      description: "Uses FFmpeg to composite multiple video layers into a final output.",
+      parameters: {
+        type: "object",
+        properties: { seconds: { type: "number", default: 5 } },
       },
     },
   },

@@ -118,6 +118,7 @@ export default function DynamicStudioPage() {
     duration: s.duration || (s.end_time - s.start_time),
     visualType: s.visual_type,
     script: s.script,
+    directorNote: s.visual_data?.[0]?.payload?.directorNote,
     // Add fake structures for the Card UI colors/icons
     aRoll: s.visual_type === 'a-roll' ? { assetStatus: s.status === 'completed' ? 'ready' : (s.status === 'processing' ? 'pending_generation' : 'generated') } : undefined,
     bRoll: s.visual_type === 'b-roll' ? { assetStatus: s.status === 'completed' ? 'ready' : (s.status === 'processing' ? 'pending_generation' : 'generated') } : undefined,

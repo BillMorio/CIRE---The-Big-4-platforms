@@ -63,6 +63,22 @@ CREATE TABLE jobs (
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- 6. AGENT MEMORY TABLE (Simulation State)
+CREATE TABLE agent_memory (
+    project_id UUID PRIMARY KEY REFERENCES projects(id) ON DELETE CASCADE,
+    project_name TEXT NOT NULL,
+    workflow_status TEXT NOT NULL DEFAULT 'idle', -- idle, processing, paused, completed
+    project_system_prompt TEXT DEFAULT '',
+    active_agents TEXT[] DEFAULT '{}',
+    total_scenes INT DEFAULT 0,
+    completed_count INT DEFAULT 0,
+    failed_count INT DEFAULT 0,
+    current_scene_id UUID REFERENCES scenes(id) ON DELETE SET NULL,
+    last_log TEXT DEFAULT '',
+    metadata JSONB DEFAULT '{}'::jsonb,
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- 6. INDEXES for Performance
 CREATE INDEX idx_scenes_project_id ON scenes(project_id);
 CREATE INDEX idx_jobs_scene_id ON jobs(scene_id);
@@ -80,3 +96,4 @@ $$ language 'plpgsql';
 CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 CREATE TRIGGER update_scenes_updated_at BEFORE UPDATE ON scenes FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 CREATE TRIGGER update_jobs_updated_at BEFORE UPDATE ON jobs FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE TRIGGER update_agent_memory_updated_at BEFORE UPDATE ON agent_memory FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();

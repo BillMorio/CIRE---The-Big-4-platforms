@@ -1,4 +1,4 @@
-import { waitForProcessing } from "@/lib/agents/tools/simulation-tools";
+import { waitForProcessing } from "./definitions";
 
 export const generate_sdxl_visual = async (args: { seconds?: number }) => {
   const delay = args.seconds || 6;

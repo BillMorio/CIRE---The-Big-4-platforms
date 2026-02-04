@@ -190,13 +190,25 @@ export function SceneCard({
         </div>
       </div>
       
-      <CardContent className="p-3 bg-card/80">
+      <CardContent className="p-3 bg-card/80 space-y-2">
         <p className={cn(
           "text-[12px] line-clamp-2 leading-relaxed font-medium transition-colors",
           isSelected ? "text-foreground" : "text-foreground/90"
         )}>
           {scene.script}
         </p>
+        
+        {scene.directorNote && (
+          <div className="p-2 bg-amber-500/5 rounded-lg border border-amber-500/10 space-y-1 group/note relative">
+            <div className="flex items-center gap-1">
+              <Sparkles className="w-2.5 h-2.5 text-amber-500/70" />
+              <span className="text-[8px] font-black uppercase tracking-widest text-amber-500/40">Director's Intent</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground italic leading-tight line-clamp-2">
+              {scene.directorNote}
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

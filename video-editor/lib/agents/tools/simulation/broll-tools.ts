@@ -1,4 +1,4 @@
-import { waitForProcessing } from "@/lib/agents/tools/simulation-tools";
+import { waitForProcessing } from "./definitions";
 
 export const search_pexels_library = async (args: { seconds?: number }) => {
   const delay = args.seconds || 4;
