@@ -1,59 +1,57 @@
-import { Scene, AgentResult, BaseAgent, ProjectContext, AgentMemory } from "./types";
+import { Scene, AgentResult, BaseAgent, ProjectContext } from "./types";
 import { ARollAgent } from "./a-roll-agent";
-import { stateService } from "../services/state-service";
+import { BRollAgent } from "./b-roll-agent";
+import { ImageAgent } from "./image-agent";
+import { MotionGraphicAgent } from "./motion-graphic-agent";
+import { memoryService } from "../services/api/memory-service";
+import { sceneService } from "../services/api/scene-service";
 
 export class Orchestrator {
-  private aRollAgent = new ARollAgent();
+  public memoryService = memoryService;
+  public sceneService = sceneService;
+
+  private agents: Record<string, BaseAgent> = {
+    'a-roll': new ARollAgent(),
+    'b-roll': new BRollAgent(),
+    'image': new ImageAgent(),
+    'graphics': new MotionGraphicAgent()
+  };
 
   async findAndProcessNextScene(projectId: string): Promise<AgentResult> {
-    console.log("[Orchestrator] Pulling project state from Agent Memory...");
+    console.log("[Orchestrator] Searching for next pending task...");
 
-    // Step 1: Get the current state from DB
-    const memory = await stateService.getProjectMemory(projectId);
+    // 1. Get current project memory
+    const memory = await memoryService.getByProjectId(projectId);
     
-    // Step 2: Check if we should even proceed
     if (memory.workflow_status === 'paused' || memory.workflow_status === 'completed') {
-      return { success: false, message: `Orchestrator idle. Workflow status: ${memory.workflow_status}` };
+      return { success: false, message: `Orchestrator inactive: ${memory.workflow_status}` };
     }
 
-    // Batch Check: Are we done?
-    if (memory.completed_count + memory.failed_count >= memory.total_scenes) {
-      await stateService.updateWorkflowStatus(projectId, 'completed');
-      return { success: true, message: "Project completed successfully." };
+    // 2. Fetch all scenes and find the first 'todo' one
+    const scenes = await sceneService.getByProjectId(projectId);
+    const nextScene = scenes.find(s => s.status === 'todo');
+
+    if (!nextScene) {
+      // If no scenes left to process, mark as completed
+      await memoryService.update(projectId, { 
+        workflow_status: 'completed',
+        last_log: "Orchestrator: All scenes processed. Project locked."
+      });
+      return { success: true, message: "Project completed." };
     }
 
-    // Step 3: Mock finding a 'todo' scene in the DB
-    const mockScene: Scene = {
-      id: "scene_123",
-      project_id: projectId,
-      index: memory.completed_count + 1,
-      start_time: 0,
-      end_time: 5,
-      script: "Hello, this is a test for the A-Roll agent with memory.",
-      visual_type: "a-roll",
-      status: "todo"
-    };
+    console.log(`[Orchestrator] Routing Scene ${nextScene.index} (Type: ${nextScene.visual_type})`);
 
-    console.log(`[Orchestrator] Next task: ${mockScene.id} (Type: ${mockScene.visual_type})`);
-
-    // Memory-Driven Context (Zero hardcoding)
-    const context: ProjectContext = {
-      memory
-    };
-
-    // Step 5: Routing logic with Context & Memory Reporting
-    if (mockScene.visual_type === 'a-roll') {
-      // Register that an agent is starting
-      await stateService.registerAgentStart(projectId, this.aRollAgent.name);
-      
-      const result = await this.aRollAgent.process(mockScene, context);
-      
-      // Register that agent is done and update state
-      await stateService.registerAgentDone(projectId, this.aRollAgent.name, result);
-      
-      return result;
+    // 3. Assign Agent
+    const agent = this.agents[nextScene.visual_type];
+    if (!agent) {
+       return { success: false, message: `No agent available for: ${nextScene.visual_type}` };
     }
 
-    return { success: false, message: "No suitable agent found for visual type" };
+    // 4. Hand-off to Agent (The agent now handles all DB updates internally)
+    const context: ProjectContext = { memory };
+    const result = await agent.process(nextScene, context);
+
+    return result;
   }
 }

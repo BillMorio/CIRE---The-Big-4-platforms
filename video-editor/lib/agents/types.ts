@@ -7,11 +7,25 @@ export interface Scene {
   index: number;
   start_time: number;
   end_time: number;
+  duration: number; // Added for convenience and calculation
   script: string;
   visual_type: VisualType;
   status: SceneStatus;
   final_video_url?: string;
   payload?: any;
+}
+
+export interface Project {
+  id: string;
+  title: string;
+  status: string;
+  orientation: string;
+  total_duration: number;
+  master_audio_url?: string;
+  transcript_url?: string;
+  metadata?: any;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export type WorkflowStatus = 'idle' | 'processing' | 'paused' | 'completed';
@@ -39,7 +53,7 @@ export interface AgentResult {
   log?: string; 
 }
 
-/** 
+/**
  * Unified Context: The agent now only needs the memory from the DB
  * to understand its purpose and progress.
  */

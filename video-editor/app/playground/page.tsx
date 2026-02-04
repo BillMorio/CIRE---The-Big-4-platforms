@@ -16,6 +16,15 @@ import {
 
 const testPages = [
   {
+    title: "Agent Orchestration (New)",
+    description: "Launch a 15-scene project and visualize Multi-Agent handoffs in a dynamic studio",
+    href: "/playground/start",
+    icon: Workflow,
+    color: "text-blue-500",
+    bgColor: "bg-blue-500/10",
+    borderColor: "border-blue-500/30"
+  },
+  {
     title: "System Health",
     description: "Real-time monitoring of Supabase, OpenAI, Pexels, and FFmpeg",
     href: "/health-check",
