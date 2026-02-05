@@ -32,23 +32,22 @@ CREATE TABLE scenes (
     duration FLOAT NOT NULL, -- Stored for convenience
     script TEXT,
     visual_type visual_type NOT NULL,
-    status asset_status NOT NULL DEFAULT 'todo',
+    scene_type TEXT, -- e.g., Intro, Explanation, Transition
+    director_notes TEXT, -- Creative direction for the AI agents
     fitting_strategy TEXT DEFAULT 'trim', -- trim, stretch, generate
     transition JSONB DEFAULT '{"type": "none", "duration": 0}'::jsonb,
+    
+    -- FLATTENED ASSET DATA
+    asset_url TEXT, -- Raw link from provider (e.g. Pexels)
+    final_video_url TEXT, -- Processed/Trimmed link
+    thumbnail_url TEXT, -- For UI preview
+    payload JSONB DEFAULT '{}'::jsonb, -- Specialized params (Prompts, search queries, etc.)
+
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now(),
     
     -- Ensure scenes are ordered unique per project
     CONSTRAINT unique_scene_index UNIQUE (project_id, index)
-);
-
--- 4. SCENE VISUAL DATA (Specialized Params)
-CREATE TABLE scene_visual_data (
-    scene_id UUID PRIMARY KEY REFERENCES scenes(id) ON DELETE CASCADE,
-    payload JSONB NOT NULL DEFAULT '{}'::jsonb, -- Prompts, search queries, avatar IDs
-    asset_url TEXT, -- Raw link from provider
-    final_video_url TEXT, -- Rendered/processed link
-    updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- 5. JOBS TABLE (Async Orchestration)

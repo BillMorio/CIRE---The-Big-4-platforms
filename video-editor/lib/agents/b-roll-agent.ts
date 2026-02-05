@@ -1,11 +1,11 @@
 import { Scene, AgentResult, BaseAgent, ProjectContext } from "./types";
 import { openai } from "../openai";
-import { SIMULATED_TOOLS } from "./tools/simulation/definitions";
+import { BROLL_AGENT_TOOLS } from "./tools/b-roll-agent-definitions";
 import { memoryService } from "../services/api/memory-service";
 import { sceneService } from "../services/api/scene-service";
 import { jobService } from "../services/api/job-service";
-// Import tools directly for readability
-import * as brollTools from "./tools/simulation/broll-tools";
+// Import real production tools
+import * as brollTools from "./tools/production/broll-tools";
 
 export class BRollAgent implements BaseAgent {
   name = "B-Roll Specialist";
@@ -31,16 +31,21 @@ export class BRollAgent implements BaseAgent {
           content: `You are the ${this.name}. ${this.role}
           
           SCENE CONTEXT:
+          - Index: ${scene.index}
           - Start Time: ${scene.start_time}s
           - End Time: ${scene.end_time}s
-          - Duration: ${scene.duration}s
+          - Target Duration: ${scene.duration}s
           - Script: "${scene.script}"
+          - Director Notes: "${scene.director_notes || "None"}"
 
           PRODUCTION WORKFLOW (Reason-Act):
           1. Execute ONE tool at a time. 
-          2. STEP 1: Search for relevant footage via 'search_pexels_library'.
+          2. STEP 1: Search for relevant footage via 'search_pexels_library'. 
+             * STRATEGY: Use the script and director notes to find the most fitting visual.
+             * SELECTION: Our tool will automatically pick the best clip based on duration.
           3. FEEDBACK: Observe the search result.
-          4. STEP 2: Use 'trim_stock_footage' to fit the best match into the scene.
+          4. STEP 2: Use 'fit_stock_footage_to_duration' to conform the clip to the exact scene duration.
+             * NOTE: This will warping/adjust the speed of the clip to fit perfectly.
           5. Respond with final confirmation text when done.` 
         },
         { 
@@ -67,7 +72,7 @@ export class BRollAgent implements BaseAgent {
         const response = await openai.chat.completions.create({
           model: "gpt-4o",
           messages: [...messages, turnContext],
-          tools: SIMULATED_TOOLS,
+          tools: BROLL_AGENT_TOOLS,
           tool_choice: "auto",
         });
 
@@ -97,9 +102,33 @@ export class BRollAgent implements BaseAgent {
 
             let toolResult: any;
             if (toolName === 'search_pexels_library') {
-              toolResult = await brollTools.search_pexels_library(args);
-            } else if (toolName === 'trim_stock_footage') {
-              toolResult = await brollTools.trim_stock_footage(args);
+              // Inject targetDuration for local selection logic
+              toolResult = await brollTools.search_pexels_library({
+                ...args,
+                targetDuration: scene.duration
+              });
+
+              // Update scene with initial search results
+              if (toolResult.status === 'completed') {
+                await sceneService.update(scene.id, {
+                  asset_url: toolResult.videoUrl,
+                  thumbnail_url: toolResult.thumbnail,
+                  payload: { ...scene.payload, ...toolResult }
+                });
+              }
+            } else if (toolName === 'fit_stock_footage_to_duration') {
+              toolResult = await brollTools.fit_stock_footage_to_duration({
+                videoUrl: args.videoUrl,
+                targetDuration: scene.duration
+              });
+
+              // Update scene with final processed video
+              if (toolResult.status === 'completed') {
+                await sceneService.update(scene.id, {
+                  final_video_url: toolResult.outputUrl,
+                  payload: { ...scene.payload, ...toolResult }
+                });
+              }
             } else {
               toolResult = { status: "failed", error: `Tool ${toolName} not found.` };
             }

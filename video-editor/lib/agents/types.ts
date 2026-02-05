@@ -1,6 +1,11 @@
 export type SceneStatus = 'todo' | 'processing' | 'completed' | 'failed' | 'awaiting_input';
 export type VisualType = 'a-roll' | 'b-roll' | 'graphics' | 'image';
 
+export interface Transition {
+  type: string;
+  duration: number;
+}
+
 export interface Scene {
   id: string;
   project_id: string;
@@ -10,9 +15,15 @@ export interface Scene {
   duration: number; // Added for convenience and calculation
   script: string;
   visual_type: VisualType;
+  scene_type?: string;
   status: SceneStatus;
   final_video_url?: string;
+  asset_url?: string;
+  thumbnail_url?: string;
   payload?: any;
+  director_notes?: string;
+  fitting_strategy?: string;
+  transition?: Transition;
 }
 
 export interface Project {

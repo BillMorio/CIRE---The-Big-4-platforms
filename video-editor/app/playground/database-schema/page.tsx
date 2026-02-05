@@ -104,10 +104,8 @@ export default function DatabaseSchemaPage() {
               </defs>
               {/* Projects to Scenes */}
               <path d="M 280 250 L 380 250" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="4 4" className="text-blue-500/50" markerEnd="url(#arrow)" />
-              {/* Scenes to Visual Data */}
-              <path d="M 640 220 L 760 150" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="4 4" className="text-amber-500/50" markerEnd="url(#arrow)" />
               {/* Scenes to Jobs */}
-              <path d="M 640 280 L 760 350" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="4 4" className="text-emerald-500/50" markerEnd="url(#arrow)" />
+              <path d="M 640 250 L 760 300" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="4 4" className="text-emerald-500/50" markerEnd="url(#arrow)" />
             </svg>
 
             {/* Entity Nodes */}
@@ -174,35 +172,19 @@ export default function DatabaseSchemaPage() {
                   <div className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-border" /> status
                   </div>
+                  <div className="flex items-center gap-2 text-amber-400">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500/50" /> director_notes (text)
+                  </div>
                   <div className="flex items-center gap-2 text-purple-400">
-                    <span className="w-1.5 h-1.5 rounded-full bg-purple-500/50" /> transition (jsonb)
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-500/50" /> payload (jsonb)
+                  </div>
+                  <div className="flex items-center gap-2 text-emerald-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-border" /> final_video_url
                   </div>
                 </div>
               </div>
 
               <div className="flex flex-col gap-8">
-                {/* Visual Data Node */}
-                <div className="w-64 p-4 bg-background/80 backdrop-blur-xl border-2 border-border rounded-xl shadow-2xl hover:border-amber-500/50 transition-all duration-300">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center"><Share2 className="w-4 h-4 text-amber-500" /></div>
-                    <div className="font-bold text-sm tracking-tight">scene_visual_data</div>
-                  </div>
-                  <div className="space-y-1.5 font-mono text-[9px] opacity-70">
-                    <div className="flex items-center gap-2 text-blue-400">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" /> scene_id (PK, FK)
-                    </div>
-                    <div className="flex items-center gap-2 text-purple-400">
-                      <span className="w-1.5 h-1.5 rounded-full bg-purple-500/50" /> payload (jsonb)
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-border" /> asset_url
-                    </div>
-                    <div className="flex items-center gap-2 text-emerald-300">
-                      <span className="w-1.5 h-1.5 rounded-full bg-border" /> final_video_url
-                    </div>
-                  </div>
-                </div>
-
                 {/* Jobs Node */}
                 <div className="w-64 p-4 bg-background/80 backdrop-blur-xl border-2 border-border rounded-xl shadow-2xl hover:border-emerald-500/50 transition-all duration-300">
                   <div className="flex items-center gap-2 mb-3">
@@ -275,66 +257,64 @@ export default function DatabaseSchemaPage() {
                   { name: "project_id", type: "UUID", desc: "Foreign key for project relationship.", isFk: true },
                   { name: "index", type: "INT", desc: "Chronological order weighting." },
                   { name: "start_time", type: "FLOAT", desc: "Timestamp offset in master audio." },
-                  { name: "visual_type", type: "ENUM", desc: "Routing key: a-roll, b-roll, graphics, image." },
-                  { name: "script", type: "TEXT", desc: "The spoken segment text." },
-                  { name: "transition", type: "JSONB", desc: "Transition visual config (type, ms)." },
-                ].map((col, i) => <ColumnRow key={i} {...col} />)}
-              </div>
-            </div>
-
-            {/* Table: Scene Visual Data */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              <div className="space-y-6">
-                <div className="flex items-center gap-4 mb-2">
-                  <TableIcon className="w-6 h-6 text-amber-500" />
-                  <h3 className="text-2xl font-bold font-mono lowercase tracking-tighter italic">Table: visual_data</h3>
-                </div>
-                <div className="overflow-hidden bg-muted/10 border border-border rounded-xl p-4">
-                  {[
-                    { name: "scene_id", type: "UUID", desc: "PK & FK back to scenes table.", isPk: true, isFk: true },
-                    { name: "payload", type: "JSONB", desc: "Prompt params (avatarId, searchQuery).", isNullable: false },
-                    { name: "asset_url", type: "TEXT", desc: "Raw asset URL from provider." },
-                    { name: "final_video_url", type: "TEXT", desc: "Processed/Rendered asset URL." },
-                  ].map((col, i) => <ColumnRow key={i} {...col} />)}
-                </div>
-              </div>
-
-              {/* JSONB Payload Anatomy */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-2">
-                  <Code2 className="w-5 h-5 text-emerald-500" />
-                  <h4 className="text-sm font-bold uppercase tracking-widest">Payload Architecture</h4>
-                </div>
-                <Card className="bg-background border-border shadow-xl">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-mono flex items-center gap-2">
-                      <FileJson className="w-4 h-4" />
-                      scene_visual_data.payload
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center text-[10px] font-bold text-muted-foreground uppercase">
-                        <span>Visual Type</span>
-                        <span>Key Structure</span>
-                      </div>
-                      <div className="p-3 bg-muted rounded border border-border/50 font-mono text-xs space-y-1">
-                        <div className="text-blue-400 font-bold">"a-roll"</div>
-                        <div className="opacity-70">{"{ avatarId, emotion, angle }"}</div>
-                      </div>
-                      <div className="p-3 bg-muted rounded border border-border/50 font-mono text-xs space-y-1 text-emerald-300">
-                        <div className="text-amber-400 font-bold">"b-roll"</div>
-                        <div className="opacity-70">{"{ searchQuery, trimStart, trimEnd }"}</div>
-                      </div>
-                      <div className="p-3 bg-muted rounded border border-border/50 font-mono text-xs space-y-1">
-                        <div className="text-purple-400 font-bold">"graphics"</div>
-                        <div className="opacity-70">{"{ prompt, style, motionParams }"}</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
+                   { name: "visual_type", type: "ENUM", desc: "Routing key: a-roll, b-roll, graphics, image." },
+                   { name: "director_notes", type: "TEXT", desc: "Creative direction for agents." },
+                   { name: "scene_type", type: "TEXT", desc: "Scene category (Intro, Demo, etc.)" },
+                   { name: "asset_url", type: "TEXT", desc: "Raw asset URL from provider." },
+                   { name: "final_video_url", type: "TEXT", desc: "Processed/Rendered asset URL." },
+                   { name: "thumbnail_url", type: "TEXT", desc: "UI preview thumbnail link." },
+                   { name: "payload", type: "JSONB", desc: "Advanced params (avatarId, searchQuery)." },
+                 ].map((col, i) => <ColumnRow key={i} {...col} />)}
+               </div>
+             </div>
+ 
+             {/* JSONB Payload Anatomy */}
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+               <div className="space-y-6">
+                 <div className="flex items-center gap-3 mb-2">
+                   <Code2 className="w-5 h-5 text-emerald-500" />
+                   <h4 className="text-sm font-bold uppercase tracking-widest">Payload Architecture</h4>
+                 </div>
+                 <Card className="bg-background border-border shadow-xl">
+                   <CardHeader className="pb-2">
+                     <CardTitle className="text-sm font-mono flex items-center gap-2">
+                       <FileJson className="w-4 h-4" />
+                       scenes.payload
+                     </CardTitle>
+                   </CardHeader>
+                   <CardContent className="space-y-4">
+                     <div className="space-y-2">
+                       <div className="flex justify-between items-center text-[10px] font-bold text-muted-foreground uppercase">
+                         <span>Visual Type</span>
+                         <span>Key Structure</span>
+                       </div>
+                       <div className="p-3 bg-muted rounded border border-border/50 font-mono text-xs space-y-1">
+                         <div className="text-blue-400 font-bold">"a-roll"</div>
+                         <div className="opacity-70">{"{ avatarId, emotion, angle }"}</div>
+                       </div>
+                       <div className="p-3 bg-muted rounded border border-border/50 font-mono text-xs space-y-1 text-emerald-300">
+                         <div className="text-amber-400 font-bold">"b-roll"</div>
+                         <div className="opacity-70">{"{ searchQuery, speedFactor }"}</div>
+                       </div>
+                       <div className="p-3 bg-muted rounded border border-border/50 font-mono text-xs space-y-1">
+                         <div className="text-purple-400 font-bold">"graphics"</div>
+                         <div className="opacity-70">{"{ prompt, style, motionParams }"}</div>
+                       </div>
+                     </div>
+                   </CardContent>
+                 </Card>
+               </div>
+ 
+               <div className="space-y-6 flex items-center justify-center p-8">
+                 <div className="text-center space-y-4">
+                    <Shield className="w-12 h-12 text-indigo-500 mx-auto" />
+                    <h3 className="text-lg font-bold">Unified Data Structure</h3>
+                    <p className="text-xs text-muted-foreground max-w-sm">
+                      We migrated to a flattened schema to reduce complexity and improve UI performance. All asset data is now directly attached to the scene.
+                    </p>
+                 </div>
+               </div>
+             </div>
 
             {/* Table: Jobs */}
             <div className="space-y-6">

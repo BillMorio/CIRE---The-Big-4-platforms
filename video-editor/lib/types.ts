@@ -86,12 +86,20 @@ export interface Scene {
   duration: number;
   script: string;
   directorNote?: string;
+  director_notes?: string;
+  sceneType?: string;
+  scene_type?: string;
   visualType: VisualType;
+  visual_type?: VisualType;
   aRoll?: ARoll;
   bRoll?: BRoll;
   graphics?: Graphics;
   image?: ImageAsset;
   transition: Transition;
+  asset_url?: string;
+  thumbnail_url?: string;
+  final_video_url?: string;
+  payload?: any;
 }
 
 export interface Project {

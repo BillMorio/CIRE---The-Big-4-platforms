@@ -8,10 +8,7 @@ export const sceneService = {
   async getByProjectId(projectId: string) {
     const { data, error } = await supabase
       .from('scenes')
-      .select(`
-        *,
-        visual_data:scene_visual_data(*)
-      `)
+      .select('*')
       .eq('project_id', projectId)
       .order('index', { ascending: true });
     
@@ -20,17 +17,16 @@ export const sceneService = {
   },
 
   /**
-   * Create a new scene and its visual data
+   * Create a new scene
    */
-  async create(scene: Partial<Scene>, visualData: any = {}) {
+  async create(scene: Partial<Scene>) {
     console.log("[SceneService] Creating scene:", scene.index);
-    // 1. Create Scene
     const { data: newScene, error: sceneError } = await supabase
       .from('scenes')
       .insert({
         ...scene,
-        fitting_strategy: (scene as any).fitting_strategy || 'trim',
-        transition: (scene as any).transition || { type: "none", duration: 0 }
+        fitting_strategy: scene.fitting_strategy || 'trim',
+        transition: scene.transition || { type: "none", duration: 0 }
       })
       .select()
       .single();
@@ -38,20 +34,6 @@ export const sceneService = {
     if (sceneError) {
         console.error("[SceneService] SCENE INSERT ERROR:", sceneError);
         throw sceneError;
-    }
-
-    // 2. Create Visual Data
-    console.log("[SceneService] Creating visual data for scene:", newScene.id);
-    const { error: visualError } = await supabase
-      .from('scene_visual_data')
-      .insert({
-        scene_id: newScene.id,
-        payload: visualData
-      });
-    
-    if (visualError) {
-        console.error("[SceneService] VISUAL DATA INSERT ERROR:", visualError);
-        throw visualError;
     }
 
     return newScene;
@@ -77,22 +59,7 @@ export const sceneService = {
   },
 
   /**
-   * Update visual data for a scene
-   */
-  async updateVisualData(sceneId: string, payload: any) {
-    const { data, error } = await supabase
-      .from('scene_visual_data')
-      .update({ payload })
-      .eq('scene_id', sceneId)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  /**
-   * Delete a scene (visual data will cascade delete)
+   * Delete a scene
    */
   async delete(id: string) {
     const { error } = await supabase

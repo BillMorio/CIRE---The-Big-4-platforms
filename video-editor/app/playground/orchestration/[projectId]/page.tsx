@@ -111,20 +111,30 @@ export default function DynamicStudioPage() {
 
   // Map DB scene format to SceneCard's expected format
   const mappedScenes = dbScenes?.map(s => ({
-    id: s.id,
-    index: s.index,
+    ...s,
     startTime: s.start_time,
     endTime: s.end_time,
     duration: s.duration || (s.end_time - s.start_time),
     visualType: s.visual_type,
-    script: s.script,
-    directorNote: s.visual_data?.[0]?.payload?.directorNote,
-    // Add fake structures for the Card UI colors/icons
-    aRoll: s.visual_type === 'a-roll' ? { assetStatus: s.status === 'completed' ? 'ready' : (s.status === 'processing' ? 'pending_generation' : 'generated') } : undefined,
-    bRoll: s.visual_type === 'b-roll' ? { assetStatus: s.status === 'completed' ? 'ready' : (s.status === 'processing' ? 'pending_generation' : 'generated') } : undefined,
-    graphics: s.visual_type === 'graphics' ? { assetStatus: s.status === 'completed' ? 'ready' : (s.status === 'processing' ? 'pending_generation' : 'generated') } : undefined,
-    image: s.visual_type === 'image' ? { assetStatus: s.status === 'completed' ? 'ready' : (s.status === 'processing' ? 'pending_generation' : 'generated') } : undefined,
-    transition: { type: 'none', duration: 0 }
+    directorNote: s.director_notes || s.payload?.directorNote,
+    // Add fake structures for the Card UI colors/icons if payload is missing
+    aRoll: s.visual_type === 'a-roll' ? { 
+      assetStatus: s.status === 'completed' ? 'ready' : (s.status === 'processing' ? 'pending_generation' : 'generated'),
+      ...s.payload 
+    } : undefined,
+    bRoll: s.visual_type === 'b-roll' ? { 
+      assetStatus: s.status === 'completed' ? 'ready' : (s.status === 'processing' ? 'pending_generation' : 'generated'),
+      ...s.payload 
+    } : undefined,
+    graphics: s.visual_type === 'graphics' ? { 
+      assetStatus: s.status === 'completed' ? 'ready' : (s.status === 'processing' ? 'pending_generation' : 'generated'),
+      ...s.payload 
+    } : undefined,
+    image: s.visual_type === 'image' ? { 
+      assetStatus: s.status === 'completed' ? 'ready' : (s.status === 'processing' ? 'pending_generation' : 'generated'),
+      ...s.payload 
+    } : undefined,
+    transition: s.transition || { type: 'none', duration: 0 }
   })) || [];
 
   if (projectLoading || scenesLoading) {

@@ -80,8 +80,9 @@ export const hydrationService = {
         visual_type: template.visualType as any,
         status: 'todo',
         fitting_strategy: 'trim',
-        transition: { type: "none", duration: 0 }
-      } as any, template.payload);
+        transition: { type: "none", duration: 0 },
+        payload: template.payload
+      });
     }
 
     console.log(`[Hydration] Successfully seeded 15 scenes for project: ${project.id}`);

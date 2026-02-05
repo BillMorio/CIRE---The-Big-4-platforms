@@ -23,16 +23,31 @@ export async function POST(req: NextRequest) {
     if (projectError) throw projectError;
 
     // 2. Create the Scenes
-    const scenesToInsert = storyboardData.scenes.map((scene: any, index: number) => ({
-      project_id: project.id,
-      index: scene.index || index + 1,
-      start_time: scene.startTime,
-      end_time: scene.endTime,
-      duration: scene.endTime - scene.startTime,
-      script: scene.script,
-      visual_type: scene.visualType,
-      status: "todo"
-    }));
+    const scenesToInsert = storyboardData.scenes.map((scene: any, index: number) => {
+      // Extract the relevant visual payload based on the type
+      let payload: any = {};
+      if (scene.visualType === 'a-roll') Object.assign(payload, scene.aRoll || {});
+      else if (scene.visualType === 'b-roll') Object.assign(payload, scene.bRoll || {});
+      else if (scene.visualType === 'graphics') Object.assign(payload, scene.graphics || {});
+      else if (scene.visualType === 'image') Object.assign(payload, scene.image || {});
+
+      return {
+        project_id: project.id,
+        index: scene.index || index + 1,
+        start_time: scene.startTime,
+        end_time: scene.endTime,
+        duration: scene.endTime - scene.startTime,
+        script: scene.script,
+        visual_type: scene.visualType,
+        scene_type: scene.sceneType,
+        director_notes: scene.directorNote || scene.director_notes,
+        asset_url: scene.assetUrl || scene.asset_url,
+        final_video_url: scene.finalVideoUrl || scene.final_video_url,
+        thumbnail_url: scene.thumbnailUrl || scene.thumbnail_url,
+        status: "todo",
+        payload: payload
+      };
+    });
 
     const { data: createdScenes, error: scenesError } = await supabase
       .from("scenes")
@@ -40,29 +55,6 @@ export async function POST(req: NextRequest) {
       .select();
 
     if (scenesError) throw scenesError;
-
-    // 3. Create Scene Visual Data
-    const visualDataToInsert = createdScenes.map((scene, i) => {
-      const sourceScene = storyboardData.scenes[i];
-      // Extract the relevant visual payload based on the type
-      let payload: any = { directorNote: sourceScene.directorNote };
-      
-      if (scene.visual_type === 'a-roll') Object.assign(payload, sourceScene.aRoll || {});
-      else if (scene.visual_type === 'b-roll') Object.assign(payload, sourceScene.bRoll || {});
-      else if (scene.visual_type === 'graphics') Object.assign(payload, sourceScene.graphics || {});
-      else if (scene.visual_type === 'image') Object.assign(payload, sourceScene.image || {});
-
-      return {
-        scene_id: scene.id,
-        payload
-      };
-    });
-
-    const { error: visualDataError } = await supabase
-      .from("scene_visual_data")
-      .insert(visualDataToInsert);
-
-    if (visualDataError) throw visualDataError;
 
     // 4. Initialize Agent Memory
     const { error: memoryError } = await supabase

@@ -1,0 +1,60 @@
+import { ChatCompletionTool } from "openai/resources/chat/completions";
+
+/**
+ * B-Roll Specialist Tool Definitions (Metadata for OpenAI)
+ */
+export const BROLL_AGENT_TOOLS: ChatCompletionTool[] = [
+  {
+    type: "function",
+    function: {
+      name: "search_pexels_library",
+      description: "Searches for high-quality stock footage based on a query.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: { 
+            type: "string", 
+            description: "The search term (e.g., 'cyberpunk city aerial view')" 
+          },
+          per_page: { 
+            type: "number", 
+            default: 5,
+            description: "Number of clips to return a maximum of 10 is ideal" 
+          },
+          orientation: {
+            type: "string",
+            enum: ["landscape", "portrait", "square"],
+            description: "The video orientation (should always use landscape for B-Roll)"
+          },
+          size: {
+            type: "string",
+            enum: ["large", "medium", "small"],
+            description: "The video size/quality (should always use small/720p for fast processing)"
+          }
+        },
+        required: ["query"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "fit_stock_footage_to_duration",
+      description: "Warps/Adjusts the speed of a stock footage clip to fit an exact target duration.",
+      parameters: {
+        type: "object",
+        properties: {
+          videoUrl: { 
+            type: "string", 
+            description: "The URL of the video to process (obtained from search)" 
+          },
+          targetDuration: { 
+            type: "number", 
+            description: "The exact duration (in seconds) the clip must be adjusted to fit." 
+          },
+        },
+        required: ["videoUrl", "targetDuration"],
+      },
+    },
+  },
+];
