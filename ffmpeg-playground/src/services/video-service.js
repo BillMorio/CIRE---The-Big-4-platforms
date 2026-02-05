@@ -168,7 +168,7 @@ export const concatVideos = async (files, transition = 'none', transitionDuratio
   // NORMALIZE ALL INPUTS: 1920x1080, 30fps, yuv420p
   // This ensures that even mixed 720p/1080p or different formats stitch perfectly.
   
-  if (transition === 'none' || files.length > 2) {
+  if (transition === 'none' || files.length < 2) {
     let concatInputs = '';
     files.forEach((_, i) => {
       // Scale and pad to 1920x1080
@@ -177,38 +177,45 @@ export const concatVideos = async (files, transition = 'none', transitionDuratio
       if (audioChecks[i]) {
         filterParts.push(`[${i}:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo[a${i}]`);
       } else {
-        // Inject silent audio from the nullsrc filter instead of an external input
-        // This avoids dependency on the 'lavfi' input format which may be missing.
         filterParts.push(`anullsrc=channel_layout=stereo:sample_rate=44100:duration=${durations[i]}[a${i}]`);
       }
       concatInputs += `[v${i}][a${i}]`;
     });
     filterParts.push(`${concatInputs}concat=n=${files.length}:v=1:a=1[outv][outa]`);
   } else {
-    // Two-file transition logic (XFADE)
-    const xfadeType = xfadeMap[transition] || 'fade';
-    const video1Duration = durations[0];
-    const offsetTime = Math.max(0, video1Duration - transitionDuration);
-    const offsetMs = Math.round(offsetTime * 1000);
-    
-    filterParts.push(`[0:v]scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,fps=30,format=yuv420p,setsar=1[v0]`);
-    filterParts.push(`[1:v]scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,fps=30,format=yuv420p,setsar=1[v1]`);
-    filterParts.push(`[v0][v1]xfade=transition=${xfadeType}:duration=${transitionDuration}:offset=${offsetTime}[outv]`);
-    
-    // Audio merging with crossfade or silence injection
-    if (audioChecks[0] && audioChecks[1]) {
-      filterParts.push(`[0:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,afade=t=out:st=${offsetTime}:d=${transitionDuration}[a0]`);
-      filterParts.push(`[1:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,afade=t=in:st=0:d=${transitionDuration},adelay=${offsetMs}|${offsetMs}[a1]`);
-      filterParts.push(`[a0][a1]amix=inputs=2:duration=longest:normalize=0[outa]`);
-    } else if (audioChecks[0]) {
-      filterParts.push(`[0:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,afade=t=out:st=${offsetTime}:d=${transitionDuration}[a0]`);
-      filterParts.push(`anullsrc=channel_layout=stereo:sample_rate=44100:duration=${durations[1]},adelay=${offsetMs}|${offsetMs}[a1]`);
-      filterParts.push(`[a0][a1]amix=inputs=2:duration=longest:normalize=0[outa]`);
-    } else if (audioChecks[1]) {
-      filterParts.push(`[1:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,afade=t=in:st=0:d=${transitionDuration},adelay=${offsetMs}|${offsetMs}[outa]`);
-    } else {
-      filterParts.push(`anullsrc=channel_layout=stereo:sample_rate=44100:duration=${video1Duration + durations[1] - transitionDuration}[outa]`);
-    }
+    // 2. Video Sequential transition chain (Duration Preserving)
+    // We use sequential fade filters on each stream and then concat them.
+    // This ensures Total Duration = Sum(Scene Durations).
+    files.forEach((_, i) => {
+      const dur = durations[i];
+      const h_fade = transitionDuration / 2;
+      
+      // Build a filter that fades in at start and out at end
+      let vFilters = `scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,fps=30,format=yuv420p,setsar=1`;
+      
+      if (i > 0) vFilters += `,fade=t=in:st=0:d=${h_fade}`;
+      if (i < files.length - 1) vFilters += `,fade=t=out:st=${dur - h_fade}:d=${h_fade}`;
+      
+      filterParts.push(`[${i}:v]${vFilters}[v${i}]`);
+      
+      let aFilters = `aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo`;
+      if (!audioChecks[i]) {
+        // Generate silence for the full duration of the clip
+        filterParts.push(`anullsrc=channel_layout=stereo:sample_rate=44100:duration=${dur}[sa${i}]`);
+        aFilters = `aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo`;
+        if (i > 0) aFilters += `,afade=t=in:st=0:d=${h_fade}`;
+        if (i < files.length - 1) aFilters += `,afade=t=out:st=${dur - h_fade}:d=${h_fade}`;
+        filterParts.push(`[sa${i}]${aFilters}[a${i}]`);
+      } else {
+        if (i > 0) aFilters += `,afade=t=in:st=0:d=${h_fade}`;
+        if (i < files.length - 1) aFilters += `,afade=t=out:st=${dur - h_fade}:d=${h_fade}`;
+        filterParts.push(`[${i}:a]${aFilters}[a${i}]`);
+      }
+    });
+
+    let sequentialInputs = '';
+    files.forEach((_, i) => { sequentialInputs += `[v${i}][a${i}]`; });
+    filterParts.push(`${sequentialInputs}concat=n=${files.length}:v=1:a=1[outv][outa]`);
   }
 
   return new Promise((resolve, reject) => {
@@ -222,6 +229,13 @@ export const concatVideos = async (files, transition = 'none', transitionDuratio
       .outputOptions(['-map', '[outv]', '-map', '[outa]', '-c:v', 'libx264', '-preset', 'medium', '-crf', '21', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart'])
       .output(outputPath)
       .on('start', (cmd) => console.log('[FFmpeg] Started Production Concat:', cmd))
+      .on('progress', (progress) => {
+        if (progress.percent) {
+          console.log(`[FFmpeg] Processing: ${progress.percent.toFixed(2)}% | Time: ${progress.timemark}`);
+        } else {
+          console.log(`[FFmpeg] Processing... | Time: ${progress.timemark}`);
+        }
+      })
       .on('end', () => {
         console.log('[FFmpeg] Production Concat complete:', outputPath);
         resolve(outputPath);

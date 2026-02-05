@@ -366,12 +366,12 @@ export const projectStitch = async (req, res) => {
   const downloadedPaths = [];
   
   try {
-    // 1. Download all assets locally
-    console.log('[API] Downloading scene assets...');
-    for (const url of sceneUrls) {
-      const localPath = await downloadFile(url);
-      downloadedPaths.push(localPath);
-    }
+    // 1. Download all assets in parallel
+    console.log(`[API] Downloading ${sceneUrls.length} scene assets in parallel...`);
+    const downloadPromises = sceneUrls.map(url => downloadFile(url));
+    const downloadedPaths = await Promise.all(downloadPromises);
+    
+    console.log('[API] All assets downloaded locally.');
 
     // 2. Concatenate with normalization
     console.log('[API] Starting concat of', downloadedPaths.length, 'files...');

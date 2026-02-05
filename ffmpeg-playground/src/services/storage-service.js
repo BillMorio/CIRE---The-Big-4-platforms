@@ -14,14 +14,15 @@ import config from '../config/storage.js';
 export async function uploadToSupabase(localPath, bucket = 'Lumina web3 file storage') {
   try {
     const fileName = `${Date.now()}-${path.basename(localPath)}`;
-    const fileBuffer = await fsPromises.readFile(localPath);
+    const fileStream = fs.createReadStream(localPath);
 
-    console.log(`[StorageService] Uploading ${path.basename(localPath)} to Supabase...`);
+    console.log(`[StorageService] Uploading ${path.basename(localPath)} to Supabase (Streaming)...`);
 
     const { data, error } = await supabase.storage
       .from(bucket)
-      .upload(fileName, fileBuffer, {
+      .upload(fileName, fileStream, {
         contentType: getContentType(localPath),
+        duplex: 'half',
         upsert: false
       });
 

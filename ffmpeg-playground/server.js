@@ -1,7 +1,7 @@
 import app from './src/app.js';
 import config from './src/config/storage.js';
 
-app.listen(config.PORT, '0.0.0.0', () => {
+const server = app.listen(config.PORT, '0.0.0.0', () => {
   console.log(`
   🎬 FFmpeg Playground Server running! (MODULAR V2)
   
@@ -14,3 +14,6 @@ app.listen(config.PORT, '0.0.0.0', () => {
   - Linux: sudo apt install ffmpeg
   `);
 });
+
+// Set server timeout to 10 minutes (600,000ms) for long-running FFmpeg tasks
+server.timeout = 600000;
