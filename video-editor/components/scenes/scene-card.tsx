@@ -1,6 +1,6 @@
 "use client";
 
-import { Scissors, Play, Plus, User, Film, Sparkles, Image as ImageIcon } from "lucide-react";
+import { Scissors, Play, Plus, User, Film, Sparkles, Image as ImageIcon, Camera, Aperture, Activity, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Scene, VisualType } from "@/lib/types";
@@ -114,13 +114,16 @@ export function SceneCard({
     }
   };
 
+  const isProcessing = scene.status === 'processing';
+
   return (
     <Card 
       className={cn(
-        "glass-premium-v2 overflow-hidden group transition-all duration-500 cursor-pointer rounded-2xl relative border border-border/40",
+        "glass-premium-v2 overflow-hidden group transition-all duration-700 cursor-pointer rounded-2xl relative border border-border/40",
         isSelected 
           ? "ring-2 ring-primary/40 bg-card/90 border-primary/60 shadow-glow-sm" 
-          : "hover:scale-[1.015] hover:shadow-xl hover:bg-card/70 hover:border-primary/20"
+          : "hover:scale-[1.015] hover:border-primary/20",
+        isProcessing && "ring-2 ring-amber-500/50 border-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.2)]"
       )}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
@@ -206,6 +209,55 @@ export function SceneCard({
             )}
           </div>
         </div>
+
+        {/* --- CREATIVE PROCESSING OVERLAY --- */}
+        {isProcessing && (
+          <div className="absolute inset-0 z-40 bg-amber-950/20 backdrop-blur-[2px] flex flex-col items-center justify-center p-6 animate-in fade-in duration-500">
+            {/* Scanning Laser Line */}
+            <div className="absolute inset-x-0 h-[2px] bg-amber-400/50 shadow-[0_0_15px_rgba(245,158,11,0.5)] animate-[scan_3s_linear_infinite] z-50 pointer-events-none" />
+            
+            {/* Corner Reels (Spinning) */}
+            <div className="absolute top-3 left-3 flex gap-2 opacity-60">
+                <Film className="w-4 h-4 text-amber-500 animate-[spin_4s_linear_infinite]" />
+                <Aperture className="w-4 h-4 text-amber-500 animate-[spin_8s_linear_infinite] opacity-40" />
+            </div>
+            <div className="absolute top-3 right-3 flex gap-2 opacity-60">
+                <Activity className="w-4 h-4 text-amber-500 animate-pulse" />
+            </div>
+
+            {/* Central High-End Indicator */}
+            <div className="relative flex flex-col items-center gap-4 group/proc">
+              <div className="relative">
+                <div className="absolute inset-0 bg-amber-500/20 rounded-full blur-2xl animate-pulse" />
+                <div className="w-16 h-16 rounded-full border-2 border-amber-500/40 flex items-center justify-center bg-black/60 relative z-10">
+                  <Camera className="w-8 h-8 text-amber-500 animate-[bounce_2s_ease-in-out_infinite]" />
+                </div>
+                {/* Red REC dot */}
+                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-600 border-2 border-white/20 animate-pulse z-20 flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                </div>
+              </div>
+              
+              <div className="flex flex-col items-center gap-1.5 text-center">
+                <span className="text-[10px] technical-label font-black text-amber-500 tracking-[0.3em] uppercase">Processing_Scene</span>
+                <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+                    <span className="text-[8px] technical-label font-bold text-amber-500/60 uppercase animate-[pulse_1s_infinite]">ENCODING_PIXELS_V4</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Live Data Ribbon */}
+            <div className="absolute bottom-4 inset-x-4 overflow-hidden mask-fade-horizontal">
+                <div className="flex gap-8 whitespace-nowrap animate-[scroll_10s_linear_infinite]">
+                    <span className="text-[7px] technical-label font-black text-amber-500/40 uppercase tracking-widest">FRAME_BUFFER_SYNCING...</span>
+                    <span className="text-[7px] technical-label font-black text-amber-500/40 uppercase tracking-widest">AGENT_HANDOFF_ACTIVE...</span>
+                    <span className="text-[7px] technical-label font-black text-amber-500/40 uppercase tracking-widest">SCENE_OPTIMIZATION...</span>
+                    <span className="text-[7px] technical-label font-black text-amber-500/40 uppercase tracking-widest">LUMINA_PIPELINE_ENCODING...</span>
+                </div>
+            </div>
+          </div>
+        )}
       </div>
       
       <CardContent className="p-5 bg-card/40 backdrop-blur-sm space-y-4">

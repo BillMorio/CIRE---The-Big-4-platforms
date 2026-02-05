@@ -10,7 +10,13 @@ import {
   Plus,
   LayoutGrid,
   PanelLeft,
-  Loader2
+  Loader2,
+  User,
+  Video,
+  Image as ImageIcon,
+  Zap,
+  CheckCircle2,
+  AlertCircle
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { NavSidebar } from "@/components/panels/nav-sidebar";
@@ -22,6 +28,16 @@ import { useProject } from "@/hooks/use-projects";
 import { useScenes, useUpdateScene } from "@/hooks/use-scenes";
 import { useAgentState, useResetAgentState, useUpdateAgentState } from "@/hooks/use-agent-state";
 import { useParams } from "next/navigation";
+
+// Agent to Icon Mapping for Premium UI
+const AGENT_ICONS: Record<string, any> = {
+  'A-Roll Agent': User,
+  'B-Roll Agent': Video,
+  'Image Agent': ImageIcon,
+  'Motion Graphics Agent': Zap,
+  'Orchestrator': Cpu,
+  'System': Terminal,
+};
 
 export default function DynamicStudioPage() {
   const params = useParams();
@@ -108,7 +124,7 @@ export default function DynamicStudioPage() {
     setIsSimulating(true);
     
     await updateAgentStateMutation.mutateAsync({ workflow_status: 'processing' });
-    await addLog("🚀 Simulation Started: Orchestrator taking control.", 'orchestrator');
+    await addLog("Orchestrator: Simulation Started. Taking control of the orchestration pipeline.", 'orchestrator');
     
     // Use the Server Action
     const { processNextScene } = await import("@/app/actions/orchestrator");
@@ -144,7 +160,7 @@ export default function DynamicStudioPage() {
   const handleReset = async () => {
     if (confirm("Reset simulation state? This will wipe progress in the database.")) {
         setIsSimulating(false);
-        setLocalLogs([{ msg: "Simulation reset by user.", type: 'system' }]);
+        setLocalLogs([{ msg: "System: Simulation reset by user. Memory cleared.", type: 'system' }]);
         
         const { resetProjectSimulation } = await import("@/app/actions/orchestrator");
         await resetProjectSimulation(projectId);
@@ -342,28 +358,60 @@ export default function DynamicStudioPage() {
                 </div>
              </div>
 
-             <div className="flex-1 overflow-y-auto pt-24 p-6 flex flex-col gap-6 font-mono text-[10px] leading-relaxed scrollbar-hide">
-                {localLogs.map((log, i) => (
-                    <div key={i} className={cn(
-                        "flex gap-4 animate-in fade-in slide-in-from-right-3 duration-500",
-                        log.type === 'success' ? "text-green-600 dark:text-green-400" : log.type === 'orchestrator' ? "text-primary" : log.type === 'agent' ? "text-amber-600 dark:text-amber-500" : "text-muted-foreground/30"
-                    )}>
-                        <span className="text-[8px] opacity-10 shrink-0 select-none font-bold mt-0.5">{(i+1).toString().padStart(2, '0')}</span>
-                        <div className="flex flex-col gap-2 flex-1">
-                            <div className="flex items-center gap-2">
-                                <span className={cn(
-                                    "px-2 py-0.5 rounded-md text-[7px] font-black uppercase tracking-widest w-fit border shadow-sm",
-                                    log.type === 'orchestrator' ? "bg-primary/10 text-primary border-primary/20" : 
-                                    log.type === 'agent' ? "bg-amber-500/10 text-amber-600 border-amber-500/20" : 
-                                    log.type === 'success' ? "bg-green-500/10 text-green-600 border-green-500/20" : "bg-muted/40 text-muted-foreground/50 border-border/40"
-                                )}>
-                                    {log.type}
-                                </span>
+             <div className="flex-1 overflow-y-auto pt-24 pb-12 p-6 flex flex-col gap-5 scrollbar-hide">
+                {localLogs.map((log, i) => {
+                    const isLast = i === localLogs.length - 1;
+                    const agentName = log.msg.split(':')[0];
+                    const cleanMsg = log.msg.includes(':') ? log.msg.split(':').slice(1).join(':').trim() : log.msg;
+                    
+                    return (
+                        <div 
+                          key={i} 
+                          className={cn(
+                              "group flex items-start gap-4 animate-[thought-stream-in_0.6s_ease-out_forwards]",
+                              !isLast && "opacity-40 grayscale-[0.5] scale-[0.98] origin-left transition-all duration-700"
+                          )}
+                          style={{ animationDelay: `${(localLogs.length - i) * 50}ms` }}
+                        >
+                            {/* Minimalist Glowing Indicator */}
+                            <div className="mt-1.5 shrink-0 relative">
+                                <div className={cn(
+                                    "w-1.5 h-1.5 rounded-full z-10 relative shadow-[0_0_8px]",
+                                    log.type === 'orchestrator' ? "bg-primary shadow-primary/50" : 
+                                    log.type === 'agent' ? "bg-amber-500 shadow-amber-500/50" : 
+                                    log.type === 'success' ? "bg-green-500 shadow-green-500/50" : "bg-muted-foreground/40 shadow-transparent"
+                                )} />
+                                {isLast && isSimulating && (
+                                    <div className="absolute inset-0 w-1.5 h-1.5 bg-current rounded-full animate-ping opacity-40" />
+                                )}
                             </div>
-                            <p className="text-[10px] leading-relaxed font-semibold tracking-tight whitespace-pre-wrap">{log.msg}</p>
+
+                            <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                    <span className={cn(
+                                        "text-[8px] technical-label font-bold uppercase tracking-[0.2em] whitespace-nowrap",
+                                        log.type === 'orchestrator' ? "text-primary/70" : 
+                                        log.type === 'agent' ? "text-amber-500/70" : 
+                                        log.type === 'success' ? "text-green-500/70" : "text-muted-foreground/40"
+                                    )}>
+                                        {agentName || log.type}
+                                    </span>
+                                    <div className="h-[1px] flex-1 bg-gradient-to-r from-border/20 via-border/5 to-transparent" />
+                                </div>
+                                
+                                <div className="relative overflow-hidden group/text">
+                                    <p className={cn(
+                                        "text-[10px] font-medium tracking-tight whitespace-nowrap",
+                                        isLast && isSimulating ? "animate-[scroll_15s_linear_infinite]" : "truncate"
+                                    )}>
+                                        {cleanMsg}
+                                        {isLast && isSimulating && <span className="ml-12 opacity-30 text-[8px] uppercase tracking-widest">{cleanMsg}</span>}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
                 <div ref={logEndRef} />
              </div>
 

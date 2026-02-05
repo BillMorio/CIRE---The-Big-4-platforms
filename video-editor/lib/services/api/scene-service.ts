@@ -59,6 +59,13 @@ export const sceneService = {
   },
 
   /**
+   * Update a scene's visual payload
+   */
+  async updateVisualData(id: string, payload: any) {
+    return this.update(id, { payload });
+  },
+
+  /**
    * Delete a scene
    */
   async delete(id: string) {

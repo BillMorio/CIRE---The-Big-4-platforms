@@ -1,6 +1,7 @@
 // Scene data types based on the example-output-for-scene.json schema
 // Visual Types: a-roll (avatar), b-roll (stock footage), graphics (motion graphics), image (static images)
 
+export type SceneStatus = "todo" | "processing" | "completed" | "failed" | "awaiting_input";
 export type VisualType = "a-roll" | "b-roll" | "graphics" | "image";
 
 export interface Transition {
@@ -91,6 +92,7 @@ export interface Scene {
   scene_type?: string;
   visualType: VisualType;
   visual_type?: VisualType;
+  status: SceneStatus;
   aRoll?: ARoll;
   bRoll?: BRoll;
   graphics?: Graphics;

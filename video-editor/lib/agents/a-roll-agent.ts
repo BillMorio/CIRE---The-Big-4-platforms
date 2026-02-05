@@ -8,7 +8,7 @@ import { jobService } from "../services/api/job-service";
 import * as arollTools from "./tools/simulation/aroll-tools";
 
 export class ARollAgent implements BaseAgent {
-  name = "A-Roll Specialist";
+  name = "A-Roll Agent";
   role = "Responsible for the primary 'talking-head' video segment. Requires trimming audio first, then generating a lip-synced avatar.";
 
   async process(scene: Scene, context: ProjectContext): Promise<AgentResult> {

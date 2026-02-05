@@ -7,6 +7,7 @@ export const useScenes = (projectId: string) => {
     queryKey: ["scenes", projectId],
     queryFn: () => sceneService.getByProjectId(projectId),
     enabled: !!projectId,
+    refetchInterval: 2000, // Poll for live scene status updates
   });
 };
 

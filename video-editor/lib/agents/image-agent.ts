@@ -8,7 +8,7 @@ import { jobService } from "../services/api/job-service";
 import * as imageTools from "./tools/simulation/image-tools";
 
 export class ImageAgent implements BaseAgent {
-  name = "Visualist Agent";
+  name = "Image Agent";
   role = "Orchestrates background graphics, SDXL image generations, and technical UI plates.";
 
   async process(scene: Scene, context: ProjectContext): Promise<AgentResult> {

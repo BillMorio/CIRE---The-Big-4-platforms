@@ -8,7 +8,7 @@ import { jobService } from "../services/api/job-service";
 import * as brollTools from "./tools/production/broll-tools";
 
 export class BRollAgent implements BaseAgent {
-  name = "B-Roll Specialist";
+  name = "B-Roll Agent";
   role = "Specializes in acquiring stock footage and overlaying it on top of the A-Roll timeline.";
 
   async process(scene: Scene, context: ProjectContext): Promise<AgentResult> {

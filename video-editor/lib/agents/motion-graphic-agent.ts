@@ -8,7 +8,7 @@ import { jobService } from "../services/api/job-service";
 import * as motionTools from "./tools/simulation/motion-tools";
 
 export class MotionGraphicAgent implements BaseAgent {
-  name = "Motion Specialist";
+  name = "Motion Graphics Agent";
   role = "Orchestrates motion graphics, animations, and complex video compositing.";
 
   async process(scene: Scene, context: ProjectContext): Promise<AgentResult> {
