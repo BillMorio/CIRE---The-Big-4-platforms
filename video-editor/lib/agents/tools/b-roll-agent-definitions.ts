@@ -46,7 +46,7 @@ export const BROLL_AGENT_TOOLS: ChatCompletionTool[] = [
         properties: {
           videoUrl: { 
             type: "string", 
-            description: "The URL of the video to process (obtained from search)" 
+            description: "The URL of the video to process (obtained from search or trim)" 
           },
           targetDuration: { 
             type: "number", 
@@ -54,6 +54,31 @@ export const BROLL_AGENT_TOOLS: ChatCompletionTool[] = [
           },
         },
         required: ["videoUrl", "targetDuration"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "trim_stock_footage",
+      description: "Surgically cuts a segment of stock footage. Use this if the clip is significantly longer than the scene duration.",
+      parameters: {
+        type: "object",
+        properties: {
+          videoUrl: { 
+            type: "string", 
+            description: "The URL of the video to trim." 
+          },
+          start: { 
+            type: "string", 
+            description: "The start timestamp in HH:MM:SS format (e.g., '00:00:02')" 
+          },
+          duration: { 
+            type: "number", 
+            description: "The length of the segment to extract in seconds." 
+          },
+        },
+        required: ["videoUrl", "start", "duration"],
       },
     },
   },

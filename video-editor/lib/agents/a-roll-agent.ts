@@ -11,6 +11,11 @@ export class ARollAgent implements BaseAgent {
   name = "A-Roll Agent";
   role = "Responsible for the primary 'talking-head' video segment. Requires trimming audio first, then generating a lip-synced avatar.";
 
+  private TOOL_LOG_MAPPING: Record<string, string> = {
+    'trim_audio_segment': 'Trimming audio segment to scene duration',
+    'generate_avatar_lipsync': 'Generating AI avatar lip-sync animation',
+  };
+
   async process(scene: Scene, context: ProjectContext): Promise<AgentResult> {
     const projectId = scene.project_id;
     console.log(`[${this.name}] Starting Production Chain for scene ${scene.index}`);
@@ -88,7 +93,8 @@ export class ARollAgent implements BaseAgent {
               result: { tool: toolName, args }
             });
 
-            await memoryService.update(projectId, { last_log: `${this.name}: Executing ${toolName}...` });
+            const logAction = this.TOOL_LOG_MAPPING[toolName] || `Executing ${toolName}`;
+            await memoryService.update(projectId, { last_log: `${this.name}: ${logAction}...` });
 
             // EXPLICIT TOOL EXECUTION
             let toolResult: any;

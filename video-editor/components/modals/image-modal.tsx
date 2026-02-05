@@ -24,7 +24,8 @@ import {
   Wand2,
   Target,
   Play,
-  Video
+  Video,
+  Clock
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -272,9 +273,15 @@ export function ImageModal({ isOpen, onClose, scene, onUpdate }: ImageModalProps
         <DialogHeader className="p-6 border-b border-border shrink-0">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <DialogTitle className="technical-label text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500" />
-                Image Editor // Scene {scene.index.toString().padStart(2, '0')}
+              <DialogTitle className="technical-label text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
+                  Image Editor // Scene {scene.index.toString().padStart(2, '0')}
+                </div>
+                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-muted/20 rounded-md border border-border/50 text-[10px] technical-label font-black text-green-500">
+                  <Clock className="w-3 h-3" />
+                  {(scene.startTime || 0).toFixed(1)}s - {(scene.endTime || 0).toFixed(1)}s
+                </div>
               </DialogTitle>
               <DialogDescription className="text-[10px] technical-label opacity-60 uppercase">
                 Ken Burns & Image Configuration

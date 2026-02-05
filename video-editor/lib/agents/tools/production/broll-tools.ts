@@ -83,3 +83,53 @@ export async function fit_stock_footage_to_duration(args: FitBrollArgs) {
     };
   }
 }
+
+/**
+ * Surgically trims a stock footage clip using the FFmpeg Playground server.
+ */
+export async function trim_stock_footage(args: { videoUrl: string, start: string, duration: number }) {
+  console.log(`[B-RollTool] Trimming footage ${args.videoUrl} (Start: ${args.start}, Duration: ${args.duration}s)...`);
+
+  try {
+    // 1. Fetch the video file
+    const videoResponse = await fetch(args.videoUrl);
+    if (!videoResponse.ok) throw new Error(`Failed to fetch video from ${args.videoUrl}`);
+    const videoBlob = await videoResponse.blob();
+
+    // 2. Prepare FormData
+    const formData = new FormData();
+    formData.append("file", videoBlob, "stock_footage.mp4");
+    formData.append("start", args.start);
+    formData.append("duration", args.duration.toString());
+
+    // 3. Post to Playground API (/api/trim)
+    const response = await fetch(`${FFMPEG_SERVER}/api/trim`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        status: "failed",
+        error: data.error || "Failed to trim video via playground",
+        details: data.details
+      };
+    }
+
+    console.log(`[B-RollTool] Trim successful: ${data.outputFile}`);
+    
+    return {
+      status: "success",
+      outputUrl: data.publicUrl || `${FFMPEG_SERVER}${data.outputFile}`,
+      message: `Stock footage trimmed to exactly ${args.duration}s starting from ${args.start}.`
+    };
+  } catch (error: any) {
+    console.error("[B-RollTool] Error during production trim:", error);
+    return {
+      status: "failed",
+      error: error.message || "Unknown error during production trim"
+    };
+  }
+}

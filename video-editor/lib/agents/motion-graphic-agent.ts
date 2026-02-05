@@ -11,6 +11,11 @@ export class MotionGraphicAgent implements BaseAgent {
   name = "Motion Graphics Agent";
   role = "Orchestrates motion graphics, animations, and complex video compositing.";
 
+  private TOOL_LOG_MAPPING: Record<string, string> = {
+    'render_motion_sequence': 'Rendering complex motion sequences',
+    'composite_ffmpeg_layer': 'Compositing final video layers and effects',
+  };
+
   async process(scene: Scene, context: ProjectContext): Promise<AgentResult> {
     const projectId = scene.project_id;
     console.log(`[${this.name}] Starting Production Chain for scene ${scene.index}`);
@@ -81,7 +86,8 @@ export class MotionGraphicAgent implements BaseAgent {
               result: { tool: toolName, args }
             });
 
-            await memoryService.update(projectId, { last_log: `${this.name}: Executing ${toolName}...` });
+            const logAction = this.TOOL_LOG_MAPPING[toolName] || `Executing ${toolName}`;
+            await memoryService.update(projectId, { last_log: `${this.name}: ${logAction}...` });
 
             let toolResult: any;
             if (toolName === 'render_motion_sequence') {

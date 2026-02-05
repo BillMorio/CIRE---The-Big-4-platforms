@@ -28,11 +28,11 @@ interface NavSidebarProps {
 
 export function NavSidebar({ activeItem = "studio", isCollapsed = false, onItemClick }: NavSidebarProps) {
   const navItems: NavItem[] = [
-    { id: "studio", label: "Studio", sub: "Primary_Path", icon: <LayoutGrid className="w-4 h-4" /> },
-    { id: "scripts", label: "Scripts", sub: "Source_Data", icon: <FileText className="w-4 h-4" /> },
-    { id: "assets", label: "Assets", sub: "Media_Pool", icon: <FolderOpen className="w-4 h-4" /> },
-    { id: "settings", label: "Settings", sub: "Node_Config", icon: <Settings className="w-4 h-4" /> },
-    { id: "export", label: "Export", sub: "Render_Out", icon: <Download className="w-4 h-4" /> },
+    { id: "studio", label: "Studio", sub: "Primary Workflow", icon: <LayoutGrid className="w-4 h-4" /> },
+    { id: "scripts", label: "Scripts", sub: "Production Drafts", icon: <FileText className="w-4 h-4" /> },
+    { id: "assets", label: "Assets", sub: "Media Library", icon: <FolderOpen className="w-4 h-4" /> },
+    { id: "settings", label: "Settings", sub: "Configuration", icon: <Settings className="w-4 h-4" /> },
+    { id: "export", label: "Export", sub: "Final Render", icon: <Download className="w-4 h-4" /> },
   ];
 
   return (
@@ -52,7 +52,7 @@ export function NavSidebar({ activeItem = "studio", isCollapsed = false, onItemC
         </div>
         {!isCollapsed && (
           <div className="flex flex-col flex-1">
-            <span className="font-bold text-[11px] tracking-[0.05em] uppercase text-foreground leading-none">Studio_Alpha</span>
+            <span className="font-bold text-[11px] tracking-[0.05em] uppercase text-foreground leading-none">Lumina Studio</span>
             <div className="flex items-center gap-1.5 mt-1">
               <span className="w-1 h-1 rounded-full bg-green-500/80 shadow-[0_0_8px_rgba(34,197,94,0.3)]" />
               <span className="text-[7px] technical-label opacity-30 uppercase tracking-widest font-black">Online</span>

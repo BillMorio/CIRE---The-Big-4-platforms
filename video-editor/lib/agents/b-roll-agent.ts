@@ -11,6 +11,12 @@ export class BRollAgent implements BaseAgent {
   name = "B-Roll Agent";
   role = "Specializes in acquiring stock footage and overlaying it on top of the A-Roll timeline.";
 
+  private TOOL_LOG_MAPPING: Record<string, string> = {
+    'search_pexels_library': 'Searching for relevant stock footage on Pexels',
+    'fit_stock_footage_to_duration': 'Conforming stock footage to scene duration',
+    'trim_stock_footage': 'Surgically trimming stock footage segment',
+  };
+
   async process(scene: Scene, context: ProjectContext): Promise<AgentResult> {
     const projectId = scene.project_id;
     console.log(`[${this.name}] Starting Production Chain for scene ${scene.index}`);
@@ -37,22 +43,30 @@ export class BRollAgent implements BaseAgent {
           - Target Duration: ${scene.duration}s
           - Script: "${scene.script}"
           - Director Notes: "${scene.director_notes || "None"}"
+          - Persistent State: ${JSON.stringify(scene.agent_state || {})}
 
-          PRODUCTION WORKFLOW (Reason-Act):
-          1. Execute ONE tool at a time. 
-          2. STEP 1: Search for relevant footage via 'search_pexels_library'. 
-             * STRATEGY: Use the script and director notes to find the most fitting visual.
-             * SELECTION: Our tool will automatically pick the best clip based on duration.
-          3. FEEDBACK: Observe the search result.
-          4. STEP 2: Use 'fit_stock_footage_to_duration' to conform the clip to the exact scene duration.
-             * NOTE: This will warping/adjust the speed of the clip to fit perfectly.
-          5. Respond with final confirmation text when done.` 
+          PRODUCTION WORKFLOW (Acquisition -> Trimming -> Conforming):
+          1. Discovery: Use 'search_pexels_library' to find the best visual match.
+          2. Evaluation: Look at the 'duration' of the found clip.
+          3. Trimming (Conditional): If the clip is significantly longer than ${scene.duration}s (e.g. > 2s gap), use 'trim_stock_footage' to extract a surgical segment first.
+          4. Mandatory Conforming: Finally, use 'fit_stock_footage_to_duration' to ensure a perfect technical fit for the master timeline.
+             * CRITICAL: You MUST call the fitting tool at least once to ensure a perfect match for the ${scene.duration}s scene.
+          5. VERIFICATION: If your state is 'asset_acquired' and the clip is long, TRIM IT. If state is 'asset_trimmed' or the clip is short, FIT IT.
+          6. Respond with final confirmation only AFTER the fitting step is complete. (Step should be 'conforming_complete')` 
         },
         { 
           role: "user", 
           content: "Please execute the B-Roll production sequence." 
         }
       ];
+
+      // Re-hydrate conversation if it's already in progress
+      if (scene.agent_state?.step === 'asset_acquired') {
+        messages.push({
+          role: "assistant",
+          content: `Internal State Recovery: Asset acquired (${scene.agent_state.videoUrl}). Proceeding to mandatory conforming.`
+        });
+      }
 
       let isRunning = true;
       let turnCount = 0;
@@ -63,10 +77,13 @@ export class BRollAgent implements BaseAgent {
       while (isRunning && turnCount < MAX_TURNS) {
         turnCount++;
         
-        // Add Turn Context (Helps AI stay aware of time)
+        // Dynamic turn context based on state
+        const stateSummary = scene.agent_state?.step || 'idle';
         const turnContext = { 
           role: "system" as const, 
-          content: `You are on turn ${turnCount}/${MAX_TURNS}. Please prioritize finalizing the scene.` 
+          content: `Current Internal State: ${stateSummary}. Turn ${turnCount}/${MAX_TURNS}. ` + 
+                   (stateSummary === 'asset_acquired' ? "HINT: If the clip is much longer than the target, call 'trim_stock_footage'. Otherwise, call 'fit_stock_footage_to_duration'." : "") +
+                   (stateSummary === 'asset_trimmed' ? "MANDATORY: You have trimmed the asset. Now call 'fit_stock_footage_to_duration' to finalize the fit." : "")
         };
 
         const response = await openai.chat.completions.create({
@@ -98,39 +115,63 @@ export class BRollAgent implements BaseAgent {
               result: { tool: toolName, args }
             });
 
-            await memoryService.update(projectId, { last_log: `${this.name}: Executing ${toolName}...` });
+            const logAction = this.TOOL_LOG_MAPPING[toolName] || `Executing ${toolName}`;
+            await memoryService.update(projectId, { last_log: `${this.name}: ${logAction}...` });
 
             let toolResult: any;
             if (toolName === 'search_pexels_library') {
-              // Inject targetDuration for local selection logic
               toolResult = await brollTools.search_pexels_library({
                 ...args,
                 targetDuration: scene.duration
               });
 
-              // Update scene with initial search results
-              if (toolResult.status === 'completed') {
+              if (toolResult.status === 'success') {
+                const newState = { 
+                  step: 'asset_acquired', 
+                  videoUrl: toolResult.videoUrl, 
+                  originalDuration: toolResult.duration 
+                };
                 const updatedScene = await sceneService.update(scene.id, {
                   asset_url: toolResult.videoUrl,
                   thumbnail_url: toolResult.thumbnail,
+                  agent_state: newState,
                   payload: { ...scene.payload, ...toolResult }
                 });
-                // Sync local state to prevent data loss in subsequent turns
+                Object.assign(scene, updatedScene);
+              }
+            } else if (toolName === 'trim_stock_footage') {
+              toolResult = await brollTools.trim_stock_footage(args);
+
+              if (toolResult.status === 'success') {
+                const newState = { 
+                  ...scene.agent_state,
+                  step: 'asset_trimmed', 
+                  videoUrl: toolResult.outputUrl 
+                };
+                const updatedScene = await sceneService.update(scene.id, {
+                  asset_url: toolResult.outputUrl, // Advance the raw asset to the trimmed version
+                  agent_state: newState,
+                  payload: { ...scene.payload, ...toolResult }
+                });
                 Object.assign(scene, updatedScene);
               }
             } else if (toolName === 'fit_stock_footage_to_duration') {
               toolResult = await brollTools.fit_stock_footage_to_duration({
-                videoUrl: args.videoUrl,
+                videoUrl: args.videoUrl || scene.asset_url,
                 targetDuration: scene.duration
               });
 
-              // Update scene with final processed video
               if (toolResult.status === 'completed') {
+                const newState = { 
+                  ...scene.agent_state,
+                  step: 'conforming_complete', 
+                  finalUrl: toolResult.outputUrl 
+                };
                 const updatedScene = await sceneService.update(scene.id, {
                   final_video_url: toolResult.outputUrl,
+                  agent_state: newState,
                   payload: { ...scene.payload, ...toolResult }
                 });
-                // Sync local state
                 Object.assign(scene, updatedScene);
               }
             } else {

@@ -80,7 +80,7 @@ export async function search_pexels_library(args: SearchPexelsArgs) {
     console.log(`[PexelsTool] Selected video: ${bestVideo.url} (Duration: ${bestVideo.duration}s)`);
 
     return {
-      status: "completed",
+      status: "success",
       videoUrl: videoFile.link,
       thumbnail: bestVideo.image,
       duration: bestVideo.duration,

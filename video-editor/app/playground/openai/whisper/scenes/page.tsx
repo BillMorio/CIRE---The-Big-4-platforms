@@ -294,10 +294,10 @@ export default function ScenePreviewPage() {
                       <Zap className="w-24 h-24" />
                    </div>
                    <div className="relative z-10 space-y-4">
-                      <Badge className="bg-emerald-500 text-white border-none font-bold text-[8px] uppercase tracking-widest">Autonomous Verified</Badge>
-                      <h3 className="text-xl font-black italic uppercase italic">Master Controller</h3>
+                      <Badge className="bg-emerald-500 text-white border-none font-bold text-[8px] uppercase tracking-widest">Verified Production Logic</Badge>
+                      <h3 className="text-xl font-black italic uppercase italic">Agent Orchestrator</h3>
                       <p className="text-neutral-400 text-[10px] font-medium leading-relaxed uppercase tracking-tight">
-                         Once created, individual agents will take command of each scene according to your storyboard design.
+                         Upon initialization, specialized agents will automate asset generation for each scene.
                       </p>
                    </div>
                 </div>

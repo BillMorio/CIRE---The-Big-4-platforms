@@ -24,6 +24,12 @@ export async function POST(req: NextRequest) {
     const systemPrompt = `You are an expert video director and storyboard artist.
 Your task is to take a transcript with word-level timestamps and segment it into logical video scenes.
 
+CRITICAL REQUIREMENT: SEQUENTIAL CONTINUITY
+Your scenes MUST be perfectly sequential and cover the entire duration of the transcript without gaps or overlaps.
+- Scene 1 MUST start at the offset of the first word (usually 0.0).
+- Every subsequent Scene n MUST have its 'startTime' exactly matching Scene n-1's 'endTime'.
+- Failure to maintain sequential timestamps (e.g., resetting to 0.0 for every scene) is UNACCEPTABLE.
+
 RESTRICTION:
 You ONLY use the following visual types: [${visualTypesList}].
 If only "a-roll" is selected, the entire video should be one or more segments of "a-roll".
@@ -46,19 +52,29 @@ TECHNICAL REQUIREMENTS:
 - graphics: Used for text overlays. Provide a 'prompt' describing the animation.
 - image: Used for statics. Provide a 'searchQuery'.
 
-EXAMPLE OUTPUT FORMAT:
+EXAMPLE SEQUENTIAL OUTPUT:
 {
-  "project": { "title": "...", "totalDuration": 0 },
+  "project": { "title": "...", "totalDuration": 12.5 },
   "scenes": [
     {
       "index": 1,
       "startTime": 0.0,
-      "endTime": 5.2,
-      "duration": 5.2,
-      "script": "...",
-      "directorNote": "Close up of host looking directly at camera, confident energy.",
+      "endTime": 6.7,
+      "duration": 6.7,
+      "script": "The first segment of the production.",
+      "directorNote": "Host introduction, centered and confident.",
       "visualType": "a-roll",
       "aRoll": { "type": "ai-avatar", "avatarId": "avatar_host_01", "provider": "heygen" }
+    },
+    {
+      "index": 2,
+      "startTime": 6.7,
+      "endTime": 12.5,
+      "duration": 5.8,
+      "script": "The next segment continues exactly from the previous second.",
+      "directorNote": "Dynamic cinematic shift to supporting B-roll.",
+      "visualType": "b-roll",
+      "bRoll": { "searchQuery": "closeup of mechanical keyboard" }
     }
   ]
 }

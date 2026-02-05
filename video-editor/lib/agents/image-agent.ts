@@ -11,6 +11,11 @@ export class ImageAgent implements BaseAgent {
   name = "Image Agent";
   role = "Orchestrates background graphics, SDXL image generations, and technical UI plates.";
 
+  private TOOL_LOG_MAPPING: Record<string, string> = {
+    'generate_sdxl_visual': 'Generating high-fidelity AI imagery via SDXL',
+    'apply_text_branding': 'Applying technical branding and overlays',
+  };
+
   async process(scene: Scene, context: ProjectContext): Promise<AgentResult> {
     const projectId = scene.project_id;
     console.log(`[${this.name}] Starting Production Chain for scene ${scene.index}`);
@@ -82,7 +87,8 @@ export class ImageAgent implements BaseAgent {
               result: { tool: toolName, args }
             });
 
-            await memoryService.update(projectId, { last_log: `${this.name}: Executing ${toolName}...` });
+            const logAction = this.TOOL_LOG_MAPPING[toolName] || `Executing ${toolName}`;
+            await memoryService.update(projectId, { last_log: `${this.name}: ${logAction}...` });
 
             let toolResult: any;
             if (toolName === 'generate_sdxl_visual') {

@@ -21,6 +21,7 @@ export interface Scene {
   asset_url?: string;
   thumbnail_url?: string;
   payload?: any;
+  agent_state?: any;
   director_notes?: string;
   fitting_strategy?: string;
   transition?: Transition;

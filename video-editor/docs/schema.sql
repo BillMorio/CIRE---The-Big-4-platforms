@@ -42,6 +42,7 @@ CREATE TABLE scenes (
     final_video_url TEXT, -- Processed/Trimmed link
     thumbnail_url TEXT, -- For UI preview
     payload JSONB DEFAULT '{}'::jsonb, -- Specialized params (Prompts, search queries, etc.)
+    agent_state JSONB DEFAULT '{}'::jsonb, -- Persistent state for AI agent flows (e.g., { "step": "asset_acquired" })
 
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now(),

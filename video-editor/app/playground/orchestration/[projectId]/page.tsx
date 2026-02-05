@@ -16,7 +16,9 @@ import {
   Image as ImageIcon,
   Zap,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Layers,
+  Download
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { NavSidebar } from "@/components/panels/nav-sidebar";
@@ -54,11 +56,15 @@ export default function DynamicStudioPage() {
 
   const [selectedSceneIndex, setSelectedSceneIndex] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSimulating, setIsSimulating] = useState(false);
+  const [isProducing, setIsProducing] = useState(false);
+  const [isStitching, setIsStitching] = useState(false);
+  const [masterVideoUrl, setMasterVideoUrl] = useState<string | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [asideWidth, setAsideWidth] = useState(320);
   const [isResizing, setIsResizing] = useState(false);
-  const [localLogs, setLocalLogs] = useState<{msg: string, type: 'system' | 'orchestrator' | 'agent' | 'success' | 'error'}[]>([]);
+  const [localLogs, setLocalLogs] = useState<{ msg: string; type: string }[]>([
+    { msg: "System: Production environment initialized.", type: 'system' }
+  ]);
   const logEndRef = useRef<HTMLDivElement>(null);
 
   // Resize handling logic
@@ -119,12 +125,12 @@ export default function DynamicStudioPage() {
     await updateAgentStateMutation.mutateAsync({ last_log: msg });
   };
 
-  const startSimulation = async () => {
-    if (!dbScenes) return;
-    setIsSimulating(true);
+  const startProduction = async () => {
+    if (isProducing) return;
+    setIsProducing(true);
     
     await updateAgentStateMutation.mutateAsync({ workflow_status: 'processing' });
-    await addLog("Orchestrator: Simulation Started. Taking control of the orchestration pipeline.", 'orchestrator');
+    await addLog("Orchestrator: Production Started. Taking control of the orchestration pipeline.", 'orchestrator');
     
     // Use the Server Action
     const { processNextScene } = await import("@/app/actions/orchestrator");
@@ -155,15 +161,45 @@ export default function DynamicStudioPage() {
         }
     }
 
-    setIsSimulating(false);
+    setIsProducing(false);
   };
+
+  const handleStitch = async () => {
+    if (isStitching) return;
+    
+    setIsStitching(true);
+    await addLog("Production Orchestrator: Initializing final high-fidelity stitching sequence...", 'orchestrator');
+
+    try {
+      const response = await fetch(`/api/projects/${projectId}/stitch`, {
+        method: 'POST'
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Stitching failed");
+      }
+
+      const data = await response.json();
+      setMasterVideoUrl(data.publicUrl);
+      
+      await addLog("✅ Production Orchestrator: Master production assembled successfully! Final render is ready for review.", 'success');
+
+    } catch (err: any) {
+      console.error("Stitching failed:", err);
+      await addLog(`❌ Error: Final assembly failed - ${err.message}`, 'error');
+    } finally {
+      setIsStitching(false);
+    }
+  };
+
   const handleReset = async () => {
-    if (confirm("Reset simulation state? This will wipe progress in the database.")) {
-        setIsSimulating(false);
-        setLocalLogs([{ msg: "System: Simulation reset by user. Memory cleared.", type: 'system' }]);
+    if (confirm("Reset production state? This will wipe progress in the database.")) {
+        setIsProducing(false);
+        setLocalLogs([{ msg: "System: Production reset by user. Memory cleared.", type: 'system' }]);
         
-        const { resetProjectSimulation } = await import("@/app/actions/orchestrator");
-        await resetProjectSimulation(projectId);
+        const { resetProjectProduction } = await import("@/app/actions/orchestrator");
+        await resetProjectProduction(projectId);
     }
   };
 
@@ -241,7 +277,7 @@ export default function DynamicStudioPage() {
               </div>
               <div className="flex flex-col">
                 <h1 className="text-sm font-bold text-foreground tracking-tight line-clamp-1">{project?.title || "Loading..."}</h1>
-                <p className="text-[9px] technical-label text-muted-foreground uppercase tracking-[0.2em] opacity-40">System_Node_{projectId.slice(0, 4)}</p>
+                <p className="text-[9px] technical-label text-muted-foreground uppercase tracking-[0.2em] opacity-40">Production Node {projectId.slice(0, 4)}</p>
               </div>
             </div>
           </div>
@@ -251,7 +287,7 @@ export default function DynamicStudioPage() {
               <ThemeToggle />
               <button 
                   onClick={handleReset}
-                  disabled={isSimulating}
+                  disabled={isProducing}
                   className="p-2 rounded-lg hover:bg-muted text-muted-foreground transition-all disabled:opacity-20 hover:text-foreground"
                   title="Reset Database State"
               >
@@ -260,18 +296,36 @@ export default function DynamicStudioPage() {
             </div>
             <div className="w-px h-6 bg-border/40 mx-1" />
             <button 
-                onClick={startSimulation}
-                disabled={isSimulating || agentMemory?.workflow_status === 'completed'}
+                onClick={startProduction}
+                disabled={isProducing || agentMemory?.workflow_status === 'completed'}
                 className={cn(
                     "flex items-center gap-2.5 px-5 py-2.5 rounded-xl technical-label text-[10px] font-bold uppercase tracking-[0.15em] transition-all",
-                    isSimulating 
+                    isProducing 
                       ? "bg-primary/10 text-primary border border-primary/30 animate-pulse" 
                       : (agentMemory?.workflow_status === 'completed' ? "bg-muted text-muted-foreground opacity-50 cursor-not-allowed" : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow active:scale-95")
                 )}
             >
-                {isSimulating ? <Clock className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 fill-current" />}
-                {isSimulating ? "SIMULATING..." : (agentMemory?.workflow_status === 'completed' ? "COMPLETED" : "START SIMULATION")}
+                {isProducing ? <Clock className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 fill-current" />}
+                {isProducing ? "PRODUCING..." : (agentMemory?.workflow_status === 'completed' ? "COMPLETED" : "START PRODUCTION")}
             </button>
+
+            {agentMemory?.workflow_status === 'completed' && (
+              <button 
+                  onClick={masterVideoUrl ? () => window.open(masterVideoUrl, '_blank') : handleStitch}
+                  disabled={isStitching}
+                  className={cn(
+                      "flex items-center gap-2.5 px-5 py-2.5 rounded-xl technical-label text-[10px] font-bold uppercase tracking-[0.15em] transition-all",
+                      isStitching
+                        ? "bg-amber-500/10 text-amber-500 border border-amber-500/30 animate-pulse"
+                        : (masterVideoUrl 
+                            ? "bg-green-600 text-white hover:bg-green-500 shadow-glow shadow-green-500/20 active:scale-95" 
+                            : "bg-amber-500 text-white hover:bg-amber-400 shadow-glow shadow-amber-500/20 active:scale-95")
+                  )}
+              >
+                  {isStitching ? <Clock className="w-4 h-4 animate-spin" /> : (masterVideoUrl ? <Download className="w-4 h-4" /> : <Layers className="w-4 h-4" />)}
+                  {isStitching ? "ASSEMBLING..." : (masterVideoUrl ? "VIEW MASTER" : "EXPORT MASTER")}
+              </button>
+            )}
           </div>
         </header>
 
@@ -288,7 +342,7 @@ export default function DynamicStudioPage() {
                     </span>
                     <span className="w-1 h-1 rounded-full bg-border" />
                     <span className="text-[9px] technical-label opacity-30 uppercase tracking-[0.3em]">
-                      {project?.total_duration}s Studio Logic
+                      {project?.total_duration}s Production Duration
                     </span>
                   </div>
                 </div>
@@ -309,7 +363,7 @@ export default function DynamicStudioPage() {
               <div 
                 className="grid gap-8 pb-32 px-1 max-w-7xl"
                 style={{ 
-                    gridTemplateColumns: `repeat(auto-fill, minmax(260px, 1fr))` 
+                    gridTemplateColumns: `repeat(auto-fill, minmax(340px, 1fr))` 
                 }}
               >
                 {mappedScenes.map((scene, i) => (
@@ -348,17 +402,17 @@ export default function DynamicStudioPage() {
                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
                       <Terminal className="w-4 h-4 text-primary" />
                     </div>
-                    <span className="text-[10px] technical-label font-black uppercase tracking-[0.2em] text-foreground/60">System_Activity</span>
+                    <span className="text-[10px] technical-label font-black uppercase tracking-[0.2em] text-foreground/60">Production Status</span>
                 </div>
                 <div className="flex items-center gap-2 bg-muted/20 px-3 py-1.5 rounded-full border border-border/40">
-                    <span className={cn("w-1.5 h-1.5 rounded-full", isSimulating ? "bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.4)]" : "bg-muted")} />
+                    <span className={cn("w-1.5 h-1.5 rounded-full", isProducing ? "bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.4)]" : "bg-muted")} />
                     <span className="text-[8px] technical-label opacity-40 uppercase font-black tracking-[0.1em]">
-                        {isSimulating ? "LIVE" : "IDLE"}
+                        {isProducing ? "LIVE" : "IDLE"}
                     </span>
                 </div>
              </div>
 
-             <div className="flex-1 overflow-y-auto pt-24 pb-12 p-6 flex flex-col gap-5 scrollbar-hide">
+             <div className="flex-1 overflow-y-auto pt-24 pb-12 px-6 flex flex-col gap-4 scrollbar-hide">
                 {localLogs.map((log, i) => {
                     const isLast = i === localLogs.length - 1;
                     const agentName = log.msg.split(':')[0];
@@ -368,46 +422,36 @@ export default function DynamicStudioPage() {
                         <div 
                           key={i} 
                           className={cn(
-                              "group flex items-start gap-4 animate-[thought-stream-in_0.6s_ease-out_forwards]",
-                              !isLast && "opacity-40 grayscale-[0.5] scale-[0.98] origin-left transition-all duration-700"
+                              "flex items-start gap-4 animate-in fade-in slide-in-from-bottom-2 duration-500",
+                              !isLast && "opacity-60"
                           )}
-                          style={{ animationDelay: `${(localLogs.length - i) * 50}ms` }}
                         >
-                            {/* Minimalist Glowing Indicator */}
-                            <div className="mt-1.5 shrink-0 relative">
+                            {/* Standard Professional Indicator */}
+                            <div className="mt-1.5 shrink-0 flex items-center justify-center">
                                 <div className={cn(
-                                    "w-1.5 h-1.5 rounded-full z-10 relative shadow-[0_0_8px]",
-                                    log.type === 'orchestrator' ? "bg-primary shadow-primary/50" : 
-                                    log.type === 'agent' ? "bg-amber-500 shadow-amber-500/50" : 
-                                    log.type === 'success' ? "bg-green-500 shadow-green-500/50" : "bg-muted-foreground/40 shadow-transparent"
+                                    "w-2 h-2 rounded-full",
+                                    log.type === 'orchestrator' ? "bg-primary" : 
+                                    log.type === 'agent' ? "bg-amber-500" : 
+                                    log.type === 'success' ? "bg-green-500" : "bg-muted-foreground/30"
                                 )} />
-                                {isLast && isSimulating && (
-                                    <div className="absolute inset-0 w-1.5 h-1.5 bg-current rounded-full animate-ping opacity-40" />
-                                )}
                             </div>
 
                             <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
                                     <span className={cn(
-                                        "text-[8px] technical-label font-bold uppercase tracking-[0.2em] whitespace-nowrap",
-                                        log.type === 'orchestrator' ? "text-primary/70" : 
-                                        log.type === 'agent' ? "text-amber-500/70" : 
-                                        log.type === 'success' ? "text-green-500/70" : "text-muted-foreground/40"
+                                        "text-[9px] technical-label font-bold uppercase tracking-widest",
+                                        log.type === 'orchestrator' ? "text-primary/90" : 
+                                        log.type === 'agent' ? "text-amber-500/90" : 
+                                        "text-muted-foreground/50"
                                     )}>
                                         {agentName || log.type}
                                     </span>
-                                    <div className="h-[1px] flex-1 bg-gradient-to-r from-border/20 via-border/5 to-transparent" />
+                                    <div className="h-px flex-1 bg-border/20" />
                                 </div>
                                 
-                                <div className="relative overflow-hidden group/text">
-                                    <p className={cn(
-                                        "text-[10px] font-medium tracking-tight whitespace-nowrap",
-                                        isLast && isSimulating ? "animate-[scroll_15s_linear_infinite]" : "truncate"
-                                    )}>
-                                        {cleanMsg}
-                                        {isLast && isSimulating && <span className="ml-12 opacity-30 text-[8px] uppercase tracking-widest">{cleanMsg}</span>}
-                                    </p>
-                                </div>
+                                <p className="text-[11px] font-medium leading-relaxed text-foreground/80 break-words">
+                                    {cleanMsg}
+                                </p>
                             </div>
                         </div>
                     );
@@ -417,17 +461,17 @@ export default function DynamicStudioPage() {
 
              <div className="p-4 border-t border-border/50 bg-muted/10 flex items-center justify-between gap-6">
                 <div className="flex flex-col gap-1">
-                    <span className="text-[7px] technical-label opacity-30 uppercase tracking-[0.4em] font-black">LOG_ID</span>
+                    <span className="text-[7px] technical-label opacity-30 uppercase tracking-[0.4em] font-black">EVENT_ID</span>
                     <div className="flex items-center gap-1.5">
                       <div className="w-1 h-1 rounded-full bg-primary/40 shrink-0" />
                       <span className="text-[9px] technical-label font-bold text-primary/70 truncate max-w-[140px] leading-none uppercase tracking-tighter">
-                          {agentMemory?.active_agents && agentMemory.active_agents.length > 0 ? agentMemory.active_agents[0] : "CORE_STANDBY"}
+                          {agentMemory?.active_agents && agentMemory.active_agents.length > 0 ? agentMemory.active_agents[0] : "ENGINE STANDBY"}
                       </span>
                     </div>
                 </div>
-                <div className="text-right">
-                    <span className="text-[7px] technical-label opacity-30 uppercase tracking-[0.4em] font-black">Cluster_V3</span>
-                    <p className="text-[9px] technical-label font-bold uppercase text-green-600/60 leading-none mt-1">Lumina_Node</p>
+                 <div className="text-right">
+                    <span className="text-[7px] technical-label opacity-30 uppercase tracking-[0.4em] font-black">Orchestration Engine</span>
+                    <p className="text-[9px] technical-label font-bold uppercase text-green-600/60 leading-none mt-1">Agent Pipeline</p>
                 </div>
              </div>
           </aside>

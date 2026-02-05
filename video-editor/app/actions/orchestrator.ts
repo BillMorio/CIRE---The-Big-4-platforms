@@ -28,7 +28,7 @@ export async function processNextScene(projectId: string): Promise<AgentResult> 
 import { memoryService } from "@/lib/services/api/memory-service";
 import { sceneService } from "@/lib/services/api/scene-service";
 
-export async function resetProjectSimulation(projectId: string) {
+export async function resetProjectProduction(projectId: string) {
     await memoryService.reset(projectId);
     const scenes = await sceneService.getByProjectId(projectId);
     for (const s of scenes) {
