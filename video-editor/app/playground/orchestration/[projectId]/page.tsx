@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, use } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { 
   Play, 
   RotateCcw, 
@@ -8,7 +8,9 @@ import {
   Terminal,
   Cpu,
   Plus,
-  LayoutGrid
+  LayoutGrid,
+  PanelLeft,
+  Loader2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { NavSidebar } from "@/components/panels/nav-sidebar";
@@ -37,8 +39,48 @@ export default function DynamicStudioPage() {
   const [selectedSceneIndex, setSelectedSceneIndex] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [asideWidth, setAsideWidth] = useState(320);
+  const [isResizing, setIsResizing] = useState(false);
   const [localLogs, setLocalLogs] = useState<{msg: string, type: 'system' | 'orchestrator' | 'agent' | 'success' | 'error'}[]>([]);
   const logEndRef = useRef<HTMLDivElement>(null);
+
+  // Resize handling logic
+  const startResizing = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  const resize = useCallback((e: MouseEvent) => {
+    if (isResizing) {
+      const newWidth = window.innerWidth - e.clientX;
+      if (newWidth >= 200 && newWidth <= 600) {
+        setAsideWidth(newWidth);
+      }
+    }
+  }, [isResizing]);
+
+  useEffect(() => {
+    if (isResizing) {
+      window.addEventListener('mousemove', resize);
+      window.addEventListener('mouseup', stopResizing);
+    } else {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    }
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    };
+  }, [isResizing, resize, stopResizing]);
+
+  const scrollToBottom = () => {
+    logEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   // Sync internal logs with DB logs
   useEffect(() => {
@@ -147,74 +189,113 @@ export default function DynamicStudioPage() {
   }
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden font-sans">
-      <NavSidebar activeItem="studio" />
+    <div className="flex h-screen bg-background overflow-hidden font-sans relative">
+      {/* Background Depth Layer - Minimalist soft glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,_rgba(var(--primary-rgb),0.015)_0%,_transparent_60%),radial-gradient(circle_at_70%_80%,_rgba(var(--primary-rgb),0.01)_0%,_transparent_60%)] pointer-events-none" />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <NavSidebar
+        activeItem="studio"
+        isCollapsed={isSidebarCollapsed}
+      />
+
+      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         
-        <header className="flex items-center justify-between px-6 py-4 border-b border-border bg-background/80 backdrop-blur-sm shrink-0">
-          <div className="flex items-center gap-4">
-            <div className="w-8 h-8 rounded-md bg-primary/20 flex items-center justify-center">
-              <LayoutGrid className="w-4 h-4 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-sm font-bold text-foreground">🎬 {project?.title || "Loading Project..."}</h1>
-              <p className="text-[10px] technical-label text-muted-foreground uppercase tracking-wider">Project ID: {projectId.slice(0, 8)}</p>
+        {/* Header - Absolute positioning with premium glassmorphism */}
+        <header className="absolute top-0 left-0 right-0 h-20 flex items-center justify-between px-8 z-50 glass-premium">
+          <div className="flex items-center gap-6">
+            {/* Sidebar Toggle - High visibility, standard pro-tool pattern */}
+            <button
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              className={cn(
+                "p-2.5 rounded-xl border transition-all flex items-center justify-center hover:scale-105 active:scale-95 group",
+                isSidebarCollapsed
+                  ? "bg-primary text-primary-foreground border-primary shadow-glow shadow-primary/20"
+                  : "bg-muted/40 border-border/60 text-foreground hover:bg-muted/60"
+              )}
+              title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+            >
+              <PanelLeft className={cn("w-5 h-5 transition-transform", isSidebarCollapsed && "rotate-180")} />
+            </button>
+
+            <div className="w-px h-6 bg-border/40 mx-1" />
+
+            <div className="flex items-center gap-4">
+              <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center border border-primary/10">
+                <span className="text-[14px]">🎬</span>
+              </div>
+              <div className="flex flex-col">
+                <h1 className="text-sm font-bold text-foreground tracking-tight line-clamp-1">{project?.title || "Loading..."}</h1>
+                <p className="text-[9px] technical-label text-muted-foreground uppercase tracking-[0.2em] opacity-40">System_Node_{projectId.slice(0, 4)}</p>
+              </div>
             </div>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <button 
-                onClick={handleReset}
-                disabled={isSimulating}
-                className="p-1.5 rounded-md hover:bg-muted text-muted-foreground transition-all disabled:opacity-20"
-                title="Reset Database State"
-            >
-                <RotateCcw className="w-4 h-4" />
-            </button>
-            <div className="w-px h-6 bg-border mx-1" />
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 bg-muted/20 p-1 rounded-xl border border-border/40">
+              <ThemeToggle />
+              <button 
+                  onClick={handleReset}
+                  disabled={isSimulating}
+                  className="p-2 rounded-lg hover:bg-muted text-muted-foreground transition-all disabled:opacity-20 hover:text-foreground"
+                  title="Reset Database State"
+              >
+                  <RotateCcw className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="w-px h-6 bg-border/40 mx-1" />
             <button 
                 onClick={startSimulation}
                 disabled={isSimulating || agentMemory?.workflow_status === 'completed'}
                 className={cn(
-                    "flex items-center gap-2 px-4 py-2 rounded-md technical-label text-[10px] font-bold uppercase tracking-widest transition-all",
+                    "flex items-center gap-2.5 px-5 py-2.5 rounded-xl technical-label text-[10px] font-bold uppercase tracking-[0.15em] transition-all",
                     isSimulating 
-                      ? "bg-primary/20 text-primary border border-primary/30" 
-                      : (agentMemory?.workflow_status === 'completed' ? "bg-muted text-muted-foreground opacity-50 cursor-not-allowed" : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow")
+                      ? "bg-primary/10 text-primary border border-primary/30 animate-pulse" 
+                      : (agentMemory?.workflow_status === 'completed' ? "bg-muted text-muted-foreground opacity-50 cursor-not-allowed" : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow active:scale-95")
                 )}
             >
-                {isSimulating ? <Clock className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+                {isSimulating ? <Clock className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 fill-current" />}
                 {isSimulating ? "SIMULATING..." : (agentMemory?.workflow_status === 'completed' ? "COMPLETED" : "START SIMULATION")}
             </button>
           </div>
         </header>
 
         <div className="flex-1 flex overflow-hidden">
-          <main className="flex-1 overflow-auto p-6 md:p-8 scrollbar-hide bg-muted/5">
+          <main className="flex-1 overflow-auto p-6 md:p-8 pt-24 md:pt-28 scrollbar-hide">
             <div className="max-w-6xl mx-auto space-y-8">
               
-              <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-border pb-6 gap-4">
-                <div>
-                  <h1 className="text-2xl font-bold tracking-tight">Storyboard Canvas</h1>
-                  <p className="text-[10px] technical-label opacity-40 uppercase tracking-widest mt-1">
-                    Orchestration Status: <span className="text-primary">{agentMemory?.workflow_status.toUpperCase()}</span> // {project?.total_duration}s total
-                  </p>
+              <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-border/40 pb-6 gap-6">
+                <div className="space-y-1.5">
+                  <h1 className="text-2xl font-black tracking-tighter bg-gradient-to-br from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent italic">Storyboard Canvas</h1>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[9px] technical-label opacity-30 uppercase tracking-[0.3em]">
+                      Status: <span className="text-primary font-black">{agentMemory?.workflow_status.toUpperCase()}</span>
+                    </span>
+                    <span className="w-1 h-1 rounded-full bg-border" />
+                    <span className="text-[9px] technical-label opacity-30 uppercase tracking-[0.3em]">
+                      {project?.total_duration}s Studio Logic
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Badge variant="outline" className="text-[10px] technical-label font-bold py-1.5 px-4">
+                <div className="flex items-center gap-2.5">
+                  <Badge variant="outline" className="text-[9px] technical-label font-bold py-1.5 px-4 rounded-lg bg-background/40 backdrop-blur-sm border-border/40">
                     {mappedScenes.length} SCENES
                   </Badge>
-                  <Badge variant="outline" className="text-[10px] technical-label font-bold py-1.5 px-4 text-green-500 border-green-500/30">
+                  <Badge variant="outline" className="text-[9px] technical-label font-bold py-1.5 px-4 rounded-lg bg-green-500/5 text-green-600 border-green-500/10">
                     {agentMemory?.completed_count || 0} READY
                   </Badge>
-                  <Badge variant="outline" className="text-[10px] technical-label font-bold py-1.5 px-4 text-amber-500 border-amber-500/30">
+                  <Badge variant="outline" className="text-[9px] technical-label font-bold py-1.5 px-4 rounded-lg bg-amber-500/5 text-amber-600 border-amber-500/10">
                     {mappedScenes.length - (agentMemory?.completed_count || 0)} PENDING
                   </Badge>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20">
+              {/* Fluid Scene Grid: Auto-fills columns based on available width, preventing squeezing */}
+              <div 
+                className="grid gap-8 pb-32 px-1 max-w-7xl"
+                style={{ 
+                    gridTemplateColumns: `repeat(auto-fill, minmax(260px, 1fr))` 
+                }}
+              >
                 {mappedScenes.map((scene, i) => (
                   <SceneCard 
                     key={scene.id} 
@@ -231,55 +312,74 @@ export default function DynamicStudioPage() {
             </div>
           </main>
 
-          <aside className="w-[420px] border-l border-border bg-card/50 flex flex-col shrink-0 backdrop-blur-md">
-             <div className="h-14 border-b border-border flex items-center justify-between px-6 bg-muted/10">
-                <div className="flex items-center gap-2">
-                    <Terminal className="w-4 h-4 text-primary" />
-                    <span className="text-[10px] technical-label font-bold uppercase tracking-widest">Agent Activity Log</span>
+          {/* Activity Log - Resizable width, neutral background for professional feel */}
+          <div 
+            onMouseDown={startResizing}
+            className={cn(
+                "w-1.5 h-full cursor-col-resize hover:bg-primary/20 transition-colors z-30 relative shrink-0",
+                isResizing && "bg-primary/40"
+            )}
+          >
+            <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-border/50" />
+          </div>
+
+          <aside 
+            style={{ width: `${asideWidth}px` }}
+            className="border-l border-border/50 bg-background flex flex-col shrink-0 relative overflow-hidden"
+          >
+             <div className="absolute top-0 left-0 right-0 h-20 flex items-center justify-between px-6 z-20 glass-premium">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+                      <Terminal className="w-4 h-4 text-primary" />
+                    </div>
+                    <span className="text-[10px] technical-label font-black uppercase tracking-[0.2em] text-foreground/60">System_Activity</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                    <span className={cn("w-1.5 h-1.5 rounded-full", isSimulating ? "bg-green-500 animate-pulse" : "bg-muted")} />
-                    <span className="text-[9px] technical-label opacity-40 uppercase font-bold tracking-widest">
-                        {isSimulating ? "LIVE" : "STANDBY"}
+                <div className="flex items-center gap-2 bg-muted/20 px-3 py-1.5 rounded-full border border-border/40">
+                    <span className={cn("w-1.5 h-1.5 rounded-full", isSimulating ? "bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.4)]" : "bg-muted")} />
+                    <span className="text-[8px] technical-label opacity-40 uppercase font-black tracking-[0.1em]">
+                        {isSimulating ? "LIVE" : "IDLE"}
                     </span>
                 </div>
              </div>
 
-             <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4 font-mono text-[11px] leading-relaxed scrollbar-hide bg-muted/5">
+             <div className="flex-1 overflow-y-auto pt-24 p-6 flex flex-col gap-6 font-mono text-[10px] leading-relaxed scrollbar-hide">
                 {localLogs.map((log, i) => (
                     <div key={i} className={cn(
                         "flex gap-4 animate-in fade-in slide-in-from-right-3 duration-500",
-                        log.type === 'success' ? "text-green-400" : log.type === 'orchestrator' ? "text-primary" : log.type === 'agent' ? "text-amber-400/80" : "text-muted-foreground/60"
+                        log.type === 'success' ? "text-green-600 dark:text-green-400" : log.type === 'orchestrator' ? "text-primary" : log.type === 'agent' ? "text-amber-600 dark:text-amber-500" : "text-muted-foreground/30"
                     )}>
-                        <span className="opacity-10 shrink-0 select-none">{(i+1).toString().padStart(2, '0')}</span>
-                        <div className="flex flex-col gap-1.5">
+                        <span className="text-[8px] opacity-10 shrink-0 select-none font-bold mt-0.5">{(i+1).toString().padStart(2, '0')}</span>
+                        <div className="flex flex-col gap-2 flex-1">
                             <div className="flex items-center gap-2">
                                 <span className={cn(
-                                    "px-1.5 py-0.5 rounded-[4px] text-[8px] font-bold uppercase tracking-tighter w-fit border",
-                                    log.type === 'orchestrator' ? "bg-primary/20 text-primary border-primary/20" : 
-                                    log.type === 'agent' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" : 
-                                    log.type === 'success' ? "bg-green-500/10 text-green-500 border-green-500/20" : "bg-muted text-muted-foreground/50 border-border"
+                                    "px-2 py-0.5 rounded-md text-[7px] font-black uppercase tracking-widest w-fit border shadow-sm",
+                                    log.type === 'orchestrator' ? "bg-primary/10 text-primary border-primary/20" : 
+                                    log.type === 'agent' ? "bg-amber-500/10 text-amber-600 border-amber-500/20" : 
+                                    log.type === 'success' ? "bg-green-500/10 text-green-600 border-green-500/20" : "bg-muted/40 text-muted-foreground/50 border-border/40"
                                 )}>
                                     {log.type}
                                 </span>
                             </div>
-                            <p className="text-[11px]">{log.msg}</p>
+                            <p className="text-[10px] leading-relaxed font-semibold tracking-tight whitespace-pre-wrap">{log.msg}</p>
                         </div>
                     </div>
                 ))}
                 <div ref={logEndRef} />
              </div>
 
-             <div className="p-4 border-t border-border bg-background/50 flex items-center justify-between gap-4">
+             <div className="p-4 border-t border-border/50 bg-muted/10 flex items-center justify-between gap-6">
                 <div className="flex flex-col gap-1">
-                    <span className="text-[8px] technical-label opacity-30 uppercase tracking-[0.2em]">Active Agent</span>
-                    <span className="text-[10px] technical-label font-bold text-primary truncate max-w-[200px]">
-                        {agentMemory?.active_agents && agentMemory.active_agents.length > 0 ? agentMemory.active_agents[0] : "IDLE"}
-                    </span>
+                    <span className="text-[7px] technical-label opacity-30 uppercase tracking-[0.4em] font-black">LOG_ID</span>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-1 h-1 rounded-full bg-primary/40 shrink-0" />
+                      <span className="text-[9px] technical-label font-bold text-primary/70 truncate max-w-[140px] leading-none uppercase tracking-tighter">
+                          {agentMemory?.active_agents && agentMemory.active_agents.length > 0 ? agentMemory.active_agents[0] : "CORE_STANDBY"}
+                      </span>
+                    </div>
                 </div>
                 <div className="text-right">
-                    <span className="text-[8px] technical-label opacity-30 uppercase tracking-[0.2em]">System</span>
-                    <p className="text-[10px] technical-label font-bold uppercase text-green-500/80">Active Memory</p>
+                    <span className="text-[7px] technical-label opacity-30 uppercase tracking-[0.4em] font-black">Cluster_V3</span>
+                    <p className="text-[9px] technical-label font-bold uppercase text-green-600/60 leading-none mt-1">Lumina_Node</p>
                 </div>
              </div>
           </aside>
@@ -304,25 +404,5 @@ export default function DynamicStudioPage() {
         .shadow-glow { box-shadow: 0 0 20px -5px rgba(var(--primary), 0.3); }
       `}</style>
     </div>
-  );
-}
-
-// Minimal loader component for inner logic
-function Loader2(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-    </svg>
   );
 }

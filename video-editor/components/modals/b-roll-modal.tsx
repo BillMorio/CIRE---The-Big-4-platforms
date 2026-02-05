@@ -21,10 +21,11 @@ import {
   Save,
   Search,
   Play,
+  Pause,
   Gauge,
   Sparkles
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 interface BRollModalProps {
@@ -42,8 +43,44 @@ export function BRollModal({ isOpen, onClose, scene, onUpdate }: BRollModalProps
   const [endZoom, setEndZoom] = useState(1.3);
   const [searchQuery, setSearchQuery] = useState(scene.bRoll?.searchQuery || "");
   const [directorNote, setDirectorNote] = useState(scene.directorNote || "");
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [videoDuration, setVideoDuration] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const bRoll = scene.bRoll;
+
+  const togglePlayback = () => {
+    if (!videoRef.current) return;
+    if (isPlaying) {
+      videoRef.current.pause();
+    } else {
+      videoRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      setCurrentTime(videoRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      setVideoDuration(videoRef.current.duration);
+    }
+  };
+
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    if (!videoRef.current || videoDuration === 0) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const seekTime = (x / rect.width) * videoDuration;
+    videoRef.current.currentTime = seekTime;
+    setCurrentTime(seekTime);
+  };
 
   const handleSave = () => {
     onUpdate({
@@ -59,15 +96,22 @@ export function BRollModal({ isOpen, onClose, scene, onUpdate }: BRollModalProps
   const leftPanel = (
     <div className="p-6 space-y-6">
       {/* Preview */}
-      <div className="aspect-[16/10] bg-muted/10 border border-border rounded-lg flex flex-col items-center justify-center relative overflow-hidden group">
+      <div 
+        className="aspect-[16/10] bg-muted/10 border border-border rounded-lg flex flex-col items-center justify-center relative overflow-hidden group cursor-pointer"
+        onClick={togglePlayback}
+      >
         {(scene.final_video_url || scene.asset_url) ? (
           <video 
+            ref={videoRef}
             src={scene.final_video_url || scene.asset_url}
             className="absolute inset-0 w-full h-full object-cover"
-            autoPlay
             muted
             loop
             playsInline
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onTimeUpdate={handleTimeUpdate}
+            onLoadedMetadata={handleLoadedMetadata}
           />
         ) : (
           <>
@@ -78,23 +122,75 @@ export function BRollModal({ isOpen, onClose, scene, onUpdate }: BRollModalProps
           </>
         )}
         
-        {/* Play Icon Overlay */}
+
+        {/* Progress Bar (Full Width, pinned to top of control bar or just above) */}
         {(scene.final_video_url || scene.asset_url) && (
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-            <div className="w-12 h-12 rounded-full bg-primary/20 backdrop-blur-md flex items-center justify-center border border-primary/30">
-              <Play className="w-6 h-6 text-primary fill-current" />
+          <div 
+            className={cn(
+              "absolute inset-x-0 bottom-0 h-1.5 bg-white/10 backdrop-blur-sm cursor-range-track z-40 transition-opacity",
+              isPlaying ? "opacity-0 group-hover:opacity-100" : "opacity-100"
+            )}
+            onClick={handleSeek}
+          >
+            <div 
+              className="h-full bg-primary shadow-glow transition-all duration-100 relative"
+              style={{ width: `${(currentTime / (videoDuration || 1)) * 100}%` }}
+            >
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-primary border-2 border-white shadow-lg pointer-events-none" />
             </div>
           </div>
         )}
 
-        <div className="absolute bottom-3 left-3 flex gap-2">
-          <Badge variant="outline" className="text-[8px] bg-background/60">
-            Source: {bRoll?.sourceDuration?.toFixed(1) || "?"}s
-          </Badge>
-          <Badge variant="outline" className="text-[8px] bg-background/60 text-primary">
-            Target: {scene.duration.toFixed(1)}s
-          </Badge>
-        </div>
+        {/* Media Player Control Bar */}
+        {(scene.final_video_url || scene.asset_url) && (
+          <div className={cn(
+            "absolute inset-x-0 bottom-0 py-3 px-4 flex items-center gap-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent transition-opacity z-30",
+            isPlaying ? "opacity-0 group-hover:opacity-100" : "opacity-100"
+          )}>
+            <button 
+              onClick={(e) => { e.stopPropagation(); togglePlayback(); }}
+              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-xl flex items-center justify-center border border-white/20 transition-all active:scale-95 shadow-[0_0_20px_rgba(0,0,0,0.4)] group/play"
+            >
+              {isPlaying ? (
+                <Pause className="w-5 h-5 text-white fill-current transition-transform group-hover/play:scale-110" />
+              ) : (
+                <Play className="w-5 h-5 text-white fill-current ml-0.5 transition-transform group-hover/play:scale-110" />
+              )}
+            </button>
+
+            <div className="flex flex-col flex-1 gap-1.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10 shadow-sm">
+                  <span className="text-[10px] font-mono font-bold text-white tracking-tight">
+                    {currentTime.toFixed(1)}s
+                  </span>
+                  <span className="text-[10px] text-white/30">/</span>
+                  <span className="text-[10px] font-mono text-white/50">
+                    {videoDuration.toFixed(1)}s
+                  </span>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Badge variant="outline" className="text-[9px] bg-black/40 backdrop-blur-md border-white/10 text-white font-medium py-1 px-2.5 rounded-full shadow-sm">
+                    Src: {bRoll?.sourceDuration?.toFixed(1) || "?"}s
+                  </Badge>
+                  <Badge variant="outline" className="text-[9px] bg-primary/20 backdrop-blur-md border-primary/40 text-primary font-bold py-1 px-2.5 rounded-full shadow-glow-sm">
+                    Tgt: {scene.duration.toFixed(1)}s
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Play Icon Center Overlay (Only shown when paused and not hovering bar) */}
+        {!isPlaying && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <div className="w-20 h-20 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-2xl transition-transform group-hover:scale-110">
+              <Play className="w-10 h-10 text-white fill-current translate-x-1" />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Trim Controls */}

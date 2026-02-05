@@ -22,29 +22,39 @@
   --input: 0 0% 89.8%;
   --ring: 262 83.3% 57.8%;
   --radius: 0.375rem;
+
+  /* Premium Glass Variables - Sync with Reference App */
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
+  --glass-border: 0 0% 0% / 0.05;
+  --glass-bg: 0 0% 100% / 0.7;
 }
 
 .dark {
-  /* Dark theme colors */
-  --background: 0 0% 3.9%;
+  /* Dark theme colors - High-End "Charcoal Slate" Palette (Softer) */
+  --background: 240 10% 10%;
   --foreground: 0 0% 98%;
-  --card: 0 0% 7%;
+  --card: 240 10% 14%;
   --card-foreground: 0 0% 98%;
-  --popover: 0 0% 7%;
+  --popover: 240 10% 14%;
   --popover-foreground: 0 0% 98%;
   --primary: 262 83.3% 57.8%;
   --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 14.9%;
+  --secondary: 240 10% 18%;
   --secondary-foreground: 0 0% 98%;
-  --muted: 0 0% 14.9%;
-  --muted-foreground: 0 0% 63.9%;
-  --accent: 0 0% 14.9%;
+  --muted: 240 10% 18%;
+  --muted-foreground: 240 5% 70%;
+  --accent: 240 10% 18%;
   --accent-foreground: 0 0% 98%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 14.9%;
-  --input: 0 0% 14.9%;
+  --border: 240 10% 20%;
+  --input: 240 10% 20%;
   --ring: 262 83.3% 57.8%;
+
+  /* Premium Glass Variables - Dark Mode */
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --glass-border: 0 0% 100% / 0.1;
+  --glass-bg: 240 10% 10% / 0.4;
 }
 
 * {
@@ -63,7 +73,14 @@ body {
   letter-spacing: 0.05em;
 }
 
-/* Glass effect */
+/* Premium Glass Effect - Restoring True Translucency */
+.glass-premium {
+  background: hsl(var(--glass-bg));
+  backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid hsl(var(--glass-border));
+}
+
+/* Glass effect - Legacy */
 .glass {
   background: hsl(var(--card) / 0.6);
   backdrop-filter: blur(12px);

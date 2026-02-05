@@ -117,32 +117,37 @@ export function SceneCard({
   return (
     <Card 
       className={cn(
-        "glass border-border overflow-hidden group transition-all cursor-pointer",
+        "glass-premium-v2 overflow-hidden group transition-all duration-500 cursor-pointer rounded-2xl relative border border-border/40",
         isSelected 
-          ? "ring-2 ring-primary ring-offset-2 ring-offset-background border-primary/50 shadow-glow bg-card" 
-          : "hover:scale-[1.01] hover:border-border/80"
+          ? "ring-2 ring-primary/40 bg-card/90 border-primary/60 shadow-glow-sm" 
+          : "hover:scale-[1.015] hover:shadow-xl hover:bg-card/70 hover:border-primary/20"
       )}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
     >
-      <div className="aspect-video bg-muted/30 relative flex items-center justify-center overflow-hidden">
+      {/* Selection Glow / Accent - Highly subtle top line */}
+      {isSelected && (
+        <div className="absolute inset-x-0 -top-px h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent z-30" />
+      )}
+
+      <div className="aspect-video bg-muted/5 relative flex items-center justify-center overflow-hidden rounded-t-2xl">
         {/* Thumbnail Background */}
         {(scene.thumbnail_url || (scene.visualType === 'image' && scene.asset_url)) && (
           <div 
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105"
             style={{ backgroundImage: `url(${scene.thumbnail_url || scene.asset_url})` }}
           />
         )}
-        {/* Dark overlay for readability */}
-        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+        {/* Modern Overlay Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 group-hover:from-black/20 group-hover:to-black/40 transition-colors" />
 
         {/* Top left - Scene number badge */}
-        <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
+        <div className="absolute top-4 left-4 z-10">
           <Badge 
             variant="outline" 
             className={cn(
-              "text-[9px] technical-label font-bold tracking-widest px-2 py-0.5",
-              isSelected ? "bg-primary/20 text-primary border-primary/30" : "bg-background/60 opacity-80"
+              "text-[9px] technical-label font-black tracking-widest px-2.5 py-1 rounded-lg backdrop-blur-md shadow-sm border-white/10",
+              isSelected ? "bg-primary text-primary-foreground border-primary" : "bg-black/40 text-white/70"
             )}
           >
             {scene.index.toString().padStart(2, '0')}
@@ -150,11 +155,11 @@ export function SceneCard({
         </div>
 
         {/* Top right - Visual type badge + Status */}
-        <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
           <Badge 
             variant="outline" 
             className={cn(
-              "text-[8px] technical-label font-bold tracking-wider px-1.5 py-0.5",
+              "text-[8px] technical-label font-black tracking-widest px-2 py-1 rounded-lg backdrop-blur-md shadow-sm",
               typeConfig.color,
               typeConfig.borderColor,
               typeConfig.bgColor
@@ -162,37 +167,40 @@ export function SceneCard({
           >
             {typeConfig.label}
           </Badge>
-          <div className={cn("w-2 h-2 rounded-full", getStatusColor(assetStatus))} />
+          <div className={cn(
+            "w-2.5 h-2.5 rounded-full ring-2 ring-black/20 shadow-glow-sm", 
+            getStatusColor(assetStatus)
+          )} />
         </div>
         
-        {/* Empty state / Provider indicator */}
-        <div className="flex flex-col items-center gap-2 opacity-30 group-hover:opacity-50 transition-opacity">
+        {/* Center UI - Provider indicator */}
+        <div className="flex flex-col items-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 relative z-10">
           <div className={cn(
-            "w-12 h-12 rounded-lg bg-muted/30 flex items-center justify-center",
+            "w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-xl flex items-center justify-center border border-white/20 shadow-2xl",
             typeConfig.bgColor
           )}>
             {getProviderIcon() || <Plus className="w-6 h-6" />}
           </div>
-          <span className="technical-label text-[9px] font-bold uppercase tracking-wider">
+          <span className="technical-label text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-sm">
             {provider?.toUpperCase() || "NO ASSET"}
           </span>
         </div>
         
         {/* Bottom overlay with timing */}
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 via-background/50 to-transparent p-3">
+        <div className="absolute inset-x-0 bottom-0 p-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 text-[9px] technical-label font-bold text-foreground/80">
-                <Scissors className="w-3 h-3 text-destructive/70" /> 
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10 text-[9px] technical-label font-bold text-white shadow-sm">
+                <Scissors className="w-3.5 h-3.5 text-blue-400" /> 
                 {(scene.duration || 0).toFixed(1)}s
               </div>
-              <div className="flex items-center gap-1 text-[9px] technical-label font-bold text-foreground/80">
-                <Play className="w-3 h-3 text-primary/70" /> 
+              <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10 text-[9px] technical-label font-bold text-white shadow-sm">
+                <Play className="w-3.5 h-3.5 text-primary" /> 
                 {scene.transition?.type?.toUpperCase() || "NONE"}
               </div>
             </div>
             {getFittingLabel() && getFittingLabel() !== "none" && (
-              <Badge variant="outline" className="text-[8px] opacity-60 py-0">
+              <Badge variant="outline" className="text-[8px] opacity-80 py-0.5 px-2 bg-black/20 backdrop-blur-sm border-white/5 rounded-md">
                 {getFittingLabel()?.replace(/_/g, ' ')}
               </Badge>
             )}
@@ -200,21 +208,24 @@ export function SceneCard({
         </div>
       </div>
       
-      <CardContent className="p-3 bg-card/80 space-y-2">
+      <CardContent className="p-5 bg-card/40 backdrop-blur-sm space-y-4">
         <p className={cn(
-          "text-[12px] line-clamp-2 leading-relaxed font-medium transition-colors",
-          isSelected ? "text-foreground" : "text-foreground/90"
+          "text-[13px] line-clamp-2 leading-relaxed font-semibold tracking-tight transition-colors",
+          isSelected ? "text-foreground" : "text-foreground/80"
         )}>
           {scene.script}
         </p>
         
         {scene.directorNote && (
-          <div className="p-2 bg-amber-500/5 rounded-lg border border-amber-500/10 space-y-1 group/note relative">
-            <div className="flex items-center gap-1">
-              <Sparkles className="w-2.5 h-2.5 text-amber-500/70" />
-              <span className="text-[8px] font-black uppercase tracking-widest text-amber-500/40">Director's Intent</span>
+          <div className="p-3 bg-primary/5 rounded-xl border border-primary/10 space-y-2 group/note relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-1 opacity-20 transform translate-x-1 -translate-y-1">
+              <Sparkles className="w-8 h-8 text-primary/20" />
             </div>
-            <p className="text-[10px] text-muted-foreground italic leading-tight line-clamp-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-3 h-3 text-primary/60" />
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40 leading-none">Director's Intent</span>
+            </div>
+            <p className="text-[11px] text-muted-foreground/90 italic leading-snug line-clamp-3 font-medium">
               {scene.directorNote}
             </p>
           </div>
