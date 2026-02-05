@@ -54,8 +54,8 @@ export async function POST(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
         sceneUrls,
-        transition: "none",
-        duration: 0
+        transition: "crossfade",
+        duration: 0.8
       })
     });
 

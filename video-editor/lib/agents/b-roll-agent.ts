@@ -140,25 +140,33 @@ export class BRollAgent implements BaseAgent {
                 Object.assign(scene, updatedScene);
               }
             } else if (toolName === 'trim_stock_footage') {
-              toolResult = await brollTools.trim_stock_footage(args);
+              // Add 0.8s handles (0.4s head/tail) to preserve content during 0.8s crossfades
+              const paddedDuration = Number(args.duration || scene.duration) + 0.8;
+              toolResult = await brollTools.trim_stock_footage({
+                ...args,
+                duration: paddedDuration
+              });
 
               if (toolResult.status === 'success') {
                 const newState = { 
                   ...scene.agent_state,
                   step: 'asset_trimmed', 
-                  videoUrl: toolResult.outputUrl 
+                  videoUrl: toolResult.outputUrl,
+                  paddedDuration
                 };
                 const updatedScene = await sceneService.update(scene.id, {
-                  asset_url: toolResult.outputUrl, // Advance the raw asset to the trimmed version
+                  asset_url: toolResult.outputUrl, 
                   agent_state: newState,
                   payload: { ...scene.payload, ...toolResult }
                 });
                 Object.assign(scene, updatedScene);
               }
             } else if (toolName === 'fit_stock_footage_to_duration') {
+              // Add 0.8s handles (0.4s head/tail) to preserve content during 0.8s crossfades
+              const paddedDuration = Number(args.targetDuration || scene.duration) + 0.8;
               toolResult = await brollTools.fit_stock_footage_to_duration({
                 videoUrl: args.videoUrl || scene.asset_url,
-                targetDuration: scene.duration
+                targetDuration: paddedDuration
               });
 
               if (toolResult.status === 'completed') {
