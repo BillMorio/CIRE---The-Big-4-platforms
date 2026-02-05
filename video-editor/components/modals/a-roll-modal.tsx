@@ -62,10 +62,33 @@ export function ARollModal({ isOpen, onClose, scene, onUpdate }: ARollModalProps
     <div className="p-6 space-y-6">
       {/* Preview */}
       <div className="aspect-[16/10] bg-muted/10 border border-border rounded-lg flex flex-col items-center justify-center relative overflow-hidden group">
-        <User className="w-12 h-12 text-muted-foreground/30" />
-        <span className="technical-label text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 mt-2">
-          Avatar Preview
-        </span>
+        {(scene.final_video_url || scene.asset_url) ? (
+          <video 
+            src={scene.final_video_url || scene.asset_url}
+            className="absolute inset-0 w-full h-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+        ) : (
+          <>
+            <User className="w-12 h-12 text-muted-foreground/30" />
+            <span className="technical-label text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 mt-2">
+              Avatar Preview
+            </span>
+          </>
+        )}
+
+        {/* Play Icon Overlay */}
+        {(scene.final_video_url || scene.asset_url) && (
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
+            <div className="w-12 h-12 rounded-full bg-primary/20 backdrop-blur-md flex items-center justify-center border border-primary/30">
+              <Play className="w-6 h-6 text-primary fill-current" />
+            </div>
+          </div>
+        )}
+
         <div className="absolute bottom-3 left-3 flex gap-2">
           <Badge variant="outline" className="text-[8px] bg-background/60">{scene.duration.toFixed(1)}s</Badge>
           <Badge variant="outline" className="text-[8px] bg-background/60">{aRoll?.cameraAngle}</Badge>

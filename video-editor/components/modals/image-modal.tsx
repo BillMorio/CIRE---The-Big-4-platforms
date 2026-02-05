@@ -85,14 +85,24 @@ export function ImageModal({ isOpen, onClose, scene, onUpdate }: ImageModalProps
             setCenterY(Math.round(y * 100) / 100);
           }}
         >
-          <ImageIcon className="w-12 h-12 text-muted-foreground/30" />
-          <span className="technical-label text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 mt-2">
-            Click to set zoom center
-          </span>
+          {scene.asset_url ? (
+            <img 
+              src={scene.asset_url}
+              className="absolute inset-0 w-full h-full object-cover"
+              alt="Source"
+            />
+          ) : (
+            <>
+              <ImageIcon className="w-12 h-12 text-muted-foreground/30" />
+              <span className="technical-label text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 mt-2">
+                Click to set zoom center
+              </span>
+            </>
+          )}
 
           {/* Zoom center indicator */}
           <div
-            className="absolute w-4 h-4 border-2 border-primary rounded-full bg-primary/20 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+            className="absolute w-4 h-4 border-2 border-primary rounded-full bg-primary/20 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10"
             style={{ left: `${centerX * 100}%`, top: `${centerY * 100}%` }}
           />
 

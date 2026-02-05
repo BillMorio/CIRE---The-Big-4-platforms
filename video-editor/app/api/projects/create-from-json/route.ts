@@ -34,9 +34,9 @@ export async function POST(req: NextRequest) {
       return {
         project_id: project.id,
         index: scene.index || index + 1,
-        start_time: scene.startTime,
-        end_time: scene.endTime,
-        duration: scene.endTime - scene.startTime,
+        start_time: scene.startTime ?? scene.start_time ?? 0,
+        end_time: scene.endTime ?? scene.end_time ?? 0,
+        duration: (scene.endTime ?? scene.end_time ?? 0) - (scene.startTime ?? scene.start_time ?? 0),
         script: scene.script,
         visual_type: scene.visualType,
         scene_type: scene.sceneType,
@@ -45,6 +45,8 @@ export async function POST(req: NextRequest) {
         final_video_url: scene.finalVideoUrl || scene.final_video_url,
         thumbnail_url: scene.thumbnailUrl || scene.thumbnail_url,
         status: "todo",
+        fitting_strategy: scene.fittingStrategy || scene.fitting_strategy || "trim",
+        transition: scene.transition || { type: "none", duration: 0 },
         payload: payload
       };
     });

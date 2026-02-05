@@ -110,11 +110,13 @@ export class BRollAgent implements BaseAgent {
 
               // Update scene with initial search results
               if (toolResult.status === 'completed') {
-                await sceneService.update(scene.id, {
+                const updatedScene = await sceneService.update(scene.id, {
                   asset_url: toolResult.videoUrl,
                   thumbnail_url: toolResult.thumbnail,
                   payload: { ...scene.payload, ...toolResult }
                 });
+                // Sync local state to prevent data loss in subsequent turns
+                Object.assign(scene, updatedScene);
               }
             } else if (toolName === 'fit_stock_footage_to_duration') {
               toolResult = await brollTools.fit_stock_footage_to_duration({
@@ -124,10 +126,12 @@ export class BRollAgent implements BaseAgent {
 
               // Update scene with final processed video
               if (toolResult.status === 'completed') {
-                await sceneService.update(scene.id, {
+                const updatedScene = await sceneService.update(scene.id, {
                   final_video_url: toolResult.outputUrl,
                   payload: { ...scene.payload, ...toolResult }
                 });
+                // Sync local state
+                Object.assign(scene, updatedScene);
               }
             } else {
               toolResult = { status: "failed", error: `Tool ${toolName} not found.` };
@@ -168,7 +172,13 @@ export class BRollAgent implements BaseAgent {
       }
 
       // 4. Finalize Scene
-      await sceneService.update(scene.id, { status: 'completed' });
+      await sceneService.update(scene.id, { 
+        status: 'completed',
+        asset_url: scene.asset_url,
+        thumbnail_url: scene.thumbnail_url,
+        final_video_url: scene.final_video_url,
+        payload: scene.payload
+      });
       const currentMemory = await memoryService.getByProjectId(projectId);
       await memoryService.update(projectId, { 
         completed_count: (currentMemory.completed_count || 0) + 1,

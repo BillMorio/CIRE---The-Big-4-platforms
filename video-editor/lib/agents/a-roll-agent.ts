@@ -128,7 +128,13 @@ export class ARollAgent implements BaseAgent {
       }
 
       // 4. Finalize Scene Level Progress
-      await sceneService.update(scene.id, { status: 'completed' });
+      await sceneService.update(scene.id, { 
+        status: 'completed',
+        asset_url: scene.asset_url,
+        thumbnail_url: scene.thumbnail_url,
+        final_video_url: scene.final_video_url,
+        payload: scene.payload
+      });
       const currentMemory = await memoryService.getByProjectId(projectId);
       await memoryService.update(projectId, { 
         completed_count: (currentMemory.completed_count || 0) + 1,

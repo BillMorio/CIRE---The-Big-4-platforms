@@ -66,13 +66,14 @@ export async function fit_stock_footage_to_duration(args: FitBrollArgs) {
     }
 
     console.log(`[B-RollTool] Warp successful: ${data.outputFile} (Applied Speed: ${data.speedApplied}x)`);
+    if (data.publicUrl) console.log(`[B-RollTool] Supabase Link: ${data.publicUrl}`);
 
     return {
       status: "completed",
-      outputUrl: `${FFMPEG_SERVER}${data.outputFile}`,
+      outputUrl: data.publicUrl || `${FFMPEG_SERVER}${data.outputFile}`,
       speedApplied: data.speedApplied,
       originalDuration: data.originalDuration,
-      message: `Stock footage warped to ${args.targetDuration}s (Speed: ${data.speedApplied}x).`
+      message: `Stock footage warped to ${args.targetDuration}s (Speed: ${data.speedApplied}x).${data.publicUrl ? ' Persisted to cloud storage.' : ''}`
     };
   } catch (error: any) {
     console.error("[B-RollTool] Error during production warp:", error);

@@ -126,6 +126,16 @@ export function SceneCard({
       onDoubleClick={onDoubleClick}
     >
       <div className="aspect-video bg-muted/30 relative flex items-center justify-center overflow-hidden">
+        {/* Thumbnail Background */}
+        {(scene.thumbnail_url || (scene.visualType === 'image' && scene.asset_url)) && (
+          <div 
+            className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+            style={{ backgroundImage: `url(${scene.thumbnail_url || scene.asset_url})` }}
+          />
+        )}
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+
         {/* Top left - Scene number badge */}
         <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
           <Badge 
@@ -174,11 +184,11 @@ export function SceneCard({
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1 text-[9px] technical-label font-bold text-foreground/80">
                 <Scissors className="w-3 h-3 text-destructive/70" /> 
-                {scene.duration.toFixed(1)}s
+                {(scene.duration || 0).toFixed(1)}s
               </div>
               <div className="flex items-center gap-1 text-[9px] technical-label font-bold text-foreground/80">
                 <Play className="w-3 h-3 text-primary/70" /> 
-                {scene.transition.type.toUpperCase()}
+                {scene.transition?.type?.toUpperCase() || "NONE"}
               </div>
             </div>
             {getFittingLabel() && getFittingLabel() !== "none" && (
