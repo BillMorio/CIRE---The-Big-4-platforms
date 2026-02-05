@@ -11,7 +11,8 @@ import {
   Book,
   Cpu,
   Database,
-  Workflow
+  Workflow,
+  Settings2
 } from "lucide-react";
 
 const testPages = [
@@ -59,6 +60,15 @@ const testPages = [
     color: "text-indigo-500",
     bgColor: "bg-indigo-500/10",
     borderColor: "border-indigo-500/30"
+  },
+  {
+    title: "FFmpeg Architecture",
+    description: "Deep dive into Video Normalization, Handles, and N-Way Stitching",
+    href: "/playground/ffmpeg-docs",
+    icon: Settings2,
+    color: "text-orange-500",
+    bgColor: "bg-orange-500/10",
+    borderColor: "border-orange-500/30"
   },
   {
     title: "UI Components",
