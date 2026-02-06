@@ -87,6 +87,10 @@ export default function WhisperPlaygroundPage() {
     if (!transcription) return;
     // Persist transcription to localStorage for the next page
     localStorage.setItem("latest_whisper_transcription", JSON.stringify(transcription));
+    // Also persist the audio URL explicitly if it exists
+    if (transcription.audioUrl) {
+      localStorage.setItem("latest_whisper_audio_url", transcription.audioUrl);
+    }
     router.push("/playground/openai/whisper/scenes");
   };
 

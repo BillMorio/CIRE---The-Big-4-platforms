@@ -82,4 +82,50 @@ export const BROLL_AGENT_TOOLS: ChatCompletionTool[] = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "trim_master_audio",
+      description: "Extracts a specific audio segment from the project's master audio file based on scene timestamps.",
+      parameters: {
+        type: "object",
+        properties: {
+          audioUrl: { 
+            type: "string", 
+            description: "The URL of the master audio file." 
+          },
+          start: { 
+            type: "string", 
+            description: "The start timestamp in HH:MM:SS format." 
+          },
+          duration: { 
+            type: "number", 
+            description: "The length of the segment to extract in seconds." 
+          },
+        },
+        required: ["audioUrl", "start", "duration"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "merge_audio_video",
+      description: "Combines a processed video clip with a specific audio segment. Prioritizes audio duration.",
+      parameters: {
+        type: "object",
+        properties: {
+          videoUrl: { 
+            type: "string", 
+            description: "The URL of the processed video clip (fitted to duration)." 
+          },
+          audioUrl: { 
+            type: "string", 
+            description: "The URL of the trimmed audio segment." 
+          },
+        },
+        required: ["videoUrl", "audioUrl"],
+      },
+    },
+  },
 ];

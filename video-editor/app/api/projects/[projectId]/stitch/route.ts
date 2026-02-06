@@ -56,7 +56,8 @@ export async function POST(
         sceneUrls,
         transition: "crossfade",
         duration: 0.8
-      })
+      }),
+      signal: AbortSignal.timeout(600000) // 10 minutes timeout
     });
 
     if (!response.ok) {

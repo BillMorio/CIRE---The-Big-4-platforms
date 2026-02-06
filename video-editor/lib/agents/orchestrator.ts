@@ -5,10 +5,12 @@ import { ImageAgent } from "./image-agent";
 import { MotionGraphicAgent } from "./motion-graphic-agent";
 import { memoryService } from "../services/api/memory-service";
 import { sceneService } from "../services/api/scene-service";
+import { projectService } from "../services/api/project-service";
 
 export class Orchestrator {
   public memoryService = memoryService;
   public sceneService = sceneService;
+  public projectService = projectService;
 
   private agents: Record<string, BaseAgent> = {
     'a-roll': new ARollAgent(),
@@ -20,8 +22,11 @@ export class Orchestrator {
   async findAndProcessNextScene(projectId: string): Promise<AgentResult> {
     console.log("[Orchestrator] Searching for next pending task...");
 
-    // 1. Get current project memory
-    const memory = await memoryService.getByProjectId(projectId);
+    // 1. Get current project memory and project details
+    const [memory, project] = await Promise.all([
+      memoryService.getByProjectId(projectId),
+      projectService.getById(projectId)
+    ]);
     
     if (memory.workflow_status === 'paused' || memory.workflow_status === 'completed') {
       return { success: false, message: `Orchestrator inactive: ${memory.workflow_status}` };
@@ -49,7 +54,10 @@ export class Orchestrator {
     }
 
     // 4. Hand-off to Agent (The agent now handles all DB updates internally)
-    const context: ProjectContext = { memory };
+    const context: ProjectContext = { 
+      memory,
+      master_audio_url: project.master_audio_url 
+    };
     const result = await agent.process(nextScene, context);
 
     return result;

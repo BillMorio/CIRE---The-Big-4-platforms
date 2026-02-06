@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
   try {
-    const { projectTitle, storyboardData } = await req.json();
+    const { projectTitle, storyboardData, masterAudioUrl, transcriptUrl } = await req.json();
 
     if (!projectTitle || !storyboardData || !storyboardData.scenes) {
       return NextResponse.json({ error: "Missing required data" }, { status: 400 });
@@ -15,6 +15,8 @@ export async function POST(req: NextRequest) {
       .insert({
         title: projectTitle,
         total_duration: storyboardData.project.totalDuration || 0,
+        master_audio_url: masterAudioUrl,
+        transcript_url: transcriptUrl,
         status: "draft"
       })
       .select()

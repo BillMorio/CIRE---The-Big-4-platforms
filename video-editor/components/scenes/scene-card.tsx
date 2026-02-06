@@ -52,24 +52,26 @@ export function SceneCard({
   onClick,
   onDoubleClick
 }: SceneCardProps) {
+  const visualType = scene.visual_type || scene.visualType || "b-roll";
+
   // Get asset data based on visual type
   const getAssetData = () => {
-    switch (scene.visualType) {
+    switch (visualType) {
       case "a-roll":
-        return { provider: scene.aRoll?.provider, status: scene.aRoll?.assetStatus };
+        return { provider: scene.payload?.provider, status: scene.payload?.assetStatus };
       case "b-roll":
-        return { provider: scene.bRoll?.provider, status: scene.bRoll?.assetStatus };
+        return { provider: scene.payload?.provider, status: scene.payload?.assetStatus };
       case "graphics":
-        return { provider: scene.graphics?.provider, status: scene.graphics?.assetStatus };
+        return { provider: scene.payload?.provider, status: scene.payload?.assetStatus };
       case "image":
-        return { provider: scene.image?.provider, status: scene.image?.assetStatus };
+        return { provider: scene.payload?.provider, status: scene.payload?.assetStatus };
       default:
         return { provider: undefined, status: undefined };
     }
   };
 
   const { provider, status: assetStatus } = getAssetData();
-  const typeConfig = VISUAL_TYPE_CONFIG[scene.visualType];
+  const typeConfig = VISUAL_TYPE_CONFIG[visualType] || VISUAL_TYPE_CONFIG["b-roll"];
 
   const getStatusColor = (status: string | undefined) => {
     switch (status) {
@@ -84,7 +86,7 @@ export function SceneCard({
   };
 
   const getProviderIcon = () => {
-    switch (scene.visualType) {
+    switch (visualType) {
       case "a-roll":
         return <User className="w-3 h-3" />;
       case "b-roll":
@@ -100,18 +102,7 @@ export function SceneCard({
 
   // Get fitting strategy label
   const getFittingLabel = () => {
-    switch (scene.visualType) {
-      case "a-roll":
-        return scene.aRoll?.fittingStrategy;
-      case "b-roll":
-        return scene.bRoll?.fittingStrategy;
-      case "graphics":
-        return scene.graphics?.fittingStrategy;
-      case "image":
-        return scene.image?.fittingStrategy;
-      default:
-        return null;
-    }
+    return scene.fitting_strategy;
   };
 
   const isProcessing = scene.status === 'processing';
@@ -135,7 +126,7 @@ export function SceneCard({
 
       <div className="aspect-video bg-muted/5 relative flex items-center justify-center overflow-hidden rounded-t-2xl">
         {/* Thumbnail Background */}
-        {(scene.thumbnail_url || (scene.visualType === 'image' && scene.asset_url)) && (
+        {(scene.thumbnail_url || (visualType === 'image' && scene.asset_url)) && (
           <div 
             className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105"
             style={{ backgroundImage: `url(${scene.thumbnail_url || scene.asset_url})` }}
@@ -199,7 +190,7 @@ export function SceneCard({
               </div>
               <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10 text-[9px] technical-label font-bold text-white shadow-sm">
                 <Clock className="w-3.5 h-3.5 text-emerald-400" /> 
-                {(scene.startTime || 0).toFixed(1)}s - {(scene.endTime || 0).toFixed(1)}s
+                {(scene.start_time ?? scene.startTime ?? 0).toFixed(1)}s - {(scene.end_time ?? scene.endTime ?? 0).toFixed(1)}s
               </div>
               <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10 text-[9px] technical-label font-bold text-white shadow-sm">
                 <Play className="w-3.5 h-3.5 text-primary" /> 

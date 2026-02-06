@@ -34,15 +34,19 @@ export default function ScenePreviewPage() {
   const [status, setStatus] = useState("");
   const [selectedSceneIndex, setSelectedSceneIndex] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [masterAudioUrl, setMasterAudioUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("latest_whisper_transcription");
+    const savedAudio = localStorage.getItem("latest_whisper_audio_url");
+    
     if (!saved) {
       router.push("/playground/openai/whisper");
       return;
     }
     const parsed = JSON.parse(saved);
     setTranscription(parsed);
+    setMasterAudioUrl(savedAudio);
     generateStoryboard(parsed);
   }, []);
 
@@ -112,7 +116,8 @@ export default function ScenePreviewPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           projectTitle,
-          storyboardData: storyboard
+          storyboardData: storyboard,
+          masterAudioUrl
         }),
       });
 

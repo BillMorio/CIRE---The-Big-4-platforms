@@ -84,6 +84,8 @@ export interface Scene {
   index: number;
   startTime: number;
   endTime: number;
+  start_time?: number;
+  end_time?: number;
   duration: number;
   script: string;
   directorNote?: string;
@@ -93,6 +95,7 @@ export interface Scene {
   visualType: VisualType;
   visual_type?: VisualType;
   status: SceneStatus;
+  fitting_strategy?: string;
   aRoll?: ARoll;
   bRoll?: BRoll;
   graphics?: Graphics;

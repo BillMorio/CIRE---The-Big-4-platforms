@@ -71,6 +71,7 @@ export interface AgentResult {
  */
 export interface ProjectContext {
   memory: AgentMemory;
+  master_audio_url?: string;
 }
 
 export interface BaseAgent {

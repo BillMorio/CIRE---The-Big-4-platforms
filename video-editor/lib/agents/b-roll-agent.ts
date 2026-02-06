@@ -1,11 +1,12 @@
 import { Scene, AgentResult, BaseAgent, ProjectContext } from "./types";
-import { openai } from "../openai";
+import { anthropic } from "../anthropic";
 import { BROLL_AGENT_TOOLS } from "./tools/b-roll-agent-definitions";
 import { memoryService } from "../services/api/memory-service";
 import { sceneService } from "../services/api/scene-service";
 import { jobService } from "../services/api/job-service";
 // Import real production tools
 import * as brollTools from "./tools/production/broll-tools";
+import * as audioTools from "./tools/production/audio-tools";
 
 export class BRollAgent implements BaseAgent {
   name = "B-Roll Agent";
@@ -15,11 +16,22 @@ export class BRollAgent implements BaseAgent {
     'search_pexels_library': 'Searching for relevant stock footage on Pexels',
     'fit_stock_footage_to_duration': 'Conforming stock footage to scene duration',
     'trim_stock_footage': 'Surgically trimming stock footage segment',
+    'trim_master_audio': 'Extracting narration segment for scene',
+    'merge_audio_video': 'Muxing visuals with narration'
   };
+
+  // Helper to map OpenAI tool definitions to Anthropic tool definitions
+  private getAnthropicTools() {
+    return BROLL_AGENT_TOOLS.map(t => ({
+      name: t.function.name,
+      description: t.function.description,
+      input_schema: t.function.parameters as any
+    }));
+  }
 
   async process(scene: Scene, context: ProjectContext): Promise<AgentResult> {
     const projectId = scene.project_id;
-    console.log(`[${this.name}] Starting Production Chain for scene ${scene.index}`);
+    console.log(`[${this.name}] Starting Production Chain for scene ${scene.index} using Claude Sonnet 4`);
 
     try {
       // 1. Register Start
@@ -30,30 +42,30 @@ export class BRollAgent implements BaseAgent {
         last_log: `${this.name}: Starting production for Scene ${scene.index}.`
       });
 
-      // 2. Initialize Conversation History
-      const messages: any[] = [
-        { 
-          role: "system", 
-          content: `You are the ${this.name}. ${this.role}
+      const systemPrompt = `You are the ${this.name}. ${this.role}
           
-          SCENE CONTEXT:
-          - Index: ${scene.index}
-          - Start Time: ${scene.start_time}s
-          - End Time: ${scene.end_time}s
-          - Target Duration: ${scene.duration}s
-          - Script: "${scene.script}"
-          - Director Notes: "${scene.director_notes || "None"}"
-          - Persistent State: ${JSON.stringify(scene.agent_state || {})}
+      SCENE CONTEXT:
+      - Index: ${scene.index}
+      - Start Time: ${scene.start_time}s
+      - End Time: ${scene.end_time}s
+      - Target Duration: ${scene.duration}s
+      - Script: "${scene.script}"
+      - Director Notes: "${scene.director_notes || "None"}"
+      - Persistent State: ${JSON.stringify(scene.agent_state || {})}
 
-          PRODUCTION WORKFLOW (Acquisition -> Trimming -> Conforming):
-          1. Discovery: Use 'search_pexels_library' to find the best visual match.
-          2. Evaluation: Look at the 'duration' of the found clip.
-          3. Trimming (Conditional): If the clip is significantly longer than ${scene.duration}s (e.g. > 2s gap), use 'trim_stock_footage' to extract a surgical segment first.
-          4. Mandatory Conforming: Finally, use 'fit_stock_footage_to_duration' to ensure a perfect technical fit for the master timeline.
-             * CRITICAL: You MUST call the fitting tool at least once to ensure a perfect match for the ${scene.duration}s scene.
-          5. VERIFICATION: If your state is 'asset_acquired' and the clip is long, TRIM IT. If state is 'asset_trimmed' or the clip is short, FIT IT.
-          6. Respond with final confirmation only AFTER the fitting step is complete. (Step should be 'conforming_complete')` 
-        },
+      PRODUCTION WORKFLOW (Acquisition -> Trimming -> Conforming -> Audio Merge):
+      1. Discovery: Use 'search_pexels_library' to find the best visual match.
+      2. Narrative Base: Use 'trim_master_audio' to extract the EXACT narration segment for this scene from the master audio: ${context.master_audio_url || "NONE"}. 
+         - Use Exact Start Time: ${scene.start_time}, Duration: ${scene.duration}.
+         - This establishes the definitive duration for the scene.
+      3. Visual Prep: If the clip is too long, use 'trim_stock_footage'. 
+      4. Visual Fit: Use 'fit_stock_footage_to_duration' to ensure the video perfectly matches the narration duration of exactly ${scene.duration}s.
+      5. Final Muxing: Finally, use 'merge_audio_video' to combine the fitted video with the trimmed audio segment.
+         - CRITICAL: No padding or handles are allowed. Narrative precision must be 1:1.
+      6. VERIFICATION: Sequence is SEARCH -> AUDIO_TRIM -> [TRIM] -> FIT -> MERGE.`;
+
+      // 2. Initialize Conversation History (Anthropic format)
+      const messages: any[] = [
         { 
           role: "user", 
           content: "Please execute the B-Roll production sequence." 
@@ -70,7 +82,7 @@ export class BRollAgent implements BaseAgent {
 
       let isRunning = true;
       let turnCount = 0;
-      const MAX_TURNS = 5;
+      const MAX_TURNS = 10; // Claude is more efficient, but let's be safe
       let finalAgentResponse = "B-Roll production complete.";
 
       // 3. THE MULTI-TURN AGENTIC LOOP
@@ -79,38 +91,41 @@ export class BRollAgent implements BaseAgent {
         
         // Dynamic turn context based on state
         const stateSummary = scene.agent_state?.step || 'idle';
-        const turnContext = { 
-          role: "system" as const, 
-          content: `Current Internal State: ${stateSummary}. Turn ${turnCount}/${MAX_TURNS}. ` + 
-                   (stateSummary === 'asset_acquired' ? "HINT: If the clip is much longer than the target, call 'trim_stock_footage'. Otherwise, call 'fit_stock_footage_to_duration'." : "") +
-                   (stateSummary === 'asset_trimmed' ? "MANDATORY: You have trimmed the asset. Now call 'fit_stock_footage_to_duration' to finalize the fit." : "")
-        };
+        
+        console.log(`[${this.name}] Round ${turnCount}: Requesting decision from Claude... State: ${stateSummary}`);
 
-        const response = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [...messages, turnContext],
-          tools: BROLL_AGENT_TOOLS,
-          tool_choice: "auto",
+        const response = await anthropic.messages.create({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 4096,
+          system: systemPrompt + `\n\nCurrent Internal State: ${stateSummary}. Turn ${turnCount}/${MAX_TURNS}. ` + 
+                  (stateSummary === 'asset_acquired' ? "HINT: If the clip is much longer than the target, call 'trim_stock_footage'. Otherwise, call 'fit_stock_footage_to_duration'." : "") +
+                  (stateSummary === 'asset_trimmed' ? "MANDATORY: You have trimmed the asset. Now call 'fit_stock_footage_to_duration' to finalize the fit." : ""),
+          messages: messages,
+          tools: this.getAnthropicTools(),
         });
 
-        const responseMessage = response.choices[0].message;
-        messages.push(responseMessage);
+        // Add assistant's response to history
+        messages.push({
+          role: "assistant",
+          content: response.content
+        });
 
-        const toolCalls = responseMessage.tool_calls;
+        const toolCalls = response.content.filter(c => c.type === 'tool_use');
 
         if (toolCalls && toolCalls.length > 0) {
           console.log(`[${this.name}] Round ${turnCount}: Processing ${toolCalls.length} tool calls...`);
           
-          for (const toolCall of toolCalls) {
-            if (toolCall.type !== 'function') continue;
+          const toolResults: any[] = [];
 
-            const { name: toolName } = toolCall.function;
-            const args = JSON.parse(toolCall.function.arguments);
+          for (const toolCall of toolCalls) {
+            const toolName = toolCall.name;
+            const args = toolCall.input as any;
+            const toolId = toolCall.id;
             
             const job = await jobService.create({
               scene_id: scene.id,
               provider: `${this.name} (${toolName})`,
-              external_id: toolCall.id,
+              external_id: toolId,
               status: 'processing',
               result: { tool: toolName, args }
             });
@@ -140,11 +155,10 @@ export class BRollAgent implements BaseAgent {
                 Object.assign(scene, updatedScene);
               }
             } else if (toolName === 'trim_stock_footage') {
-              // Add 0.8s handles (0.4s head/tail) to preserve content during 0.8s crossfades
-              const paddedDuration = Number(args.duration || scene.duration) + 0.8;
+              const targetDuration = Number(args.duration || scene.duration);
               toolResult = await brollTools.trim_stock_footage({
                 ...args,
-                duration: paddedDuration
+                duration: targetDuration
               });
 
               if (toolResult.status === 'success') {
@@ -152,7 +166,8 @@ export class BRollAgent implements BaseAgent {
                   ...scene.agent_state,
                   step: 'asset_trimmed', 
                   videoUrl: toolResult.outputUrl,
-                  paddedDuration
+                  paddedDuration: targetDuration,
+                  isExactCut: true
                 };
                 const updatedScene = await sceneService.update(scene.id, {
                   asset_url: toolResult.outputUrl, 
@@ -162,11 +177,10 @@ export class BRollAgent implements BaseAgent {
                 Object.assign(scene, updatedScene);
               }
             } else if (toolName === 'fit_stock_footage_to_duration') {
-              // Add 0.8s handles (0.4s head/tail) to preserve content during 0.8s crossfades
-              const paddedDuration = Number(args.targetDuration || scene.duration) + 0.8;
+              const targetDuration = Number(args.targetDuration || scene.duration);
               toolResult = await brollTools.fit_stock_footage_to_duration({
                 videoUrl: args.videoUrl || scene.asset_url,
-                targetDuration: paddedDuration
+                targetDuration: targetDuration
               });
 
               if (toolResult.status === 'completed') {
@@ -182,6 +196,59 @@ export class BRollAgent implements BaseAgent {
                 });
                 Object.assign(scene, updatedScene);
               }
+            } else if (toolName === 'trim_master_audio') {
+              const parseNumber = (val: any, fallback: number) => {
+                if (typeof val === 'number') return val;
+                if (!val) return fallback;
+                const clean = String(val).replace(/[^0-9.]/g, '');
+                const parsed = parseFloat(clean);
+                return isNaN(parsed) ? fallback : parsed;
+              };
+
+              const startTime = parseNumber(args.start ?? scene.start_time, 0);
+              const duration = parseNumber(args.duration ?? scene.duration, 0);
+
+              console.log(`[BRollAgent] Trim Audio for Scene ${scene.index}: Start=${startTime}, Dur=${duration}`);
+
+              toolResult = await audioTools.trim_master_audio({
+                audioUrl: args.audioUrl || context.master_audio_url || "",
+                start: startTime.toString(),
+                duration: duration
+              });
+
+              if (toolResult.success) {
+                const newState = { 
+                  ...scene.agent_state,
+                  step: 'audio_trimmed', 
+                  trimmedAudioUrl: toolResult.audioUrl
+                };
+                const updatedScene = await sceneService.update(scene.id, {
+                  agent_state: newState,
+                  payload: { ...scene.payload, ...toolResult }
+                });
+                Object.assign(scene, updatedScene);
+                toolResult.status = "success";
+              }
+            } else if (toolName === 'merge_audio_video') {
+              toolResult = await audioTools.merge_audio_video({
+                videoUrl: args.videoUrl || scene.final_video_url || scene.asset_url,
+                audioUrl: args.audioUrl || scene.agent_state?.trimmedAudioUrl
+              });
+
+              if (toolResult.success) {
+                const newState = { 
+                  ...scene.agent_state,
+                  step: 'production_complete', 
+                  finalMergedUrl: toolResult.videoUrl 
+                };
+                const updatedScene = await sceneService.update(scene.id, {
+                  final_video_url: toolResult.videoUrl,
+                  agent_state: newState,
+                  payload: { ...scene.payload, ...toolResult }
+                });
+                Object.assign(scene, updatedScene);
+                toolResult.status = "success";
+              }
             } else {
               toolResult = { status: "failed", error: `Tool ${toolName} not found.` };
             }
@@ -192,22 +259,27 @@ export class BRollAgent implements BaseAgent {
               result: { ...job.result, ...toolResult, completed_at: new Date().toISOString() }
             });
 
-            messages.push({
-              tool_call_id: toolCall.id,
-              role: "tool",
-              name: toolName,
+            toolResults.push({
+              type: "tool_result",
+              tool_use_id: toolId,
               content: JSON.stringify(toolResult),
             });
 
-            // Handle Failures
             if (toolResult.status === "failed") {
               console.error(`[${this.name}] Tool ${toolName} failed logistically.`);
-              // Note: We don't break yet, allowing AI to see the failure and try to fix it.
             }
           }
+
+          // Add tool results to messages
+          messages.push({
+            role: "user",
+            content: toolResults
+          });
+
         } else {
-          console.log(`[${this.name}] Final response received from AI.`);
-          finalAgentResponse = responseMessage.content || finalAgentResponse;
+          console.log(`[${this.name}] Final response received from Claude.`);
+          const textBlock = response.content.find(c => c.type === 'text');
+          finalAgentResponse = textBlock?.text || finalAgentResponse;
           isRunning = false;
         }
       }
@@ -239,7 +311,7 @@ export class BRollAgent implements BaseAgent {
       return { 
         success: true, 
         message: finalAgentResponse, 
-        log: `Completed in ${turnCount} turns.`
+        log: `Completed in ${turnCount} turns using Claude Sonnet 4.`
       };
     } catch (error) {
       console.error(`[${this.name}] CRITICAL FAILURE:`, error);

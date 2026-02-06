@@ -1,64 +1,80 @@
-/**
- * PRODUCTION AUDIO TOOLS
- * These tools bridge to the external FFmpeg Playground server (port 3333)
- * to perform surgical media operations.
- */
-
-const FFMPEG_SERVER = process.env.FFMPEG_SERVER_URL || "http://localhost:3333";
+import { FFMPEG_SERVER_URL } from "./broll-tools";
 
 export interface TrimAudioArgs {
   audioUrl: string;
-  start: number;
+  start: string;
   duration: number;
 }
 
+export interface MergeAudioVideoArgs {
+  videoUrl: string;
+  audioUrl: string;
+}
+
 /**
- * Trims a specific segment from a master audio file using the FFmpeg Playground server.
- * Uses FormData to ship the audio stream to the surgical layer.
+ * Trims an audio segment from a source URL using the FFmpeg server.
  */
 export async function trim_audio_segment(args: TrimAudioArgs) {
-  console.log(`[AudioTool] Trimming segment from ${args.audioUrl} starting at ${args.start}s for ${args.duration}s...`);
+  console.log(`[AudioTool] Trimming audio: ${args.audioUrl} from ${args.start} for ${args.duration}s`);
 
-  try {
-    // 1. Fetch the master audio file
-    const audioResponse = await fetch(args.audioUrl);
-    if (!audioResponse.ok) throw new Error(`Failed to fetch master audio from ${args.audioUrl}`);
-    const audioBlob = await audioResponse.blob();
+  // We need to download the remote file first and send as FormData 
+  // because the FFmpeg server /api/audio-trim expects a file upload.
+  const audioBlob = await fetch(args.audioUrl).then(res => res.blob());
+  const formData = new FormData();
+  formData.append("file", audioBlob, "input.mp3");
+  formData.append("start", args.start);
+  formData.append("duration", args.duration.toString());
 
-    // 2. Prepare FormData for the FFmpeg Playground
-    const formData = new FormData();
-    formData.append("file", audioBlob, "master_audio.mp3");
-    formData.append("start", args.start.toString());
-    formData.append("duration", args.duration.toString());
+  const response = await fetch(`${FFMPEG_SERVER_URL}/api/audio-trim`, {
+    method: "POST",
+    body: formData,
+  });
 
-    // 3. Post to Playground API
-    const response = await fetch(`${FFMPEG_SERVER}/api/audio-trim`, {
-      method: "POST",
-      body: formData,
-    });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Audio trimming failed");
 
-    const data = await response.json();
+  return {
+    success: true,
+    audioUrl: `${FFMPEG_SERVER_URL}${data.outputFile}`,
+    publicUrl: data.publicUrl
+  };
+}
 
-    if (!response.ok) {
-      return {
-        status: "failed",
-        error: data.error || "Failed to trim audio via playground",
-        details: data.details
-      };
-    }
+/**
+ * Semantic wrapper for trim_audio_segment specifically for master audio.
+ */
+export async function trim_master_audio(args: TrimAudioArgs) {
+    return trim_audio_segment(args);
+}
 
-    console.log(`[AudioTool] Trim successful: ${data.outputFile}`);
+/**
+ * Merges a video stream with an audio stream using the FFmpeg server.
+ * Prioritizes the audio duration.
+ */
+export async function merge_audio_video(args: MergeAudioVideoArgs) {
+  console.log(`[AudioTool] Merging Video (${args.videoUrl}) with Audio (${args.audioUrl})`);
 
-    return {
-      status: "completed",
-      outputUrl: `${FFMPEG_SERVER}${data.outputFile}`,
-      message: "Audio segment extracted successfully."
-    };
-  } catch (error: any) {
-    console.error("[AudioTool] Error during production trim:", error);
-    return {
-      status: "failed",
-      error: error.message || "Unknown error during production trim"
-    };
-  }
+  // Download both files to send as multipart/form-data
+  const [videoBlob, audioBlob] = await Promise.all([
+    fetch(args.videoUrl).then(res => res.blob()),
+    fetch(args.audioUrl).then(res => res.blob())
+  ]);
+
+  const formData = new FormData();
+  formData.append("video", videoBlob, "video.mp4");
+  formData.append("audio", audioBlob, "audio.mp3");
+
+  const response = await fetch(`${FFMPEG_SERVER_URL}/api/merge`, {
+    method: "POST",
+    body: formData,
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Merging failed");
+
+  return {
+    success: true,
+    videoUrl: `${FFMPEG_SERVER_URL}${data.outputFile}`,
+    publicUrl: data.publicUrl
+  };
 }

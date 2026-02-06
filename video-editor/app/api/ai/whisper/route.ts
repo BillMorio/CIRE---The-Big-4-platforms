@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { supabase } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -20,7 +21,22 @@ export async function POST(req: NextRequest) {
 
     console.log(`[Whisper API] Processing file: ${file.name} (${file.size} bytes)`);
 
-    // Call OpenAI Whisper API
+    // 1. Upload to Supabase Storage
+    const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("projects")
+      .upload(`audio/${fileName}`, file);
+
+    if (uploadError) {
+      console.error("[Whisper Storage Error]", uploadError);
+      throw new Error(`Failed to upload audio: ${uploadError.message}`);
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from("projects")
+      .getPublicUrl(`audio/${fileName}`);
+
+    // 2. Call OpenAI Whisper API
     const transcription = await openai.audio.transcriptions.create({
       file: file,
       model: "whisper-1",
@@ -28,7 +44,10 @@ export async function POST(req: NextRequest) {
       timestamp_granularities: ["word"],
     });
 
-    return NextResponse.json(transcription);
+    return NextResponse.json({
+      ...transcription,
+      audioUrl: publicUrl
+    });
   } catch (error: any) {
     console.error("[Whisper API Error]", error);
     return NextResponse.json({ 

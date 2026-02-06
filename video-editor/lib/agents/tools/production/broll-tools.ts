@@ -5,7 +5,7 @@
 
 import { search_pexels_library as pexelsSearch } from "./pexels-tools";
 
-const FFMPEG_SERVER = process.env.FFMPEG_SERVER_URL || "http://localhost:3333";
+export const FFMPEG_SERVER_URL = process.env.FFMPEG_SERVER_URL || "http://localhost:3333";
 
 export interface SearchBrollArgs {
   query: string;
@@ -50,7 +50,7 @@ export async function fit_stock_footage_to_duration(args: FitBrollArgs) {
     formData.append("targetDuration", args.targetDuration.toString());
 
     // 3. Post to Playground API
-    const response = await fetch(`${FFMPEG_SERVER}/api/speed`, {
+    const response = await fetch(`${FFMPEG_SERVER_URL}/api/speed`, {
       method: "POST",
       body: formData,
     });
@@ -70,7 +70,7 @@ export async function fit_stock_footage_to_duration(args: FitBrollArgs) {
 
     return {
       status: "completed",
-      outputUrl: data.publicUrl || `${FFMPEG_SERVER}${data.outputFile}`,
+      outputUrl: data.publicUrl || `${FFMPEG_SERVER_URL}${data.outputFile}`,
       speedApplied: data.speedApplied,
       originalDuration: data.originalDuration,
       message: `Stock footage warped to ${args.targetDuration}s (Speed: ${data.speedApplied}x).${data.publicUrl ? ' Persisted to cloud storage.' : ''}`
@@ -103,7 +103,7 @@ export async function trim_stock_footage(args: { videoUrl: string, start: string
     formData.append("duration", args.duration.toString());
 
     // 3. Post to Playground API (/api/trim)
-    const response = await fetch(`${FFMPEG_SERVER}/api/trim`, {
+    const response = await fetch(`${FFMPEG_SERVER_URL}/api/trim`, {
       method: "POST",
       body: formData,
     });
@@ -122,7 +122,7 @@ export async function trim_stock_footage(args: { videoUrl: string, start: string
     
     return {
       status: "success",
-      outputUrl: data.publicUrl || `${FFMPEG_SERVER}${data.outputFile}`,
+      outputUrl: data.publicUrl || `${FFMPEG_SERVER_URL}${data.outputFile}`,
       message: `Stock footage trimmed to exactly ${args.duration}s starting from ${args.start}.`
     };
   } catch (error: any) {

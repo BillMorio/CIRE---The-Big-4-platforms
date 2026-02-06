@@ -107,7 +107,6 @@ export function ARollModal({ isOpen, onClose, scene, onUpdate }: ARollModalProps
             ref={videoRef}
             src={scene.final_video_url || scene.asset_url}
             className="absolute inset-0 w-full h-full object-cover"
-            muted
             loop
             playsInline
             onPlay={() => setIsPlaying(true)}
