@@ -20,6 +20,16 @@ const tools = [
     status: "Operational"
   },
   {
+    title: "Light Leak FX",
+    description: "Synthetic organic transitions with animated color bursts.",
+    href: "/playground/ffmpeg/light-leak",
+    icon: Sparkles,
+    color: "text-amber-600",
+    bgColor: "bg-amber-50",
+    borderColor: "border-amber-100",
+    status: "New"
+  },
+  {
     title: "Trim & Fit",
     description: "Extract segments or warp time to fit target durations.",
     href: "/playground/ffmpeg/trim-fit",
