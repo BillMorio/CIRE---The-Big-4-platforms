@@ -1,20 +1,28 @@
 import { Scene, AgentResult, BaseAgent, ProjectContext } from "./types";
-import { openai } from "../openai";
-import { SIMULATED_TOOLS } from "./tools/simulation/definitions";
+import { anthropic } from "../anthropic";
+import { A_ROLL_AGENT_TOOLS } from "./tools/a-roll-agent-definitions";
 import { memoryService } from "../services/api/memory-service";
 import { sceneService } from "../services/api/scene-service";
 import { jobService } from "../services/api/job-service";
-// Import tools directly for explicit execution
-import * as arollTools from "./tools/simulation/aroll-tools";
+// Import real production tools
+import * as arollTools from "./tools/production/aroll-tools";
 
 export class ARollAgent implements BaseAgent {
   name = "A-Roll Agent";
   role = "Responsible for the primary 'talking-head' video segment. Requires trimming audio first, then generating a lip-synced avatar.";
 
   private TOOL_LOG_MAPPING: Record<string, string> = {
-    'trim_audio_segment': 'Trimming audio segment to scene duration',
-    'generate_avatar_lipsync': 'Generating AI avatar lip-sync animation',
+    'cut_audio_segment': 'Extracting narration segment and uploading to clinical storage',
+    'generate_heygen_avatar_video': 'Generating and Polling Heygen AI synthesis'
   };
+
+  private getAnthropicTools() {
+    return A_ROLL_AGENT_TOOLS.map(t => ({
+      name: (t as any).function.name,
+      description: (t as any).function.description,
+      input_schema: (t as any).function.parameters as any
+    }));
+  }
 
   async process(scene: Scene, context: ProjectContext): Promise<AgentResult> {
     const projectId = scene.project_id;
@@ -29,66 +37,78 @@ export class ARollAgent implements BaseAgent {
         last_log: `${this.name}: Starting production for Scene ${scene.index}.`
       });
 
-      // 2. Initialize Conversation History for Multi-Turn Reasoning
-      const messages: any[] = [
-        { 
-          role: "system", 
-          content: `You are the ${this.name}. ${this.role}
+      const systemPrompt = `You are the ${this.name}. ${this.role}
           
+          AVATAR_ID: "75fb83b62014421a88be427fbe3bf2f3"
+
           SCENE CONTEXT:
           - Start Time: ${scene.start_time}s
           - End Time: ${scene.end_time}s
           - Duration: ${scene.duration}s
           - Script: "${scene.script}"
+          - Master Audio: ${context.master_audio_url || "NOT_PROVIDED"}
 
-          PRODUCTION WORKFLOW (Reason-Act):
-          1. You operate in a loop. Execute ONE tool at a time.
-          2. STEP 1: Use 'trim_audio_segment' to extract the audio.
-          3. FEEDBACK: I will provide the result of the trimming.
-          4. STEP 2: Use 'generate_avatar_lipsync' with the resulting audio to create the visual.
-          5. FINISH: Once both steps are successful, respond with a final confirmation text.` 
-        },
+          PRODUCTION WORKFLOW (Reason-Act-Feedback):
+          1. You operate in a loop. Execute tools sequentially to achieve the goal.
+          2. STEP 1: Use 'cut_audio_segment' to extract the audio for this scene from the master audio.
+             - Use Start Time: ${scene.start_time}, Duration: ${scene.duration}.
+          3. STEP 2: Use 'generate_heygen_avatar_video' using the Supabase URL returned from Step 1.
+             - Use the AVATAR_ID provided above.
+             - THIS TOOL WILL WAIT FOR THE VIDEO TO BE READY. Do not call any other tools for this video.
+          4. FINISH: Once Step 2 returns 'success', respond with a final confirmation.
+          
+          CRITICAL: Do not respond with a final summary until you have the final video URL from Step 2.`;
+
+      // 2. Initialize Conversation History
+      const messages: any[] = [
         { 
           role: "user", 
-          content: "Please begin the production sequence for this scene." 
+          content: "Please begin the A-Roll production sequence for this scene." 
         }
       ];
 
       let isRunning = true;
       let turnCount = 0;
-      const MAX_TURNS = 5;
+      const MAX_TURNS = 10;
+      let finalAgentResponse = "A-Roll production complete.";
 
-      // 3. THE MULTI-TURN AGENTIC LOOP (Re-entrant)
+      // 3. THE MULTI-TURN AGENTIC LOOP
       while (isRunning && turnCount < MAX_TURNS) {
         turnCount++;
         
-        const response = await openai.chat.completions.create({
-          model: "gpt-4o",
+        console.log(`[${this.name}] Round ${turnCount}: Requesting decision from Claude...`);
+
+        const response = await anthropic.messages.create({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 4096,
+          system: systemPrompt,
           messages: messages,
-          tools: SIMULATED_TOOLS,
-          tool_choice: "auto",
+          tools: this.getAnthropicTools(),
         });
 
-        const responseMessage = response.choices[0].message;
-        messages.push(responseMessage); // Save AI's thought/intent
+        // Add assistant's response to history
+        messages.push({
+          role: "assistant",
+          content: response.content
+        });
 
-        const toolCalls = responseMessage.tool_calls;
+        const toolCalls = response.content.filter(c => c.type === 'tool_use');
 
-        // Condition A: AI wants to call tools
         if (toolCalls && toolCalls.length > 0) {
           console.log(`[${this.name}] Round ${turnCount}: Processing ${toolCalls.length} tool calls...`);
           
+          const toolResults: any[] = [];
+
           for (const toolCall of toolCalls) {
-            if (toolCall.type !== 'function') continue;
-            
-            const { name: toolName } = toolCall.function;
-            const args = JSON.parse(toolCall.function.arguments);
+            const toolName = toolCall.name;
+            const args = toolCall.input as any;
+            const toolId = toolCall.id;
             
             // Create Job for tracking
             const job = await jobService.create({
               scene_id: scene.id,
               provider: `${this.name} (${toolName})`,
-              external_id: toolCall.id,
+              external_id: toolId,
               status: 'processing',
               result: { tool: toolName, args }
             });
@@ -98,12 +118,39 @@ export class ARollAgent implements BaseAgent {
 
             // EXPLICIT TOOL EXECUTION
             let toolResult: any;
-            if (toolName === 'trim_audio_segment') {
-              toolResult = await arollTools.trim_audio_segment(args);
-            } else if (toolName === 'generate_avatar_lipsync') {
-              toolResult = await arollTools.generate_avatar_lipsync(args);
-            } else {
-              toolResult = { status: "failed", error: `Tool ${toolName} not found.` };
+            try {
+              if (toolName === 'cut_audio_segment') {
+                toolResult = await arollTools.cut_audio_segment({
+                  ...args,
+                  audioUrl: args.audioUrl || context.master_audio_url || ""
+                });
+              } else if (toolName === 'generate_heygen_avatar_video') {
+                toolResult = await arollTools.generate_heygen_avatar_video(args);
+                
+                if (toolResult.status === 'success') {
+                  const updatedScene = await sceneService.update(scene.id, {
+                    asset_url: toolResult.videoUrl,
+                    final_video_url: toolResult.videoUrl,
+                    payload: { ...scene.payload, ...toolResult }
+                  });
+                  Object.assign(scene, updatedScene);
+                }
+              } else if (toolName === 'poll_heygen_video_status') {
+                toolResult = await arollTools.poll_heygen_video_status(args);
+                
+                if (toolResult.status === 'success') {
+                  const updatedScene = await sceneService.update(scene.id, {
+                    asset_url: toolResult.videoUrl,
+                    final_video_url: toolResult.videoUrl,
+                    payload: { ...scene.payload, ...toolResult }
+                  });
+                  Object.assign(scene, updatedScene);
+                }
+              } else {
+                toolResult = { status: "failed", error: `Tool ${toolName} not found.` };
+              }
+            } catch (err: any) {
+              toolResult = { status: "failed", error: err.message };
             }
 
             // Update Job with result
@@ -112,24 +159,41 @@ export class ARollAgent implements BaseAgent {
               result: { ...job.result, ...toolResult, completed_at: new Date().toISOString() }
             });
 
-            // FEEDBACK: Pass the tool result back into the conversation history
-            messages.push({
-              tool_call_id: toolCall.id,
-              role: "tool",
-              name: toolName,
+            toolResults.push({
+              type: "tool_result",
+              tool_use_id: toolId,
               content: JSON.stringify(toolResult),
             });
 
-            // If a critical tool fails, we let the LLM see it, but we might want to throw if it persists
             if (toolResult.status === "failed") {
               console.error(`[${this.name}] Tool ${toolName} failed logistically.`);
             }
           }
+
+          // Add tool results to messages
+          messages.push({
+            role: "user",
+            content: toolResults
+          });
         } 
-        // Condition B: AI responds with text (Final response or intermediate thought)
         else {
-          console.log(`[${this.name}] Final response received from AI.`);
-          isRunning = false; 
+          console.log(`[${this.name}] Intermediate or Final response received from Claude.`);
+          const textBlock = response.content.find(c => c.type === 'text');
+          finalAgentResponse = textBlock?.text || finalAgentResponse;
+
+          // PERSISTENCE CHECK: If we started generation but haven't finished, enforce another turn
+          const hasInitiated = messages.some(m => m.role === 'assistant' && Array.isArray(m.content) && m.content.some((c: any) => c.tool_use?.name === 'generate_heygen_avatar_video' || (c.type === 'tool_use' && c.name === 'generate_heygen_avatar_video')));
+          const hasFinished = !!scene.final_video_url;
+
+          if (hasInitiated && !hasFinished) {
+            console.log(`[${this.name}] PERSISTENCE: Claude tried to finish without success result. Enforcing turn.`);
+            messages.push({
+              role: "user",
+              content: "You have initiated generation but haven't retrieved the final video. Ensure you have called 'generate_heygen_avatar_video' and it returned success."
+            });
+          } else {
+            isRunning = false; 
+          }
         }
       }
 
@@ -151,8 +215,8 @@ export class ARollAgent implements BaseAgent {
 
       return { 
         success: true, 
-        message: `${this.name} work complete for scene ${scene.index}.`, 
-        log: `Completed in ${turnCount} reasoning turns.`
+        message: finalAgentResponse, 
+        log: `Completed in ${turnCount} turns using Claude Sonnet 4.`
       };
 
     } catch (error) {
