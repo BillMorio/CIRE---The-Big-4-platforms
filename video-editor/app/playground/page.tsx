@@ -12,7 +12,8 @@ import {
   Cpu,
   Database,
   Workflow,
-  Settings2
+  Settings2,
+  User
 } from "lucide-react";
 
 const testPages = [
@@ -105,6 +106,15 @@ const testPages = [
     color: "text-purple-500",
     bgColor: "bg-purple-500/10",
     borderColor: "border-purple-500/30"
+  },
+  {
+    title: "Heygen Avatars",
+    description: "Connect to Heygen V2 API to list and preview talking head avatars",
+    href: "/playground/heygen",
+    icon: User,
+    color: "text-rose-500",
+    bgColor: "bg-rose-500/10",
+    borderColor: "border-rose-500/30"
   },
 ];
 

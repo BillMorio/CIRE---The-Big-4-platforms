@@ -124,10 +124,61 @@ TECHNICAL REQUIREMENTS:
       throw new Error("Claude failed to generate a valid storyboard tool call");
     }
 
-    return NextResponse.json(toolUse.input);
+    const storyboard = (toolUse.input as any);
+    
+    // Apply Mid-Silence Snapping to resolve bleeding voice overs
+    const snappedStoryboard = snapStoryboardToSilence(storyboard, transcription.words);
+
+    return NextResponse.json(snappedStoryboard);
 
   } catch (error: any) {
     console.error("[Scene Generation Error]", error);
     return NextResponse.json({ error: error.message || "Failed to generate scenes" }, { status: 500 });
   }
+}
+
+/**
+ * Snaps scene boundaries to the midpoint of the silence gap between words
+ * to prevent cut-off words and bleeding audio.
+ */
+function snapStoryboardToSilence(storyboard: any, whisperWords: any[]) {
+  if (!storyboard.scenes || storyboard.scenes.length <= 1 || !whisperWords || whisperWords.length === 0) {
+    return storyboard;
+  }
+
+  const scenes = storyboard.scenes;
+
+  for (let i = 0; i < scenes.length - 1; i++) {
+    const currentScene = scenes[i];
+    const nextScene = scenes[i + 1];
+
+    // 1. Find the word that corresponds to the end of the current scene
+    // We use a small epsilon to catch words that end exactly at the boundary
+    const boundaryWordIndex = whisperWords.findIndex(w => w.end >= currentScene.endTime - 0.01);
+    
+    if (boundaryWordIndex !== -1 && boundaryWordIndex < whisperWords.length - 1) {
+      const currentWordEnd = whisperWords[boundaryWordIndex].end;
+      const nextWordStart = whisperWords[boundaryWordIndex + 1].start;
+      
+      // 2. Calculate the silence gap
+      const gap = nextWordStart - currentWordEnd;
+      
+      // 3. Snap to midpoint if there is a gap, otherwise at least stay at the word end
+      const snapPoint = gap > 0 
+        ? currentWordEnd + (gap / 2) 
+        : currentWordEnd;
+
+      console.log(`[Snapping] Scene ${currentScene.index} | Original: ${currentScene.endTime.toFixed(3)} | Snapped: ${snapPoint.toFixed(3)} (Gap: ${gap.toFixed(3)}s)`);
+
+      // 4. Update scene boundaries
+      currentScene.endTime = snapPoint;
+      nextScene.startTime = snapPoint;
+      
+      // 5. Recalculate durations to maintain precision
+      currentScene.duration = currentScene.endTime - currentScene.startTime;
+      nextScene.duration = nextScene.endTime - nextScene.startTime;
+    }
+  }
+
+  return storyboard;
 }
