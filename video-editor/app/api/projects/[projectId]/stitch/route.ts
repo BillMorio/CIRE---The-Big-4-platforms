@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sceneService } from "@/lib/services/api/scene-service";
+import { memoryService } from "@/lib/services/api/memory-service";
 
 const FFMPEG_SERVER = "http://127.0.0.1:3333";
 
@@ -22,6 +23,10 @@ export async function POST(
     if (!scenes || scenes.length === 0) {
       return NextResponse.json({ error: "No scenes found for this project" }, { status: 404 });
     }
+
+    // 1.5. Fetch project settings/memory
+    const memory = await memoryService.getByProjectId(projectId).catch(() => null);
+    const globalLightLeakUrl = memory?.metadata?.lightLeakOverlayUrl;
 
     console.log(`[StitchOrchestrator] Found ${scenes.length} total scenes.`);
     
@@ -54,8 +59,12 @@ export async function POST(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
         sceneUrls,
+        scenes: validScenes, // Pass scene metadata for transition selection
         transition: "crossfade",
-        duration: 0.8
+        duration: 1.5,
+        globalSettings: {
+          lightLeakOverlayUrl: globalLightLeakUrl
+        }
       }),
       signal: AbortSignal.timeout(600000) // 10 minutes timeout
     });

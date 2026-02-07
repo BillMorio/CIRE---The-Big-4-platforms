@@ -45,6 +45,7 @@ export class ARollAgent implements BaseAgent {
           - Start Time: ${scene.start_time}s
           - End Time: ${scene.end_time}s
           - Duration: ${scene.duration}s
+          - Scale (Framing): ${scene.scale || 1.0}
           - Script: "${scene.script}"
           - Master Audio: ${context.master_audio_url || "NOT_PROVIDED"}
 
@@ -54,6 +55,7 @@ export class ARollAgent implements BaseAgent {
              - Use Start Time: ${scene.start_time}, Duration: ${scene.duration}.
           3. STEP 2: Use 'generate_heygen_avatar_video' using the Supabase URL returned from Step 1.
              - Use the AVATAR_ID provided above.
+             - Use Scale: ${scene.scale || 1.0}.
              - THIS TOOL WILL WAIT FOR THE VIDEO TO BE READY. Do not call any other tools for this video.
           4. FINISH: Once Step 2 returns 'success', respond with a final confirmation.
           

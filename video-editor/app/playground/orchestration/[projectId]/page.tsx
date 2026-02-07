@@ -30,6 +30,7 @@ import { useProject } from "@/hooks/use-projects";
 import { useScenes, useUpdateScene } from "@/hooks/use-scenes";
 import { useAgentState, useResetAgentState, useUpdateAgentState } from "@/hooks/use-agent-state";
 import { useParams } from "next/navigation";
+import { SettingsPanel } from "@/components/panels/settings-panel";
 
 // Agent to Icon Mapping for Premium UI
 const AGENT_ICONS: Record<string, any> = {
@@ -65,6 +66,7 @@ export default function DynamicStudioPage() {
   const [localLogs, setLocalLogs] = useState<{ msg: string; type: string }[]>([
     { msg: "System: Production environment initialized.", type: 'system' }
   ]);
+  const [activeView, setActiveView] = useState("studio");
   const logEndRef = useRef<HTMLDivElement>(null);
 
   // Resize handling logic
@@ -246,8 +248,9 @@ export default function DynamicStudioPage() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,_rgba(var(--primary-rgb),0.015)_0%,_transparent_60%),radial-gradient(circle_at_70%_80%,_rgba(var(--primary-rgb),0.01)_0%,_transparent_60%)] pointer-events-none" />
 
       <NavSidebar
-        activeItem="studio"
+        activeItem={activeView}
         isCollapsed={isSidebarCollapsed}
+        onItemClick={(id) => setActiveView(id)}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
@@ -330,57 +333,68 @@ export default function DynamicStudioPage() {
         </header>
 
         <div className="flex-1 flex overflow-hidden">
-          <main className="flex-1 overflow-auto p-6 md:p-8 pt-24 md:pt-28 scrollbar-hide">
-            <div className="max-w-6xl mx-auto space-y-8">
-              
-              <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-border/40 pb-6 gap-6">
-                <div className="space-y-1.5">
-                  <h1 className="text-2xl font-black tracking-tighter bg-gradient-to-br from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent italic">Storyboard Canvas</h1>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[9px] technical-label opacity-30 uppercase tracking-[0.3em]">
-                      Status: <span className="text-primary font-black">{agentMemory?.workflow_status.toUpperCase()}</span>
-                    </span>
-                    <span className="w-1 h-1 rounded-full bg-border" />
-                    <span className="text-[9px] technical-label opacity-30 uppercase tracking-[0.3em]">
-                      {project?.total_duration}s Production Duration
-                    </span>
+          {activeView === "studio" ? (
+            <main className="flex-1 overflow-auto p-6 md:p-8 pt-24 md:pt-28 scrollbar-hide">
+              <div className="max-w-6xl mx-auto space-y-8">
+                
+                <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-border/40 pb-6 gap-6">
+                  <div className="space-y-1.5">
+                    <h1 className="text-2xl font-black tracking-tighter bg-gradient-to-br from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent italic">Storyboard Canvas</h1>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[9px] technical-label opacity-30 uppercase tracking-[0.3em]">
+                        Status: <span className="text-primary font-black">{agentMemory?.workflow_status.toUpperCase()}</span>
+                      </span>
+                      <span className="w-1 h-1 rounded-full bg-border" />
+                      <span className="text-[9px] technical-label opacity-30 uppercase tracking-[0.3em]">
+                        {project?.total_duration}s Production Duration
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <Badge variant="outline" className="text-[9px] technical-label font-bold py-1.5 px-4 rounded-lg bg-background/40 backdrop-blur-sm border-border/40">
+                      {mappedScenes.length} SCENES
+                    </Badge>
+                    <Badge variant="outline" className="text-[9px] technical-label font-bold py-1.5 px-4 rounded-lg bg-green-500/5 text-green-600 border-green-500/10">
+                      {agentMemory?.completed_count || 0} READY
+                    </Badge>
+                    <Badge variant="outline" className="text-[9px] technical-label font-bold py-1.5 px-4 rounded-lg bg-amber-500/5 text-amber-600 border-amber-500/10">
+                      {mappedScenes.length - (agentMemory?.completed_count || 0)} PENDING
+                    </Badge>
                   </div>
                 </div>
-                <div className="flex items-center gap-2.5">
-                  <Badge variant="outline" className="text-[9px] technical-label font-bold py-1.5 px-4 rounded-lg bg-background/40 backdrop-blur-sm border-border/40">
-                    {mappedScenes.length} SCENES
-                  </Badge>
-                  <Badge variant="outline" className="text-[9px] technical-label font-bold py-1.5 px-4 rounded-lg bg-green-500/5 text-green-600 border-green-500/10">
-                    {agentMemory?.completed_count || 0} READY
-                  </Badge>
-                  <Badge variant="outline" className="text-[9px] technical-label font-bold py-1.5 px-4 rounded-lg bg-amber-500/5 text-amber-600 border-amber-500/10">
-                    {mappedScenes.length - (agentMemory?.completed_count || 0)} PENDING
-                  </Badge>
+
+                {/* Fluid Scene Grid: Auto-fills columns based on available width, preventing squeezing */}
+                <div 
+                  className="grid gap-8 pb-32 px-1 max-w-7xl"
+                  style={{ 
+                      gridTemplateColumns: `repeat(auto-fill, minmax(340px, 1fr))` 
+                  }}
+                >
+                  {mappedScenes.map((scene, i) => (
+                    <SceneCard 
+                      key={scene.id} 
+                      scene={scene as any}
+                      isSelected={selectedSceneIndex === i}
+                      onClick={() => setSelectedSceneIndex(i)}
+                      onDoubleClick={() => {
+                          setSelectedSceneIndex(i);
+                          setIsModalOpen(true);
+                      }}
+                    />
+                  ))}
                 </div>
               </div>
-
-              {/* Fluid Scene Grid: Auto-fills columns based on available width, preventing squeezing */}
-              <div 
-                className="grid gap-8 pb-32 px-1 max-w-7xl"
-                style={{ 
-                    gridTemplateColumns: `repeat(auto-fill, minmax(340px, 1fr))` 
-                }}
-              >
-                {mappedScenes.map((scene, i) => (
-                  <SceneCard 
-                    key={scene.id} 
-                    scene={scene as any}
-                    isSelected={selectedSceneIndex === i}
-                    onClick={() => setSelectedSceneIndex(i)}
-                    onDoubleClick={() => {
-                        setSelectedSceneIndex(i);
-                        setIsModalOpen(true);
-                    }}
-                  />
-                ))}
-              </div>
+            </main>
+          ) : activeView === "settings" ? (
+            <SettingsPanel 
+                memory={agentMemory as any} 
+                onUpdate={(updates) => updateAgentStateMutation.mutateAsync(updates)} 
+            />
+          ) : (
+            <div className="flex-1 flex items-center justify-center p-8 text-center text-muted-foreground/30 uppercase technical-label text-[10px] tracking-widest italic">
+               Module Offline or Under Maintenance
             </div>
-          </main>
+          )}
 
           {/* Activity Log - Resizable width, neutral background for professional feel */}
           <div 

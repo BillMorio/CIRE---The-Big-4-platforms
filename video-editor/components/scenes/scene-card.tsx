@@ -196,6 +196,12 @@ export function SceneCard({
                 <Play className="w-3.5 h-3.5 text-primary" /> 
                 {scene.transition?.type?.toUpperCase() || "NONE"}
               </div>
+              {(visualType === 'a-roll' || scene.scale) && (
+                <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10 text-[9px] technical-label font-bold text-white shadow-sm">
+                  <Aperture className="w-3.5 h-3.5 text-primary" /> 
+                  Scale: {(scene.scale || scene.aRoll?.scale || 1.0).toFixed(1)}x
+                </div>
+              )}
             </div>
             {getFittingLabel() && getFittingLabel() !== "none" && (
               <Badge variant="outline" className="text-[8px] opacity-80 py-0.5 px-2 bg-black/20 backdrop-blur-sm border-white/5 rounded-md self-end">

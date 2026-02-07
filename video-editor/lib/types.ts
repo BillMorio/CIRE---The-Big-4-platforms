@@ -5,7 +5,7 @@ export type SceneStatus = "todo" | "processing" | "completed" | "failed" | "awai
 export type VisualType = "a-roll" | "b-roll" | "graphics" | "image";
 
 export interface Transition {
-  type: "fade" | "crossfade" | "wipe" | "dissolve" | "none";
+  type: "fade" | "crossfade" | "wipe" | "dissolve" | "light-leak" | "none";
   duration: number;
   direction?: "in" | "out" | "left" | "right";
 }
@@ -21,6 +21,7 @@ export interface ARoll {
   assetStatus: "pending_generation" | "generated" | "ready";
   fittingRequired: boolean;
   fittingStrategy: "generate_to_duration" | "none";
+  scale?: number;
 }
 
 // B-Roll: Stock Footage / Real-world video
@@ -105,6 +106,7 @@ export interface Scene {
   thumbnail_url?: string;
   final_video_url?: string;
   payload?: any;
+  scale?: number;
 }
 
 export interface Project {

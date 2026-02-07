@@ -323,6 +323,24 @@ export function ARollModal({ isOpen, onClose, scene, onUpdate }: ARollModalProps
               <option>wide-shot</option>
             </select>
           </div>
+
+          <div className="space-y-1">
+            <span className="text-[9px] text-muted-foreground">Video Scale (Framing)</span>
+            <div className="flex items-center gap-3">
+              <Input 
+                type="number" 
+                value={scene.scale || aRoll?.scale || 1.0} 
+                onChange={(e) => onUpdate({ scale: parseFloat(e.target.value) || 1.0 })}
+                className="h-9 text-xs font-mono"
+                step={0.1}
+                min={1.0}
+                max={2.0}
+              />
+              <span className="text-[10px] technical-label font-bold text-muted-foreground whitespace-nowrap">
+                {((scene.scale || aRoll?.scale || 1.0) >= 1.5) ? "CLOSE UP" : "MEDIUM"}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 

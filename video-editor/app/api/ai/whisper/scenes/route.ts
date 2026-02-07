@@ -36,10 +36,18 @@ If only "a-roll" is selected, the entire video should be one or more segments of
 
 TECHNICAL REQUIREMENTS:
 - startTime and endTime must exactly match the word-level timestamps provided.
-- a-roll: Used for host explanation. Provide 'avatarId' (e.g., "avatar_host_01").
-- b-roll: Used for b-roll footage. You MUST provide a highly descriptive 'searchQuery' (e.g., "closeup of developer typing on mechanical keyboard with blue neon lighting").
-- graphics: Used for text overlays. Provide a 'prompt' describing the animation.
-- image: Used for statics. Provide a 'searchQuery'.`;
+  - a-roll: Used for host explanation. Provide 'avatarId' (e.g., "avatar_host_01") and a 'scale' (numeric, between 1.0 and 2.0).
+    * Choose a scale of 1.0 for standard medium shots.
+    * Choose a scale up to 2.0 (e.g., 1.5, 1.8) for close-ups or more intense/intimate moments.
+  - b-roll: Used for b-roll footage. You MUST provide a highly descriptive 'searchQuery' (e.g., "closeup of developer typing on mechanical keyboard with blue neon lighting").
+  - graphics: Used for text overlays. Provide a 'prompt' describing the animation.
+  - image: Used for statics. Provide a 'searchQuery'.
+  
+TRANSITION RULES:
+1. Every scene has a 'transition' object describing how it moves to the NEXT scene.
+2. Default transition should be 'fade' or 'none'.
+3. SPECIAL RULE: You MUST use 'light-leak' as the transition type ONLY when a scene of type 'a-roll' is followed by a scene of type 'b-roll', 'image', or 'graphics'. 
+4. Do NOT use 'light-leak' for any other transitions.`;
 
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",
@@ -86,7 +94,8 @@ TECHNICAL REQUIREMENTS:
                       properties: {
                         type: { type: "string" },
                         avatarId: { type: "string" },
-                        provider: { type: "string" }
+                        provider: { type: "string" },
+                        scale: { type: "number", description: "Video scale/framing (1.0 to 2.0)" }
                       }
                     },
                     bRoll: {
@@ -105,6 +114,17 @@ TECHNICAL REQUIREMENTS:
                       type: "object",
                       properties: {
                         searchQuery: { type: "string" }
+                      }
+                    },
+                    transition: {
+                      type: "object",
+                      properties: {
+                        type: { 
+                          type: "string", 
+                          enum: ["fade", "crossfade", "wipe", "dissolve", "light-leak", "none"],
+                          description: "The transition to use when moving to the NEXT scene. Use 'light-leak' ONLY when moving from a-roll to b-roll, image, or graphics."
+                        },
+                        duration: { type: "number", default: 0.8 }
                       }
                     }
                   },

@@ -2,7 +2,7 @@ export type SceneStatus = 'todo' | 'processing' | 'completed' | 'failed' | 'awai
 export type VisualType = 'a-roll' | 'b-roll' | 'graphics' | 'image';
 
 export interface Transition {
-  type: string;
+  type: "fade" | "crossfade" | "wipe" | "dissolve" | "light-leak" | "none";
   duration: number;
 }
 
@@ -25,6 +25,7 @@ export interface Scene {
   director_notes?: string;
   fitting_strategy?: string;
   transition?: Transition;
+  scale?: number;
 }
 
 export interface Project {

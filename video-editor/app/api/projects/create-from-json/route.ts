@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
         status: "todo",
         fitting_strategy: scene.fittingStrategy || scene.fitting_strategy || "trim",
         transition: scene.transition || { type: "none", duration: 0 },
+        scale: scene.visualType === 'a-roll' ? (scene.aRoll?.scale || 1.0) : null,
         payload: payload
       };
     });

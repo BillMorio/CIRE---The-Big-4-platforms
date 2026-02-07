@@ -12,6 +12,7 @@ export interface GenerateHeygenVideoArgs {
   audioUrl: string;
   avatarId: string;
   caption?: boolean;
+  scale?: number;
 }
 
 export interface PollHeygenStatusArgs {
@@ -63,7 +64,7 @@ export async function generate_heygen_avatar_video(args: GenerateHeygenVideoArgs
   const apiKey = process.env.HEY_GEN_API;
   if (!apiKey) throw new Error("HEY_GEN_API key is not configured");
 
-  console.log(`[ARollTools] Initiating Heygen generation with avatar: ${args.avatarId}`);
+  console.log(`[ARollTools] Initiating Heygen generation with avatar: ${args.avatarId}, scale: ${args.scale ?? 1.0}`);
   
   const payload = {
     caption: args.caption ?? false,
@@ -72,7 +73,8 @@ export async function generate_heygen_avatar_video(args: GenerateHeygenVideoArgs
         character: {
           type: "avatar",
           avatar_id: args.avatarId,
-          avatar_style: "normal"
+          avatar_style: "normal",
+          scale: args.scale ?? 1.0
         },
         voice: {
           type: "audio",
