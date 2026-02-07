@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { 
-  ArrowLeft, Film, Blend, Scissors, Maximize2, 
+  ArrowLeft, Film, Blend, Scissors, Maximize2, ZoomIn,
   ChevronRight, Sparkles, Activity, Terminal, Music, Mic2
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -48,6 +48,16 @@ const tools = [
     bgColor: "bg-violet-50",
     borderColor: "border-violet-100",
     status: "Operational"
+  },
+  {
+    title: "Zoom In Transition",
+    description: "Multi-clip zoom-in flow with cinematic cross-fading.",
+    href: "/playground/ffmpeg/zoom-transition",
+    icon: ZoomIn,
+    color: "text-indigo-600",
+    bgColor: "bg-indigo-50",
+    borderColor: "border-indigo-100",
+    status: "New"
   },
   {
     title: "AI Agent Lab",
