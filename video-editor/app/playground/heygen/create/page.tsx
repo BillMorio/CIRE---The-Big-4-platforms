@@ -35,6 +35,8 @@ export default function HeygenCreateVideoPage() {
     audio_url: "",
     background_color: "#FFFFFF",
     title: "Playground Video",
+    scale: 1,
+    caption: false,
   });
 
   const [isGenerating, setIsGenerating] = useState(false);
@@ -52,11 +54,21 @@ export default function HeygenCreateVideoPage() {
     setVideoData(null);
 
     const payload = {
+      caption: formData.caption,
       video_inputs: [
         {
           character: activeCharacterType === "avatar" 
-            ? { type: "avatar", avatar_id: formData.avatar_id, avatar_style: "normal" }
-            : { type: "talking_photo", talking_photo_id: formData.talking_photo_id },
+            ? { 
+                type: "avatar", 
+                avatar_id: formData.avatar_id, 
+                avatar_style: "normal",
+                scale: formData.scale
+              }
+            : { 
+                type: "talking_photo", 
+                talking_photo_id: formData.talking_photo_id,
+                scale: formData.scale
+              },
           voice: activeVoiceType === "text"
             ? { type: "text", input_text: formData.input_text, voice_id: "2d5b0e6cfdba4191af46571597517b60" } // Default voice
             : { type: "audio", audio_url: formData.audio_url },
@@ -214,6 +226,22 @@ export default function HeygenCreateVideoPage() {
                     />
                   </div>
                 )}
+
+                <div className="pt-4 border-t border-neutral-50 space-y-2">
+                   <div className="flex items-center justify-between px-1">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-neutral-500">Scale Factor</label>
+                      <span className="text-[10px] font-mono font-bold text-indigo-600">{formData.scale.toFixed(1)}x</span>
+                   </div>
+                   <input 
+                      type="range" 
+                      min="0.5" 
+                      max="3.0" 
+                      step="0.1"
+                      className="w-full h-1.5 bg-neutral-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                      value={formData.scale}
+                      onChange={(e) => setFormData({ ...formData, scale: parseFloat(e.target.value) })}
+                   />
+                </div>
               </CardContent>
             </Card>
 
@@ -318,6 +346,20 @@ export default function HeygenCreateVideoPage() {
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     />
+                  </div>
+                  <div className="space-y-4 pt-4 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                       <div className="space-y-1">
+                          <label className="text-[9px] font-black uppercase tracking-widest text-white/60">Auto Captions</label>
+                          <p className="text-[7px] text-white/30 uppercase font-bold tracking-tight">Generate burnt-in subtitles</p>
+                       </div>
+                       <button 
+                         onClick={() => setFormData({ ...formData, caption: !formData.caption })}
+                         className={`w-10 h-5 rounded-full transition-all flex items-center px-1 ${formData.caption ? "bg-indigo-500" : "bg-white/10"}`}
+                       >
+                         <div className={`w-3 h-3 rounded-full bg-white transition-transform ${formData.caption ? "translate-x-5" : "translate-x-0"}`} />
+                       </button>
+                    </div>
                   </div>
                </div>
             </Card>
